@@ -1,11 +1,15 @@
 {
   "/_global-error/page": "/_global-error",
   "/_not-found/page": "/_not-found",
+  "/about/page": "/about",
   "/api/ec3/route": "/api/ec3",
   "/api/epd/route": "/api/epd",
   "/api/webhook/revit/route": "/api/webhook/revit",
+  "/contact/page": "/contact",
   "/icon.svg/route": "/icon.svg",
   "/page": "/",
+  "/privacy-policy/page": "/privacy-policy",
   "/robots.txt/route": "/robots.txt",
-  "/sitemap.xml/route": "/sitemap.xml"
+  "/sitemap.xml/route": "/sitemap.xml",
+  "/terms-of-service/page": "/terms-of-service"
 }

@@ -14,8 +14,12 @@ export default function ContactUs() {
           <h2 className="text-2xl font-semibold mb-6 text-slate-800">Get in Touch</h2>
           <div className="space-y-6">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Location</h3>
-              <p className="text-gray-900 mt-1">Mardan, Khyber Pakhtunkhwa, Pakistan</p>
+              <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">WhatsApp</h3>
+              <p className="text-gray-900 mt-1">
+                <a href="https://wa.me/923339359980" target="_blank" rel="noopener noreferrer" className="hover:text-green-700 transition-colors font-medium">
+                  +92 333 9359980
+                </a>
+              </p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Email</h3>
