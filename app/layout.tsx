@@ -40,6 +40,7 @@ export default function RootLayout({
               </Link>
               <div className="hidden md:flex items-center space-x-8">
                 <Link href="/" className="text-sm font-bold transition-colors text-slate-600 hover:text-emerald-600">The Engine</Link>
+                <Link href="/cbam-calculator" className="text-sm font-bold transition-colors text-slate-600 hover:text-emerald-600">CBAM Estimator</Link>
                 <Link href="/about" className="text-sm font-bold transition-colors text-slate-600 hover:text-emerald-600">About Us</Link>
                 <Link href="/contact" className="text-sm font-bold transition-colors text-slate-600 hover:text-emerald-600">Contact</Link>
                 <Link href="/#calculator-workspace" className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-md text-sm font-bold shadow-md transition-all">Launch Workspace</Link>
