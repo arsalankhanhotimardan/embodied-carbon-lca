@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import React, { useState, useRef, useMemo, useEffect } from 'react';
+import Link from 'next/link';
 import Papa from 'papaparse';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -16,12 +17,6 @@ const safeNum = (val: any, fallback: number = 0): number => {
 const CSI_DIVISIONS = ["Div 03: Concrete", "Div 04: Masonry", "Div 05: Metals", "Div 06: Wood, Plastics, and Composites", "Div 07: Thermal and Moisture Protection", "Div 08: Openings", "Div 09: Finishes", "Div 10-49: Other"];
 
 export default function GreenEngineeringSaaS() {
-  const [currentRoute, setCurrentRoute] = useState<'home' | 'about' | 'contact' | 'terms'>('home');
-
-  useEffect(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentRoute]);
-
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-emerald-200 flex flex-col">
       {/* JSON-LD SCHEMA FOR GOOGLE SEO */}
@@ -48,158 +43,98 @@ export default function GreenEngineeringSaaS() {
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-20">
-            <div className="flex items-center cursor-pointer" onClick={() => setCurrentRoute('home')}>
+            <Link href="/" className="flex items-center cursor-pointer">
               <div className="bg-emerald-500 p-2 rounded-lg mr-3 shadow-inner shadow-emerald-700/50">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
               </div>
               <span className="font-black text-2xl tracking-tight text-slate-900">GreenEngineering<span className="text-emerald-600">LCA</span></span>
-            </div>
+            </Link>
             <div className="hidden md:flex items-center space-x-8">
-              <button onClick={() => setCurrentRoute('home')} className={`text-sm font-bold transition-colors ${currentRoute === 'home' ? 'text-emerald-600' : 'text-slate-600 hover:text-slate-900'}`}>The Engine</button>
-              <button onClick={() => setCurrentRoute('about')} className={`text-sm font-bold transition-colors ${currentRoute === 'about' ? 'text-emerald-600' : 'text-slate-600 hover:text-slate-900'}`}>About Us</button>
-              <button onClick={() => setCurrentRoute('contact')} className={`text-sm font-bold transition-colors ${currentRoute === 'contact' ? 'text-emerald-600' : 'text-slate-600 hover:text-slate-900'}`}>Contact</button>
-              <button onClick={() => { setCurrentRoute('home'); setTimeout(() => document.getElementById('calculator-workspace')?.scrollIntoView({ behavior: 'smooth' }), 100); }} className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-md text-sm font-bold shadow-md transition-all">Launch Workspace</button>
+              <Link href="/" className="text-sm font-bold transition-colors text-emerald-600 hover:text-slate-900">The Engine</Link>
+              <Link href="/about" className="text-sm font-bold transition-colors text-slate-600 hover:text-slate-900">About Us</Link>
+              <Link href="/contact" className="text-sm font-bold transition-colors text-slate-600 hover:text-slate-900">Contact</Link>
+              <button onClick={() => { document.getElementById('calculator-workspace')?.scrollIntoView({ behavior: 'smooth' }) }} className="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-md text-sm font-bold shadow-md transition-all">Launch Workspace</button>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* --- DYNAMIC ROUTING SYSTEM --- */}
+      {/* --- HOMEPAGE CONTENT --- */}
       <main className="flex-1 flex flex-col">
-        {currentRoute === 'home' && (
-            <>
-                <div className="bg-slate-900 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-                    <div className="absolute inset-0 bg-gradient-to-b from-emerald-900/20 to-transparent"></div>
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 relative z-10 text-center">
-                        <div className="inline-block bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-6">EN-15804 & LEED v4 Compliant</div>
-                        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight mb-8">Enterprise <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Life Cycle Assessment</span> Software</h1>
-                        <p className="mt-4 text-xl text-slate-300 max-w-3xl mx-auto font-medium leading-relaxed mb-10">
-                            Calculate embodied carbon, reconcile EC3 databases, and generate LEED v4 compliance matrices directly from your browser or live BIM webhook.
-                        </p>
-                        <div className="flex justify-center gap-4">
-                            <button onClick={() => document.getElementById('calculator-workspace')?.scrollIntoView({ behavior: 'smooth' })} className="bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-lg text-lg font-black shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2">
-                                Access the Engine <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
-                            </button>
-                            <button onClick={() => document.getElementById('seo-content')?.scrollIntoView({ behavior: 'smooth' })} className="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white px-8 py-4 rounded-lg text-lg font-bold transition-all">Read Methodology</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="calculator-workspace" className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                    <LcaEngineComponent />
-                </div>
-
-                <div id="seo-content" className="bg-white border-t border-slate-200 py-20">
-                    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">Advanced Life Cycle Assessment Software for Modern Engineering</h2>
-                            <p className="text-lg text-slate-600 font-medium">Why architectural firms rely on Green Engineering Tools to manage their carbon accounting workflows.</p>
-                        </div>
-                        
-                        <div className="prose prose-lg prose-slate max-w-none">
-                            <p>In the modern AEC (Architecture, Engineering, and Construction) industry, managing a building's environmental footprint is no longer optional. Our <strong>embodied carbon calculator</strong> provides precise, EN-15804 compliant tracking for architectural materials across their entire lifecycle—from Phase A (Manufacturing and Construction) to Phase C (End of Life).</p>
-                            
-                            <div className="grid md:grid-cols-3 gap-8 my-12 not-prose">
-                                <div className="bg-slate-50 p-8 rounded-xl border border-slate-200">
-                                    <div className="bg-blue-100 text-blue-700 w-12 h-12 rounded-lg flex items-center justify-center mb-6"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg></div>
-                                    <h3 className="text-xl font-bold text-slate-900 mb-3">EC3 Database Reconciliation</h3>
-                                    <p className="text-slate-600 text-sm leading-relaxed">Bypass generic approximations. Our LCA software connects directly to the Building Transparency EC3 database, allowing you to link CAD takeoff quantities directly to verified, manufacturer-specific Environmental Product Declarations (EPDs).</p>
-                                </div>
-                                <div className="bg-slate-50 p-8 rounded-xl border border-slate-200">
-                                    <div className="bg-emerald-100 text-emerald-700 w-12 h-12 rounded-lg flex items-center justify-center mb-6"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg></div>
-                                    <h3 className="text-xl font-bold text-slate-900 mb-3">LEED v4 Compliance</h3>
-                                    <p className="text-slate-600 text-sm leading-relaxed">Achieve the Building Life-Cycle Impact Reduction credit easily. Upload a Baseline and Proposed structural schedule, and our engine automatically calculates TRACI metrics (Acidification, Smog, Eutrophication) to generate your legal compliance matrix.</p>
-                                </div>
-                                <div className="bg-slate-50 p-8 rounded-xl border border-slate-200">
-                                    <div className="bg-indigo-100 text-indigo-700 w-12 h-12 rounded-lg flex items-center justify-center mb-6"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
-                                    <h3 className="text-xl font-bold text-slate-900 mb-3">Bid Leveling & Carbon Cost</h3>
-                                    <p className="text-slate-600 text-sm leading-relaxed">Merge your financial budget with your carbon budget. By utilizing our Procurement dashboard, estimators can establish the exact "Carbon per Dollar" ratio, optimizing sustainable material choices without breaking the bank.</p>
-                                </div>
-                            </div>
-
-                            <h3>Evaluating the Circular Economy (Module D)</h3>
-                            <p>Standard life cycle assessment software often stops at demolition (Phase C4). Green Engineering Tools goes further by calculating <strong>Module D</strong>. When you input high material recovery rates (e.g., melting down structural steel or repurposing cross-laminated timber), our engine calculates the negative carbon credits generated, providing a truly holistic view of your architectural system's environmental stewardship.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-slate-50 border-t border-slate-200 py-20">
-                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">Frequently Asked Questions</h2>
-                        <div className="space-y-6">
-                            {[
-                                { q: "What is an embodied carbon calculator?", a: "An embodied carbon calculator is an engineering utility tool used to quantify the total greenhouse gas emissions generated during the manufacturing, transportation, and construction phases (Phases A1-A5) of building materials." },
-                                { q: "Does this software integrate with the EC3 database?", a: "Yes, our Life Cycle Assessment software features a direct API bridge to the Building Transparency EC3 global database. When an unrecognized material is uploaded via CSV, the engine prompts you to search and link a verified manufacturer EPD instantly." },
-                                { q: "Can I use this for LEED v4 certification?", a: "Absolutely. The engine automatically evaluates baseline versus proposed designs across 6 critical TRACI impact categories (Global Warming Potential, Acidification, Smog Formation, Eutrophication, Ozone Depletion, and Energy Demand) to generate an automated PDF compliance matrix." },
-                                { q: "Do I have to use CSV uploads?", a: "No. For advanced enterprise users, our software features a secure Webhook endpoint, allowing developers to pipe architectural schedules directly from custom C# Autodesk Revit add-ins into the web application." }
-                            ].map((faq, i) => (
-                                <div key={i} className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                                    <h4 className="text-lg font-bold text-slate-900 mb-2 flex items-start gap-3"><span className="text-emerald-500">Q.</span> {faq.q}</h4>
-                                    <p className="text-slate-600 leading-relaxed ml-7">{faq.a}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </>
-        )}
-
-        {currentRoute === 'about' && (
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1">
-                <h1 className="text-4xl font-black text-slate-900 mb-6">About Green Engineering Tools</h1>
-                <div className="prose prose-lg text-slate-600">
-                    <p>Green Engineering Tools was founded with a single mission: to democratize access to high-tier architectural sustainability metrics. As the global construction industry shifts towards net-zero emissions, architectural and engineering firms require rapid, mathematically accurate tools to evaluate the life cycle of their structural systems.</p>
-                    <p>Our flagship product, the Embodied Carbon LCA Engine, bridges the gap between raw CAD schedules and verified Environmental Product Declarations (EPDs). By integrating directly with global databases like EC3, we ensure that every calculation—from Phase A1 manufacturing to Phase D circular economy recovery—is grounded in empirical reality.</p>
-                    <p>We are a dedicated team of software developers and engineering advocates building cloud-native infrastructure that scales from single-building analysis to enterprise-level LEED v4 compliance reporting.</p>
+        <div className="bg-slate-900 relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-emerald-900/20 to-transparent"></div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 relative z-10 text-center">
+                <div className="inline-block bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest mb-6">EN-15804 & LEED v4 Compliant</div>
+                <h1 className="text-5xl md:text-7xl font-black text-white tracking-tight mb-8">Enterprise <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">Life Cycle Assessment</span> Software</h1>
+                <p className="mt-4 text-xl text-slate-300 max-w-3xl mx-auto font-medium leading-relaxed mb-10">
+                    Calculate embodied carbon, reconcile EC3 databases, and generate LEED v4 compliance matrices directly from your browser or live BIM webhook.
+                </p>
+                <div className="flex justify-center gap-4">
+                    <button onClick={() => document.getElementById('calculator-workspace')?.scrollIntoView({ behavior: 'smooth' })} className="bg-emerald-500 hover:bg-emerald-400 text-white px-8 py-4 rounded-lg text-lg font-black shadow-lg shadow-emerald-500/30 transition-all flex items-center gap-2">
+                        Access the Engine <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <button onClick={() => document.getElementById('seo-content')?.scrollIntoView({ behavior: 'smooth' })} className="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white px-8 py-4 rounded-lg text-lg font-bold transition-all">Read Methodology</button>
                 </div>
             </div>
-        )}
+        </div>
 
-        {currentRoute === 'terms' && (
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1">
-                <h1 className="text-4xl font-black text-slate-900 mb-6">Terms of Service & Privacy Policy</h1>
-                <div className="prose prose-lg text-slate-600">
-                    <h3>1. Acceptance of Terms</h3>
-                    <p>By accessing and using the Green Engineering Tools Life Cycle Assessment (LCA) software, you accept and agree to be bound by the terms and provision of this agreement.</p>
-                    <h3>2. Data Privacy and Local Storage</h3>
-                    <p>Our application prioritizes your privacy. The LCA engine utilizes your browser's Local Storage to cache EC3 database reconciliations and material mappings. We do not aggregate or sell your proprietary architectural CSV uploads or BIM structural schedules.</p>
-                    <h3>3. Disclaimer of Liability regarding LEED Certification</h3>
-                    <p>While our mathematics and TRACI metric evaluations are rigorously structured around EN-15804 standards and LEED v4 guidelines, the PDF reports generated by this software act as preparatory and executive review documents. They do not constitute an automatic grant of certification from the USGBC. Final certification requires independent audit.</p>
-                    <h3>4. Third-Party Advertising (AdSense)</h3>
-                    <p>This site may display advertisements served by Google AdSense. Third party vendors, including Google, use cookies to serve ads based on a user's prior visits to this website. You may opt out of personalized advertising by visiting Google's Ads Settings.</p>
+        <div id="calculator-workspace" className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <LcaEngineComponent />
+        </div>
+
+        <div id="seo-content" className="bg-white border-t border-slate-200 py-20">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-4xl font-black text-slate-900 mb-4">Advanced Life Cycle Assessment Software for Modern Engineering</h2>
+                    <p className="text-lg text-slate-600 font-medium">Why architectural firms rely on Green Engineering Tools to manage their carbon accounting workflows.</p>
                 </div>
-            </div>
-        )}
-
-        {currentRoute === 'contact' && (
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex-1">
-                <h1 className="text-4xl font-black text-slate-900 mb-6">Contact Our Engineering Team</h1>
-                <p className="text-lg text-slate-600 mb-10">Whether you need help configuring a Revit Webhook, integrating a custom EPD database, or have questions regarding our LCA methodology, we are here to help.</p>
                 
-                <div className="grid md:grid-cols-3 gap-8 mb-10">
-                    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 col-span-3 md:col-span-1 flex flex-col items-center justify-center text-center">
-                        <div className="bg-emerald-100 text-emerald-600 p-3 rounded-full mb-4">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                        </div>
-                        <h3 className="font-bold text-slate-900 mb-1">Direct Support</h3>
-                        <a href="mailto:support@greenengineeringtools.com" className="text-emerald-600 font-semibold text-sm hover:underline">support@greenengineeringtools.com</a>
-                    </div>
+                <div className="prose prose-lg prose-slate max-w-none">
+                    <p>In the modern AEC (Architecture, Engineering, and Construction) industry, managing a building's environmental footprint is no longer optional. Our <strong>embodied carbon calculator</strong> provides precise, EN-15804 compliant tracking for architectural materials across their entire lifecycle—from Phase A (Manufacturing and Construction) to Phase C (End of Life).</p>
                     
-                    <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm col-span-3 md:col-span-2">
-                        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div><label className="block text-sm font-bold text-slate-700 mb-2">Full Name</label><input type="text" className="w-full border-2 border-slate-200 rounded-lg p-3 focus:border-emerald-500 outline-none" placeholder="Jane Doe" /></div>
-                                <div><label className="block text-sm font-bold text-slate-700 mb-2">Corporate Email</label><input type="email" className="w-full border-2 border-slate-200 rounded-lg p-3 focus:border-emerald-500 outline-none" placeholder="jane@architecture.com" /></div>
-                            </div>
-                            <div><label className="block text-sm font-bold text-slate-700 mb-2">Subject</label><select className="w-full border-2 border-slate-200 rounded-lg p-3 focus:border-emerald-500 outline-none"><option>Technical Support</option><option>API / BIM Integration</option><option>General Inquiry</option></select></div>
-                            <div><label className="block text-sm font-bold text-slate-700 mb-2">Message</label><textarea rows={5} className="w-full border-2 border-slate-200 rounded-lg p-3 focus:border-emerald-500 outline-none" placeholder="How can we help?"></textarea></div>
-                            <button type="submit" className="bg-slate-900 text-white font-bold px-8 py-3 rounded-lg hover:bg-emerald-600 transition-colors">Send Transmission</button>
-                        </form>
+                    <div className="grid md:grid-cols-3 gap-8 my-12 not-prose">
+                        <div className="bg-slate-50 p-8 rounded-xl border border-slate-200">
+                            <div className="bg-blue-100 text-blue-700 w-12 h-12 rounded-lg flex items-center justify-center mb-6"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg></div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-3">EC3 Database Reconciliation</h3>
+                            <p className="text-slate-600 text-sm leading-relaxed">Bypass generic approximations. Our LCA software connects directly to the Building Transparency EC3 database, allowing you to link CAD takeoff quantities directly to verified, manufacturer-specific Environmental Product Declarations (EPDs).</p>
+                        </div>
+                        <div className="bg-slate-50 p-8 rounded-xl border border-slate-200">
+                            <div className="bg-emerald-100 text-emerald-700 w-12 h-12 rounded-lg flex items-center justify-center mb-6"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg></div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-3">LEED v4 Compliance</h3>
+                            <p className="text-slate-600 text-sm leading-relaxed">Achieve the Building Life-Cycle Impact Reduction credit easily. Upload a Baseline and Proposed structural schedule, and our engine automatically calculates TRACI metrics (Acidification, Smog, Eutrophication) to generate your legal compliance matrix.</p>
+                        </div>
+                        <div className="bg-slate-50 p-8 rounded-xl border border-slate-200">
+                            <div className="bg-indigo-100 text-indigo-700 w-12 h-12 rounded-lg flex items-center justify-center mb-6"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-3">Bid Leveling & Carbon Cost</h3>
+                            <p className="text-slate-600 text-sm leading-relaxed">Merge your financial budget with your carbon budget. By utilizing our Procurement dashboard, estimators can establish the exact "Carbon per Dollar" ratio, optimizing sustainable material choices without breaking the bank.</p>
+                        </div>
                     </div>
+
+                    <h3>Evaluating the Circular Economy (Module D)</h3>
+                    <p>Standard life cycle assessment software often stops at demolition (Phase C4). Green Engineering Tools goes further by calculating <strong>Module D</strong>. When you input high material recovery rates (e.g., melting down structural steel or repurposing cross-laminated timber), our engine calculates the negative carbon credits generated, providing a truly holistic view of your architectural system's environmental stewardship.</p>
                 </div>
             </div>
-        )}
+        </div>
+
+        <div className="bg-slate-50 border-t border-slate-200 py-20">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">Frequently Asked Questions</h2>
+                <div className="space-y-6">
+                    {[
+                        { q: "What is an embodied carbon calculator?", a: "An embodied carbon calculator is an engineering utility tool used to quantify the total greenhouse gas emissions generated during the manufacturing, transportation, and construction phases (Phases A1-A5) of building materials." },
+                        { q: "Does this software integrate with the EC3 database?", a: "Yes, our Life Cycle Assessment software features a direct API bridge to the Building Transparency EC3 global database. When an unrecognized material is uploaded via CSV, the engine prompts you to search and link a verified manufacturer EPD instantly." },
+                        { q: "Can I use this for LEED v4 certification?", a: "Absolutely. The engine automatically evaluates baseline versus proposed designs across 6 critical TRACI impact categories (Global Warming Potential, Acidification, Smog Formation, Eutrophication, Ozone Depletion, and Energy Demand) to generate an automated PDF compliance matrix." },
+                        { q: "Do I have to use CSV uploads?", a: "No. For advanced enterprise users, our software features a secure Webhook endpoint, allowing developers to pipe architectural schedules directly from custom C# Autodesk Revit add-ins into the web application." }
+                    ].map((faq, i) => (
+                        <div key={i} className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                            <h4 className="text-lg font-bold text-slate-900 mb-2 flex items-start gap-3"><span className="text-emerald-500">Q.</span> {faq.q}</h4>
+                            <p className="text-slate-600 leading-relaxed ml-7">{faq.a}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
       </main>
 
       {/* --- FOOTER --- */}
@@ -210,10 +145,11 @@ export default function GreenEngineeringSaaS() {
               <span className="font-bold text-white tracking-tight">GreenEngineering Tools</span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm font-semibold">
-                <button onClick={() => setCurrentRoute('home')} className="hover:text-white transition-colors">Home</button>
-                <button onClick={() => setCurrentRoute('about')} className="hover:text-white transition-colors">About Us</button>
-                <button onClick={() => setCurrentRoute('terms')} className="hover:text-white transition-colors">Privacy & Terms</button>
-                <button onClick={() => setCurrentRoute('contact')} className="hover:text-white transition-colors">Contact</button>
+                <Link href="/" className="hover:text-white transition-colors">Home</Link>
+                <Link href="/about" className="hover:text-white transition-colors">About Us</Link>
+                <Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link>
+                <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
             </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 text-center text-xs text-slate-600">

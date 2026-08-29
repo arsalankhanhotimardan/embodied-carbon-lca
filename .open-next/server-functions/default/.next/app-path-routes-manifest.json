@@ -1,0 +1,11 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/ec3/route": "/api/ec3",
+  "/api/epd/route": "/api/epd",
+  "/api/webhook/revit/route": "/api/webhook/revit",
+  "/icon.svg/route": "/icon.svg",
+  "/page": "/",
+  "/robots.txt/route": "/robots.txt",
+  "/sitemap.xml/route": "/sitemap.xml"
+}
