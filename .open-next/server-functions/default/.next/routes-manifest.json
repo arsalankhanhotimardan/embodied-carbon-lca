@@ -48,6 +48,12 @@
       "namedRegex": "^/about(?:/)?$"
     },
     {
+      "page": "/api/cbam",
+      "regex": "^/api/cbam(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam(?:/)?$"
+    },
+    {
       "page": "/api/ec3",
       "regex": "^/api/ec3(?:/)?$",
       "routeKeys": {},
@@ -64,6 +70,12 @@
       "regex": "^/api/webhook/revit(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/webhook/revit(?:/)?$"
+    },
+    {
+      "page": "/cbam-calculator",
+      "regex": "^/cbam\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/cbam\\-calculator(?:/)?$"
     },
     {
       "page": "/contact",

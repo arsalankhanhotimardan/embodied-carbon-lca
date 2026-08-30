@@ -1,0 +1,17 @@
+name: Weekly EU ETS Price Update
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every Monday
+    - cron: '0 0 * * 1'
+  # This allows you to manually trigger it from the GitHub website for testing
+  workflow_dispatch: 
+
+jobs:
+  update-ets-price:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Cloudflare API Route
+        run: |
+          curl -X GET "https://greenengineeringtools.com/api/cron/update-ets" \
+          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

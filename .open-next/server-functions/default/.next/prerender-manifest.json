@@ -5,7 +5,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 30239,
+      "htmlSize": 31557,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -62,7 +62,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 17708,
+      "htmlSize": 18012,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -90,7 +90,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 18017,
+      "htmlSize": 18321,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -114,11 +114,39 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/cbam-calculator": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 17132,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/cbam-calculator",
+      "dataRoute": "/cbam-calculator.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/contact": {
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 21260,
+      "htmlSize": 21564,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -178,7 +206,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 21692,
+      "htmlSize": 21996,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -270,7 +298,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 20481,
+      "htmlSize": 20799,
       "experimentalBypassFor": [
         {
           "type": "header",

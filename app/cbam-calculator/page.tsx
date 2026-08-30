@@ -17,7 +17,7 @@ const CBAM_SCHEDULE = [
 interface Product { id: string; name: string; cn: string; defaultEf: number; actualEf: number; }
 interface PortfolioItem { id: string; supplier: string; product: Product; volume: number; netCost: number; emissions: number; mode: string; }
 
-export default function MobilePerfectCbamPlatform() {
+export default function DefinitiveCbamPlatform() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeAppTab, setActiveAppTab] = useState<'calculator' | 'portfolio' | 'erp' | 'supplier'>('calculator');
   const [productDatabase, setProductDatabase] = useState<Product[]>([]);
@@ -25,7 +25,7 @@ export default function MobilePerfectCbamPlatform() {
   
   // Single Calculator State
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [volume, setVolume] = useState<number>(5000);
+  const [volume, setVolume] = useState<number>(50);
   const [supplierName, setSupplierName] = useState<string>(""); 
   const [euEtsPrice, setEuEtsPrice] = useState<number>(82.63); 
   const [foreignTaxRate, setForeignTaxRate] = useState<number>(0);
@@ -82,6 +82,25 @@ export default function MobilePerfectCbamPlatform() {
 
     return { finalActualEf, actEmissions, actGrossCost, actForeignDeduction, actNet2026, actPerTonne: volume > 0 ? actNet2026/volume : 0, forecast };
   }, [selectedProduct, volume, euEtsPrice, foreignTaxRate, emissionsMode, directActualEf]);
+
+  // --- PORTFOLIO EXEMPTION LOGIC (REGULATION EU 2025/2083) ---
+  const exemptableVolume = useMemo(() => {
+    return portfolio
+      .filter(item => item.product.id !== 'hydrogen' && item.product.id !== 'electricity')
+      .reduce((sum, item) => sum + item.volume, 0);
+  }, [portfolio]);
+
+  const isExempt = exemptableVolume < 50 && exemptableVolume > 0;
+
+  const totalCorporateLiability = useMemo(() => {
+    return portfolio.reduce((sum, item) => {
+      if (isExempt && item.product.id !== 'hydrogen' && item.product.id !== 'electricity') {
+        return sum; // 50-tonne exemption applied
+      }
+      return sum + item.netCost;
+    }, 0);
+  }, [portfolio, isExempt]);
+
 
   // --- PDF GENERATOR ---
   const generatePDF = () => {
@@ -143,9 +162,15 @@ export default function MobilePerfectCbamPlatform() {
   // --- SINGLE XML GENERATOR ---
   const generateSingleXML = () => {
     if (!calculation || !selectedProduct) return;
+    
+    // Evaluate if this single item qualifies for the 50-tonne exemption by itself
+    const itemIsExempt = volume < 50 && selectedProduct.id !== 'hydrogen' && selectedProduct.id !== 'electricity';
+    const finalLiability = itemIsExempt ? 0 : calculation.actNet2026;
+
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<CBAMDeclaration xmlns="urn:eu:taxud:cbam:v1">
-    <ReportingPeriod>2026-Q1</ReportingPeriod>
+<CBAMAnnualDeclaration xmlns="urn:eu:taxud:cbam:v2">
+    <ReportingYear>2026</ReportingYear>
+    <SubmissionDeadline>2027-09-30</SubmissionDeadline>
     <Declarant><Id>GREEN-ENGINEERING-TOOLS-SAAS</Id></Declarant>
     <Goods>
         <Commodity>
@@ -161,15 +186,16 @@ export default function MobilePerfectCbamPlatform() {
         </Emissions>
         <CarbonPriceDue>
             <ForeignCarbonTaxPaid>${foreignTaxRate.toFixed(2)}</ForeignCarbonTaxPaid>
-            <NetLiability>${calculation.actNet2026.toFixed(2)}</NetLiability>
+            <NetLiability>${finalLiability.toFixed(2)}</NetLiability>
+            ${itemIsExempt ? '<ExemptionReason>DeMinimis_Under_50t</ExemptionReason>' : ''}
         </CarbonPriceDue>
     </Goods>
-</CBAMDeclaration>`;
+</CBAMAnnualDeclaration>`;
 
     const blob = new Blob([xmlContent], { type: 'application/xml' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a'); link.href = url;
-    link.download = `CBAM_Registry_Export_${selectedProduct.cn}.xml`;
+    link.download = `CBAM_Annual_Declaration_${selectedProduct.cn}.xml`;
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
@@ -223,27 +249,34 @@ export default function MobilePerfectCbamPlatform() {
   };
 
   const exportPortfolioXml = () => {
-    let goodsStr = portfolio.map(item => `
+    let goodsStr = portfolio.map(item => {
+        const itemIsExempt = isExempt && item.product.id !== 'hydrogen' && item.product.id !== 'electricity';
+        const finalLiability = itemIsExempt ? 0 : item.netCost;
+
+        return `
         <Commodity>
             <Supplier>${item.supplier}</Supplier>
             <CNCode>${item.product.cn}</CNCode>
             <Quantity unit="tonnes">${item.volume}</Quantity>
             <TotalEmbeddedEmissions>${item.emissions.toFixed(2)}</TotalEmbeddedEmissions>
-            <NetLiability>${item.netCost.toFixed(2)}</NetLiability>
-        </Commodity>`).join("");
+            <NetLiability>${finalLiability.toFixed(2)}</NetLiability>
+            ${itemIsExempt ? '<ExemptionReason>DeMinimis_Under_50t</ExemptionReason>' : ''}
+        </Commodity>`;
+    }).join("");
 
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<CBAMDeclaration xmlns="urn:eu:taxud:cbam:v1">
-    <ReportingPeriod>2026-Q1</ReportingPeriod>
+<CBAMAnnualDeclaration xmlns="urn:eu:taxud:cbam:v2">
+    <ReportingYear>2026</ReportingYear>
+    <SubmissionDeadline>2027-09-30</SubmissionDeadline>
     <Declarant><Id>GREEN-ENGINEERING-TOOLS-ENTERPRISE</Id></Declarant>
     <Goods>${goodsStr}</Goods>
-    <QuarterlyTotalDue>${portfolio.reduce((sum, item) => sum + item.netCost, 0).toFixed(2)}</QuarterlyTotalDue>
-</CBAMDeclaration>`;
+    <AnnualTotalDue>${totalCorporateLiability.toFixed(2)}</AnnualTotalDue>
+</CBAMAnnualDeclaration>`;
 
     const blob = new Blob([xmlContent], { type: 'application/xml' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a'); link.href = url;
-    link.download = `CBAM_Enterprise_Portfolio_Export.xml`;
+    link.download = `CBAM_Annual_Master_Declaration_2026.xml`;
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
   };
 
@@ -256,10 +289,10 @@ export default function MobilePerfectCbamPlatform() {
         {/* APP HEADER */}
         <div className="text-center max-w-3xl mx-auto mb-8 md:mb-10">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-3 md:mb-4">EU CBAM Calculator 2026</h1>
-          <p className="text-base md:text-lg text-slate-600 font-medium px-2">Easily calculate your CBAM certificate costs, deduct foreign carbon taxes, and manage your global supply chain portfolio.</p>
+          <p className="text-base md:text-lg text-slate-600 font-medium px-2">Easily calculate your definitive phase CBAM certificate costs, process 50-tonne exemptions, and generate your annual XML declarations.</p>
         </div>
 
-        {/* MOBILE-PERFECT TAB NAVIGATION (2x2 Grid on Mobile, 1x4 on Desktop) */}
+        {/* MOBILE-PERFECT TAB NAVIGATION */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 bg-white border border-slate-200 p-2 rounded-xl shadow-sm w-full mb-8">
           <button onClick={()=>setActiveAppTab('calculator')} className={`flex items-center justify-center px-2 py-3 sm:px-4 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeAppTab === 'calculator' ? 'bg-slate-900 shadow-md text-white' : 'text-slate-600 hover:bg-slate-100'}`}>1. Calculator</button>
           <button onClick={()=>setActiveAppTab('portfolio')} className={`flex items-center justify-center gap-1.5 px-2 py-3 sm:px-4 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeAppTab === 'portfolio' ? 'bg-slate-900 shadow-md text-white' : 'text-slate-600 hover:bg-slate-100'}`}>2. Portfolio <span className={`${activeAppTab === 'portfolio' ? 'bg-indigo-500' : 'bg-indigo-100 text-indigo-700'} text-white px-1.5 py-0.5 rounded-full text-[10px]`}>{portfolio.length}</span></button>
@@ -292,7 +325,12 @@ export default function MobilePerfectCbamPlatform() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1">Total Weight (Tonnes)</label>
+                    <label className="block text-xs sm:text-sm font-bold text-slate-700 mb-1 flex justify-between">
+                      Total Weight (Tonnes)
+                      {volume < 50 && selectedProduct?.id !== 'hydrogen' && selectedProduct?.id !== 'electricity' && (
+                        <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">De Minimis Eligible</span>
+                      )}
+                    </label>
                     <input type="number" value={volume} onChange={(e)=>setVolume(Number(e.target.value))} className="w-full border border-slate-300 rounded-lg p-2.5 sm:p-3 font-mono text-base sm:text-lg font-bold focus:ring-2 focus:ring-indigo-500 outline-none" />
                   </div>
                 </div>
@@ -347,15 +385,21 @@ export default function MobilePerfectCbamPlatform() {
                       <h3 className="font-black text-xl sm:text-2xl mb-1">Your 2026 CBAM Liability</h3>
                       <p className="text-slate-400 text-xs sm:text-sm mb-6 sm:mb-8 border-b border-slate-700 pb-4">Based on {volume.toLocaleString()} tonnes of {selectedProduct?.name}.</p>
                       
-                      {/* Stack perfectly on mobile, side-by-side on sm+ */}
+                      {volume < 50 && selectedProduct?.id !== 'hydrogen' && selectedProduct?.id !== 'electricity' && (
+                        <div className="bg-emerald-900/40 border border-emerald-500 p-4 rounded-xl mb-6 shadow-sm">
+                            <h4 className="text-sm font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> De Minimis Exemption Applies</h4>
+                            <p className="text-xs text-emerald-200 mt-1">At {volume} tonnes, this single shipment falls below the 50-tonne annual threshold. If your aggregate yearly imports remain under 50 tonnes, your net liability is €0.00.</p>
+                        </div>
+                      )}
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-6 sm:mb-8">
                         <div>
                           <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Carbon Emitted</div>
                           <div className="text-2xl sm:text-3xl font-mono font-bold text-slate-200">{calculation.actEmissions.toLocaleString('en-IE', {maximumFractionDigits:0})} <span className="text-xs sm:text-sm">tCO₂e</span></div>
                         </div>
                         <div>
-                          <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Cost (Euros)</div>
-                          <div className="text-3xl sm:text-4xl font-mono font-black text-emerald-400">{calculation.actNet2026.toLocaleString('en-IE', { style: 'currency', currency: 'EUR' })}</div>
+                          <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Estimated Cost (Euros)</div>
+                          <div className={`text-3xl sm:text-4xl font-mono font-black ${volume < 50 && selectedProduct?.id !== 'hydrogen' && selectedProduct?.id !== 'electricity' ? 'text-emerald-400 line-through decoration-emerald-500/50' : 'text-emerald-400'}`}>{calculation.actNet2026.toLocaleString('en-IE', { style: 'currency', currency: 'EUR' })}</div>
                           <div className="text-xs sm:text-sm font-medium text-slate-400 mt-1">Cost per tonne: {calculation.actPerTonne.toLocaleString('en-IE', { style: 'currency', currency: 'EUR' })}</div>
                         </div>
                       </div>
@@ -368,11 +412,10 @@ export default function MobilePerfectCbamPlatform() {
                         </button>
                         <button onClick={generateSingleXML} className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 sm:py-4 px-4 rounded-xl shadow-md transition-colors flex justify-center items-center gap-2 text-xs sm:text-sm border border-slate-600">
                           <svg className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
-                          Export XML (Single)
+                          Export Annual XML
                         </button>
                       </div>
 
-                      {/* MASSIVE SAVE TO PORTFOLIO BUTTON */}
                       <button onClick={addToPortfolio} className="w-full mt-5 sm:mt-6 bg-emerald-500 hover:bg-emerald-400 text-white font-black py-4 sm:py-5 px-4 rounded-xl shadow-lg transition-transform hover:scale-[1.02] flex justify-center items-center gap-2 sm:gap-3 text-sm sm:text-lg border border-emerald-400">
                         <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
                         Save Calculation to Portfolio
@@ -408,15 +451,25 @@ export default function MobilePerfectCbamPlatform() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 border-b border-slate-100 pb-4 sm:pb-6 gap-4">
               <div>
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900">My Saved Portfolio</h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">Review your combined shipments and export a master XML declaration.</p>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">Review your combined shipments and export your 2026 annual XML declaration.</p>
               </div>
               <div className="text-left sm:text-right w-full sm:w-auto bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-lg border sm:border-none border-slate-200">
                 <div className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Total Corporate Liability</div>
                 <div className="text-2xl sm:text-4xl font-black text-indigo-700 font-mono">
-                  {portfolio.reduce((sum, item) => sum + item.netCost, 0).toLocaleString('en-IE', { style: 'currency', currency: 'EUR' })}
+                  {totalCorporateLiability.toLocaleString('en-IE', { style: 'currency', currency: 'EUR' })}
                 </div>
               </div>
             </div>
+
+            {isExempt && (
+                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl mb-6 flex items-start gap-3 shadow-sm">
+                    <svg className="w-6 h-6 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <div>
+                        <h4 className="text-sm font-bold text-emerald-900 uppercase tracking-widest">De Minimis Exemption Active</h4>
+                        <p className="text-xs sm:text-sm text-emerald-700 mt-1">Your total annual volume of applicable goods ({exemptableVolume.toLocaleString()} tonnes) is below the 50-tonne threshold. Under Regulation (EU) 2025/2083, these items are completely exempt from CBAM financial obligations.</p>
+                    </div>
+                </div>
+            )}
 
             {portfolio.length === 0 ? (
               <div className="text-center py-16 sm:py-20 bg-slate-50 rounded-lg border-2 border-dashed border-slate-200 px-4">
@@ -435,29 +488,35 @@ export default function MobilePerfectCbamPlatform() {
                     </tr>
                   </thead>
                   <tbody>
-                    {portfolio.map((item) => (
-                      <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
-                        <td className="p-3 sm:p-4 text-slate-800 font-bold">{item.product.name} <span className="text-[10px] sm:text-xs text-slate-400 font-normal block mt-0.5">CN: {item.product.cn} | Source: {item.supplier}</span></td>
-                        <td className="p-3 sm:p-4 text-right font-mono text-slate-500">{item.volume.toLocaleString('en-IE')} t</td>
-                        <td className="p-3 sm:p-4 text-right font-mono font-black text-indigo-700 bg-indigo-50/30">
-                          {item.netCost.toLocaleString('en-IE', { style: 'currency', currency: 'EUR' })}
-                        </td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <button onClick={() => deleteFromPortfolio(item.id)} className="text-slate-400 hover:text-red-600 transition-colors p-2" title="Remove Item">
-                            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {portfolio.map((item) => {
+                      const itemIsExempt = isExempt && item.product.id !== 'hydrogen' && item.product.id !== 'electricity';
+                      return (
+                        <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="p-3 sm:p-4 text-slate-800 font-bold">{item.product.name} <span className="text-[10px] sm:text-xs text-slate-400 font-normal block mt-0.5">CN: {item.product.cn} | Source: {item.supplier}</span></td>
+                          <td className="p-3 sm:p-4 text-right font-mono text-slate-500">{item.volume.toLocaleString('en-IE')} t</td>
+                          <td className="p-3 sm:p-4 text-right font-mono font-black text-indigo-700 bg-indigo-50/30">
+                            {itemIsExempt ? (
+                                <span className="text-emerald-600 line-through decoration-emerald-500/50">€0.00 <span className="text-[10px] block uppercase font-bold mt-1">Exempt</span></span>
+                            ) : (
+                                item.netCost.toLocaleString('en-IE', { style: 'currency', currency: 'EUR' })
+                            )}
+                          </td>
+                          <td className="p-3 sm:p-4 text-center">
+                            <button onClick={() => deleteFromPortfolio(item.id)} className="text-slate-400 hover:text-red-600 transition-colors p-2" title="Remove Item">
+                              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
 
-                {/* Stacks vertically on mobile, horizontal on SM and up */}
                 <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
                   <button onClick={()=>setPortfolio([])} className="w-full sm:w-auto px-6 py-3 sm:py-4 font-bold text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-100 sm:border-none text-sm">Clear All</button>
                   <button onClick={exportPortfolioXml} className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-emerald-400 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold shadow-md transition-colors flex items-center justify-center gap-2 text-sm">
                     <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    Download Master XML
+                    Download Annual XML
                   </button>
                 </div>
               </div>
@@ -538,14 +597,14 @@ export default function MobilePerfectCbamPlatform() {
               To accurately <strong>calculate CBAM liability</strong>, you must determine the total embedded emissions of your imported goods (such as steel, cement, or aluminum). You then multiply that volume by the current weekly EU ETS carbon price. Finally, you adjust for the specific phase-in factor for the current year (which is 2.5% in 2026). Our <strong>CBAM certificate cost estimator</strong> handles all of this math automatically in your browser.
             </p>
 
-            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-6 sm:mt-8 mb-3 sm:mb-4">What happens if I use EU Default Emission Values?</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-6 sm:mt-8 mb-3 sm:mb-4">How does the 50-Tonne Exemption work?</h3>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              Under the new regulations, relying on the EU's estimated default values instead of collecting actual, verified factory data triggers a mandatory 10% penalty markup. Furthermore, if you use default values, you are legally forbidden from deducting any foreign carbon taxes your manufacturer may have already paid. Using our <strong>CBAM compliance software</strong>, you can easily toggle between these two options to visualize the exact "Cost Trap" of failing to verify your supply chain.
+              Regulation (EU) 2025/2083 introduced a critical update for importers: the 50-tonne de minimis threshold. This rule automatically exempts you from all financial and reporting obligations if your total annual volume of CBAM goods (excluding electricity and hydrogen) remains under 50 tonnes. Our built-in portfolio aggregator automatically tracks your annual volume and zero-rates your certificate costs if you qualify for the exemption.
             </p>
 
             <h3 className="text-lg sm:text-xl font-bold text-slate-900 mt-6 sm:mt-8 mb-3 sm:mb-4">Can I export my data for the EU Registry?</h3>
             <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-              Yes. After running your calculations, simply click "Export EU Registry XML". The tool will automatically format your shipment data into the strict XML schema required by the European Commission's CBAM Transitional Registry, saving you hours of manual data entry. You can process single shipments, or use our bulk ERP upload tool to aggregate a massive portfolio of shipments.
+              Yes. After running your calculations, simply click "Export Annual XML". The tool will automatically format your shipment data into the strict annual XML declaration schema required by the European Commission's CBAM Transitional Registry, which is due by September 30th of the following year.
             </p>
           </div>
         </div>
