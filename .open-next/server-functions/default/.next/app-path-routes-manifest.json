@@ -3,6 +3,7 @@
   "/_not-found/page": "/_not-found",
   "/about/page": "/about",
   "/api/cbam/route": "/api/cbam",
+  "/api/cron/update-ets/route": "/api/cron/update-ets",
   "/api/ec3/route": "/api/ec3",
   "/api/epd/route": "/api/epd",
   "/api/webhook/revit/route": "/api/webhook/revit",
@@ -13,5 +14,6 @@
   "/privacy-policy/page": "/privacy-policy",
   "/robots.txt/route": "/robots.txt",
   "/sitemap.xml/route": "/sitemap.xml",
+  "/supplier-portal/request/page": "/supplier-portal/request",
   "/terms-of-service/page": "/terms-of-service"
 }

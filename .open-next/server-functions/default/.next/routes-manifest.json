@@ -54,6 +54,12 @@
       "namedRegex": "^/api/cbam(?:/)?$"
     },
     {
+      "page": "/api/cron/update-ets",
+      "regex": "^/api/cron/update\\-ets(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/update\\-ets(?:/)?$"
+    },
+    {
       "page": "/api/ec3",
       "regex": "^/api/ec3(?:/)?$",
       "routeKeys": {},
@@ -106,6 +112,12 @@
       "regex": "^/sitemap\\.xml(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/sitemap\\.xml(?:/)?$"
+    },
+    {
+      "page": "/supplier-portal/request",
+      "regex": "^/supplier\\-portal/request(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/supplier\\-portal/request(?:/)?$"
     },
     {
       "page": "/terms-of-service",

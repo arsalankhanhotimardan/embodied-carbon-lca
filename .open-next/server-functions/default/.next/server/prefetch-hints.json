@@ -9,10 +9,10 @@
     }
   },
   "/_not-found": {
-    "hints": 64,
+    "hints": 0,
     "slots": {
       "children": {
-        "hints": 96,
+        "hints": 64,
         "slots": {
           "children": {
             "hints": 160,
@@ -23,10 +23,10 @@
     }
   },
   "/about": {
-    "hints": 64,
+    "hints": 0,
     "slots": {
       "children": {
-        "hints": 96,
+        "hints": 64,
         "slots": {
           "children": {
             "hints": 160,
@@ -37,10 +37,10 @@
     }
   },
   "/cbam-calculator": {
-    "hints": 64,
+    "hints": 0,
     "slots": {
       "children": {
-        "hints": 96,
+        "hints": 64,
         "slots": {
           "children": {
             "hints": 160,
@@ -51,10 +51,10 @@
     }
   },
   "/contact": {
-    "hints": 64,
+    "hints": 0,
     "slots": {
       "children": {
-        "hints": 96,
+        "hints": 64,
         "slots": {
           "children": {
             "hints": 160,
@@ -65,19 +65,19 @@
     }
   },
   "/": {
-    "hints": 64,
+    "hints": 0,
     "slots": {
       "children": {
-        "hints": 160,
+        "hints": 128,
         "slots": null
       }
     }
   },
   "/privacy-policy": {
-    "hints": 64,
+    "hints": 0,
     "slots": {
       "children": {
-        "hints": 96,
+        "hints": 64,
         "slots": {
           "children": {
             "hints": 160,
@@ -87,11 +87,30 @@
       }
     }
   },
-  "/terms-of-service": {
-    "hints": 64,
+  "/supplier-portal/request": {
+    "hints": 0,
     "slots": {
       "children": {
-        "hints": 96,
+        "hints": 64,
+        "slots": {
+          "children": {
+            "hints": 96,
+            "slots": {
+              "children": {
+                "hints": 160,
+                "slots": null
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "/terms-of-service": {
+    "hints": 0,
+    "slots": {
+      "children": {
+        "hints": 64,
         "slots": {
           "children": {
             "hints": 160,

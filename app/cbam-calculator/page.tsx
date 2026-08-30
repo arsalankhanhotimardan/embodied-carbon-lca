@@ -19,7 +19,7 @@ interface PortfolioItem { id: string; supplier: string; product: Product; volume
 
 export default function DefinitiveCbamPlatform() {
   const [isLoading, setIsLoading] = useState(true);
-  const [activeAppTab, setActiveAppTab] = useState<'calculator' | 'portfolio' | 'erp' | 'supplier'>('calculator');
+  const [activeAppTab, setActiveAppTab] = useState<'calculator' | 'portfolio' | 'erp'>('calculator');
   const [productDatabase, setProductDatabase] = useState<Product[]>([]);
   const [isDownloading, setIsDownloading] = useState(false);
   
@@ -35,8 +35,6 @@ export default function DefinitiveCbamPlatform() {
   // Enterprise States
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const erpFileInputRef = useRef<HTMLInputElement>(null);
-  const [supplierEmail, setSupplierEmail] = useState("");
-  const [generatedPortalLink, setGeneratedPortalLink] = useState("");
 
   // Initial Fetch
   useEffect(() => {
@@ -163,7 +161,6 @@ export default function DefinitiveCbamPlatform() {
   const generateSingleXML = () => {
     if (!calculation || !selectedProduct) return;
     
-    // Evaluate if this single item qualifies for the 50-tonne exemption by itself
     const itemIsExempt = volume < 50 && selectedProduct.id !== 'hydrogen' && selectedProduct.id !== 'electricity';
     const finalLiability = itemIsExempt ? 0 : calculation.actNet2026;
 
@@ -242,12 +239,6 @@ export default function DefinitiveCbamPlatform() {
     reader.readAsText(file);
   };
 
-  const generateSupplierPortal = () => {
-    if(!selectedProduct) return;
-    const token = btoa(`${supplierEmail}|${selectedProduct.cn}`);
-    setGeneratedPortalLink(`https://greenengineeringtools.com/supplier-portal/request?token=${token}`);
-  };
-
   const exportPortfolioXml = () => {
     let goodsStr = portfolio.map(item => {
         const itemIsExempt = isExempt && item.product.id !== 'hydrogen' && item.product.id !== 'electricity';
@@ -292,12 +283,11 @@ export default function DefinitiveCbamPlatform() {
           <p className="text-base md:text-lg text-slate-600 font-medium px-2">Easily calculate your definitive phase CBAM certificate costs, process 50-tonne exemptions, and generate your annual XML declarations.</p>
         </div>
 
-        {/* MOBILE-PERFECT TAB NAVIGATION */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 bg-white border border-slate-200 p-2 rounded-xl shadow-sm w-full mb-8">
-          <button onClick={()=>setActiveAppTab('calculator')} className={`flex items-center justify-center px-2 py-3 sm:px-4 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeAppTab === 'calculator' ? 'bg-slate-900 shadow-md text-white' : 'text-slate-600 hover:bg-slate-100'}`}>1. Calculator</button>
-          <button onClick={()=>setActiveAppTab('portfolio')} className={`flex items-center justify-center gap-1.5 px-2 py-3 sm:px-4 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeAppTab === 'portfolio' ? 'bg-slate-900 shadow-md text-white' : 'text-slate-600 hover:bg-slate-100'}`}>2. Portfolio <span className={`${activeAppTab === 'portfolio' ? 'bg-indigo-500' : 'bg-indigo-100 text-indigo-700'} text-white px-1.5 py-0.5 rounded-full text-[10px]`}>{portfolio.length}</span></button>
-          <button onClick={()=>setActiveAppTab('erp')} className={`flex items-center justify-center px-2 py-3 sm:px-4 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeAppTab === 'erp' ? 'bg-slate-900 shadow-md text-white' : 'text-slate-600 hover:bg-slate-100'}`}>3. Bulk Import</button>
-          <button onClick={()=>setActiveAppTab('supplier')} className={`flex items-center justify-center px-2 py-3 sm:px-4 text-xs sm:text-sm font-bold rounded-lg transition-all ${activeAppTab === 'supplier' ? 'bg-slate-900 shadow-md text-white' : 'text-slate-600 hover:bg-slate-100'}`}>4. Supplier Portal</button>
+        {/* 3-TAB NAVIGATION */}
+        <div className="flex flex-col sm:flex-row gap-2 bg-white border border-slate-200 p-2 rounded-xl shadow-sm w-full mb-8">
+          <button onClick={()=>setActiveAppTab('calculator')} className={`flex-1 flex items-center justify-center px-2 py-3 sm:px-4 text-sm font-bold rounded-lg transition-all ${activeAppTab === 'calculator' ? 'bg-slate-900 shadow-md text-white' : 'text-slate-600 hover:bg-slate-100'}`}>1. Calculator</button>
+          <button onClick={()=>setActiveAppTab('portfolio')} className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-3 sm:px-4 text-sm font-bold rounded-lg transition-all ${activeAppTab === 'portfolio' ? 'bg-slate-900 shadow-md text-white' : 'text-slate-600 hover:bg-slate-100'}`}>2. Portfolio <span className={`${activeAppTab === 'portfolio' ? 'bg-indigo-500' : 'bg-indigo-100 text-indigo-700'} text-white px-2 py-0.5 rounded-full text-[10px]`}>{portfolio.length}</span></button>
+          <button onClick={()=>setActiveAppTab('erp')} className={`flex-1 flex items-center justify-center px-2 py-3 sm:px-4 text-sm font-bold rounded-lg transition-all ${activeAppTab === 'erp' ? 'bg-slate-900 shadow-md text-white' : 'text-slate-600 hover:bg-slate-100'}`}>3. Bulk Import</button>
         </div>
 
         {/* TAB 1: EASY CALCULATOR */}
@@ -537,50 +527,6 @@ export default function DefinitiveCbamPlatform() {
             <button onClick={() => erpFileInputRef.current?.click()} className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 sm:py-4 px-6 sm:px-10 rounded-xl shadow-lg transition-transform hover:scale-105 text-base sm:text-lg">
               Select Bulk CSV File
             </button>
-          </div>
-        )}
-
-        {/* TAB 4: SUPPLIER PORTAL */}
-        {activeAppTab === 'supplier' && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-5 sm:p-8 min-h-[500px]">
-            <div className="max-w-2xl mx-auto py-4 sm:py-8">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
-                <div className="bg-emerald-100 text-emerald-600 p-2.5 sm:p-3 rounded-full hidden sm:block">
-                  <svg className="w-6 h-6 sm:w-8 sm:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                </div>
-                <h2 className="text-xl sm:text-3xl font-black text-slate-900">Supply Chain Portal</h2>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-600 font-medium mb-6 sm:mb-8">Generate a secure, encrypted link to send to your Tier 1 suppliers. They can enter their actual factory emissions directly, which automatically syncs to your portfolio to bypass the 10% penalty.</p>
-              
-              <div className="space-y-4 sm:space-y-5 bg-slate-50 p-5 sm:p-8 rounded-xl border border-slate-200 shadow-inner">
-                <div>
-                  <label className="block text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 sm:mb-2">Supplier Contact Email</label>
-                  <input type="email" value={supplierEmail} onChange={(e)=>setSupplierEmail(e.target.value)} placeholder="manager@steelmill.com" className="w-full bg-white border border-slate-300 text-slate-900 text-sm sm:text-base font-semibold rounded-lg p-2.5 sm:p-3 outline-none focus:border-indigo-500" />
-                </div>
-                <div>
-                  <label className="block text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 sm:mb-2">Requested Material (CN Code)</label>
-                  <select onChange={(e) => setSelectedProduct(productDatabase.find(p => p.id === e.target.value) || productDatabase[0])} className="w-full bg-white border border-slate-300 text-slate-900 text-sm sm:text-base font-semibold rounded-lg p-2.5 sm:p-3 outline-none focus:border-indigo-500 cursor-pointer">
-                    {productDatabase.map(p => <option key={p.id} value={p.id}>{p.name} (CN: {p.cn})</option>)}
-                  </select>
-                </div>
-                <button onClick={generateSupplierPortal} disabled={!supplierEmail} className="w-full mt-2 sm:mt-4 bg-slate-900 hover:bg-slate-800 text-white font-black py-3 sm:py-4 rounded-xl shadow-md transition-colors disabled:opacity-50 text-sm sm:text-lg">
-                  Generate Secure Link
-                </button>
-              </div>
-
-              {generatedPortalLink && (
-                <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-emerald-50 border border-emerald-200 rounded-xl shadow-sm">
-                  <p className="text-[10px] sm:text-xs font-bold text-emerald-800 uppercase tracking-widest mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
-                    <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
-                    Link Generated Successfully
-                  </p>
-                  <p className="text-xs sm:text-sm text-emerald-700 mb-2 sm:mb-3">Copy and send this link to your supplier:</p>
-                  <code className="block w-full p-3 sm:p-4 bg-white border border-emerald-300 text-emerald-900 rounded-lg font-mono text-xs sm:text-sm overflow-x-auto select-all shadow-inner whitespace-nowrap">
-                    {generatedPortalLink}
-                  </code>
-                </div>
-              )}
-            </div>
           </div>
         )}
 
