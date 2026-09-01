@@ -6094,7 +6094,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_page_tsx_20u_jxs._.js": {
-      "bytes": 60765,
+      "bytes": 70256,
       "imports": [],
       "format": "cjs"
     },
@@ -11741,7 +11741,7 @@
           "bytesInOutput": 281
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_page_tsx_20u_jxs._.js": {
-          "bytesInOutput": 61677
+          "bytesInOutput": 71431
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_0tu3wcy._.js": {
           "bytesInOutput": 958
@@ -12146,7 +12146,7 @@
           "bytesInOutput": 74363
         }
       },
-      "bytes": 6640325
+      "bytes": 6650079
     }
   }
 }
