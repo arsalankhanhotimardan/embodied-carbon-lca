@@ -1,4 +1,21 @@
 {
   "version": 1,
-  "functions": {}
+  "functions": {
+    "/api/cbam": {},
+    "/api/cbam/bulk": {},
+    "/api/cbam/calculate": {},
+    "/api/cbam/health": {},
+    "/api/cbam/reference": {},
+    "/api/cbam/reference/activate": {},
+    "/api/cbam/reference/options": {},
+    "/api/cbam/reference/status": {},
+    "/api/cbam/sync-prices": {},
+    "/api/cbam/sync-reference": {},
+    "/api/cbam/years": {},
+    "/api/ec3": {},
+    "/api/epd": {},
+    "/api/health/lca": {},
+    "/api/material-mappings": {},
+    "/api/webhook/revit": {}
+  }
 }

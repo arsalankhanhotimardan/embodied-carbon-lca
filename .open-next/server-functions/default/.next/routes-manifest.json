@@ -42,6 +42,12 @@
       "namedRegex": "^/_not\\-found(?:/)?$"
     },
     {
+      "page": "/a1-a3-embodied-carbon",
+      "regex": "^/a1\\-a3\\-embodied\\-carbon(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/a1\\-a3\\-embodied\\-carbon(?:/)?$"
+    },
+    {
       "page": "/about",
       "regex": "^/about(?:/)?$",
       "routeKeys": {},
@@ -52,6 +58,66 @@
       "regex": "^/api/cbam(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/cbam(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/bulk",
+      "regex": "^/api/cbam/bulk(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/bulk(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/calculate",
+      "regex": "^/api/cbam/calculate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/calculate(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/health",
+      "regex": "^/api/cbam/health(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/health(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/reference",
+      "regex": "^/api/cbam/reference(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/reference(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/reference/activate",
+      "regex": "^/api/cbam/reference/activate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/reference/activate(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/reference/options",
+      "regex": "^/api/cbam/reference/options(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/reference/options(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/reference/status",
+      "regex": "^/api/cbam/reference/status(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/reference/status(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/sync-prices",
+      "regex": "^/api/cbam/sync\\-prices(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/sync\\-prices(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/sync-reference",
+      "regex": "^/api/cbam/sync\\-reference(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/sync\\-reference(?:/)?$"
+    },
+    {
+      "page": "/api/cbam/years",
+      "regex": "^/api/cbam/years(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cbam/years(?:/)?$"
     },
     {
       "page": "/api/cron/update-ets",
@@ -72,10 +138,28 @@
       "namedRegex": "^/api/epd(?:/)?$"
     },
     {
+      "page": "/api/health/lca",
+      "regex": "^/api/health/lca(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/health/lca(?:/)?$"
+    },
+    {
+      "page": "/api/material-mappings",
+      "regex": "^/api/material\\-mappings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/material\\-mappings(?:/)?$"
+    },
+    {
       "page": "/api/webhook/revit",
       "regex": "^/api/webhook/revit(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/webhook/revit(?:/)?$"
+    },
+    {
+      "page": "/bim-embodied-carbon",
+      "regex": "^/bim\\-embodied\\-carbon(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/bim\\-embodied\\-carbon(?:/)?$"
     },
     {
       "page": "/cbam-calculator",
@@ -84,16 +168,76 @@
       "namedRegex": "^/cbam\\-calculator(?:/)?$"
     },
     {
+      "page": "/cbam-calculator/actual-data",
+      "regex": "^/cbam\\-calculator/actual\\-data(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/cbam\\-calculator/actual\\-data(?:/)?$"
+    },
+    {
+      "page": "/cbam-calculator/bulk",
+      "regex": "^/cbam\\-calculator/bulk(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/cbam\\-calculator/bulk(?:/)?$"
+    },
+    {
+      "page": "/cbam-calculator/electricity",
+      "regex": "^/cbam\\-calculator/electricity(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/cbam\\-calculator/electricity(?:/)?$"
+    },
+    {
       "page": "/contact",
       "regex": "^/contact(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/contact(?:/)?$"
     },
     {
+      "page": "/ec3-epd-guide",
+      "regex": "^/ec3\\-epd\\-guide(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/ec3\\-epd\\-guide(?:/)?$"
+    },
+    {
+      "page": "/embodied-carbon-calculator",
+      "regex": "^/embodied\\-carbon\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/embodied\\-carbon\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/epd-carbon-calculator",
+      "regex": "^/epd\\-carbon\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/epd\\-carbon\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/guides",
+      "regex": "^/guides(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/guides(?:/)?$"
+    },
+    {
       "page": "/icon.svg",
       "regex": "^/icon\\.svg(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/icon\\.svg(?:/)?$"
+    },
+    {
+      "page": "/leed-whole-building-lca",
+      "regex": "^/leed\\-whole\\-building\\-lca(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/leed\\-whole\\-building\\-lca(?:/)?$"
+    },
+    {
+      "page": "/methodology",
+      "regex": "^/methodology(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/methodology(?:/)?$"
+    },
+    {
+      "page": "/module-d-lca",
+      "regex": "^/module\\-d\\-lca(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/module\\-d\\-lca(?:/)?$"
     },
     {
       "page": "/privacy-policy",
@@ -118,6 +262,12 @@
       "regex": "^/terms\\-of\\-service(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/terms\\-of\\-service(?:/)?$"
+    },
+    {
+      "page": "/whole-building-lca",
+      "regex": "^/whole\\-building\\-lca(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/whole\\-building\\-lca(?:/)?$"
     }
   ],
   "dataRoutes": [],

@@ -554,6 +554,7 @@ export default function CbamEstimatorV3() {
   const [priceRefreshToken, setPriceRefreshToken] = useState(0);
   const [planningEtsPrice, setPlanningEtsPrice] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isPortfolioDownloading, setIsPortfolioDownloading] = useState(false);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -1438,6 +1439,141 @@ export default function CbamEstimatorV3() {
     }, 0);
   }, [portfolio, portfolioThresholdByYear]);
 
+
+  /**
+   * Portfolio exports and UI must use the same annual threshold treatment.
+   * Raw line certificates/cost are retained on each PortfolioItem, while the
+   * effective values below become zero when that reporting year's <= 50 t
+   * mass-based exemption applies.
+   */
+  const getPortfolioEffectiveValues = (item: PortfolioItem) => {
+    const threshold = portfolioThresholdByYear.get(item.reportingYear);
+    const exempt =
+      item.eligibleForMassThreshold &&
+      Boolean(threshold?.exempt);
+
+    return {
+      exempt,
+      annualEligibleMass: threshold?.annualEligibleMass ?? null,
+      effectiveCertificates:
+        item.certificates === null
+          ? null
+          : exempt
+            ? 0
+            : item.certificates,
+      effectiveCost:
+        item.estimatedCost === null
+          ? null
+          : exempt
+            ? 0
+            : item.estimatedCost,
+    };
+  };
+
+  const portfolioSummary = useMemo(() => {
+    let totalMass = 0;
+    let totalEmissions = 0;
+    let totalFaa = 0;
+    let totalEffectiveCertificates = 0;
+    let certificateLines = 0;
+    let faaLines = 0;
+
+    for (const item of portfolio) {
+      totalMass += item.volume;
+      totalEmissions += item.emissions;
+
+      if (item.freeAllocationAdjustment !== null) {
+        totalFaa += item.freeAllocationAdjustment;
+        faaLines += 1;
+      }
+
+      const threshold = portfolioThresholdByYear.get(item.reportingYear);
+      const exempt =
+        item.eligibleForMassThreshold &&
+        Boolean(threshold?.exempt);
+
+      if (item.certificates !== null) {
+        totalEffectiveCertificates += exempt ? 0 : item.certificates;
+        certificateLines += 1;
+      }
+    }
+
+    return {
+      lineCount: portfolio.length,
+      totalMass,
+      totalEmissions,
+      totalFaa: faaLines ? totalFaa : null,
+      totalEffectiveCertificates:
+        certificateLines ? totalEffectiveCertificates : null,
+      totalExposure: portfolioTotal,
+    };
+  }, [portfolio, portfolioThresholdByYear, portfolioTotal]);
+
+  const portfolioYearSummary = useMemo(() => {
+    const years = new Map<
+      number,
+      {
+        lineCount: number;
+        totalMass: number;
+        totalEmissions: number;
+        totalFaa: number;
+        faaLines: number;
+        effectiveCertificates: number;
+        certificateLines: number;
+        effectiveCost: number;
+        costLines: number;
+      }
+    >();
+
+    for (const item of portfolio) {
+      const current = years.get(item.reportingYear) ?? {
+        lineCount: 0,
+        totalMass: 0,
+        totalEmissions: 0,
+        totalFaa: 0,
+        faaLines: 0,
+        effectiveCertificates: 0,
+        certificateLines: 0,
+        effectiveCost: 0,
+        costLines: 0,
+      };
+
+      current.lineCount += 1;
+      current.totalMass += item.volume;
+      current.totalEmissions += item.emissions;
+
+      if (item.freeAllocationAdjustment !== null) {
+        current.totalFaa += item.freeAllocationAdjustment;
+        current.faaLines += 1;
+      }
+
+      const threshold = portfolioThresholdByYear.get(item.reportingYear);
+      const exempt =
+        item.eligibleForMassThreshold &&
+        Boolean(threshold?.exempt);
+
+      if (item.certificates !== null) {
+        current.effectiveCertificates += exempt ? 0 : item.certificates;
+        current.certificateLines += 1;
+      }
+
+      if (item.estimatedCost !== null) {
+        current.effectiveCost += exempt ? 0 : item.estimatedCost;
+        current.costLines += 1;
+      }
+
+      years.set(item.reportingYear, current);
+    }
+
+    return Array.from(years.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([year, values]) => ({
+        year,
+        ...values,
+        threshold: portfolioThresholdByYear.get(year) ?? null,
+      }));
+  }, [portfolio, portfolioThresholdByYear]);
+
   const addToPortfolio = () => {
     if (!selectedProduct || !calculation) return;
 
@@ -1480,6 +1616,325 @@ export default function CbamEstimatorV3() {
 
   const deleteFromPortfolio = (id: string) => {
     setPortfolio((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const generatePortfolioPDF = () => {
+    if (!portfolio.length) {
+      alert("Add at least one portfolio line before generating a report.");
+      return;
+    }
+
+    setIsPortfolioDownloading(true);
+
+    try {
+      const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const generatedAt = new Date();
+      const generatedDate = generatedAt.toISOString().slice(0, 10);
+
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, pageWidth, 34, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.text("CBAM PORTFOLIO PLANNING REPORT", 12, 15);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.text(
+        "Planning estimate only — not an EU CBAM Registry filing, declaration or legal certification",
+        12,
+        23
+      );
+      doc.text(`Generated: ${generatedDate}`, pageWidth - 12, 23, {
+        align: "right",
+      });
+
+      doc.setTextColor(15, 23, 42);
+
+      autoTable(doc, {
+        startY: 41,
+        head: [["Portfolio summary", "Value"]],
+        body: [
+          ["Portfolio lines", String(portfolioSummary.lineCount)],
+          ["Total imported mass", `${num(portfolioSummary.totalMass)} t`],
+          [
+            "Total embedded emissions",
+            `${num(portfolioSummary.totalEmissions)} tCO2e`,
+          ],
+          [
+            "Total free-allocation adjustment",
+            portfolioSummary.totalFaa !== null
+              ? `${num(portfolioSummary.totalFaa)} tCO2e`
+              : "Unavailable for one or more calculation bases",
+          ],
+          [
+            "Effective certificates after annual threshold",
+            portfolioSummary.totalEffectiveCertificates !== null
+              ? num(portfolioSummary.totalEffectiveCertificates)
+              : "Unavailable for one or more calculation bases",
+          ],
+          ["Estimated portfolio exposure", eur(portfolioSummary.totalExposure)],
+        ],
+        theme: "grid",
+        styles: { fontSize: 8, cellPadding: 2.1 },
+        columnStyles: {
+          0: {
+            fontStyle: "bold",
+            fillColor: [248, 250, 252],
+            cellWidth: 68,
+          },
+        },
+        margin: { left: 12, right: 150 },
+      });
+
+      const annualStartY = (doc as any).lastAutoTable.finalY + 6;
+
+      autoTable(doc, {
+        startY: annualStartY,
+        head: [
+          [
+            "Reporting year",
+            "Lines",
+            "Mass (t)",
+            "Embedded emissions",
+            "Eligible annual mass",
+            "50 t threshold",
+            "Effective certificates",
+            "Estimated exposure",
+          ],
+        ],
+        body: portfolioYearSummary.map((row) => [
+          String(row.year),
+          String(row.lineCount),
+          num(row.totalMass),
+          num(row.totalEmissions),
+          row.threshold
+            ? num(row.threshold.annualEligibleMass)
+            : "Not applicable",
+          row.threshold
+            ? row.threshold.exempt
+              ? "Exempt (<= 50 t)"
+              : "Not exempt"
+            : "Not applicable",
+          row.certificateLines
+            ? num(row.effectiveCertificates)
+            : "N/A",
+          row.costLines ? eur(row.effectiveCost) : "N/A",
+        ]),
+        theme: "striped",
+        headStyles: { fillColor: [30, 58, 138] },
+        styles: { fontSize: 7.6, cellPadding: 1.9 },
+        margin: { left: 12, right: 12 },
+      });
+
+      const detailsStartY = (doc as any).lastAutoTable.finalY + 7;
+
+      autoTable(doc, {
+        startY: detailsStartY,
+        head: [
+          [
+            "Product / CN",
+            "Supplier / origin",
+            "Year / period",
+            "Mass (t)",
+            "Emissions",
+            "FAA",
+            "Certificates",
+            "Price",
+            "Cost",
+          ],
+        ],
+        body: portfolio.map((item) => {
+          const effective = getPortfolioEffectiveValues(item);
+          const itemSector = inferSector(item.product);
+
+          return [
+            `${item.product.name}\nCN/TARIC: ${item.product.cn}\nSector: ${sectorLabel(itemSector)}`,
+            `${item.supplier}\n${item.product.country || "Country not supplied"}`,
+            `${item.reportingYear} / ${item.periodLabel}\nProduction: ${item.productionYear}`,
+            num(item.volume),
+            `${num(item.emissions)} tCO2e`,
+            item.freeAllocationAdjustment !== null
+              ? `${num(item.freeAllocationAdjustment)} tCO2e`
+              : "N/A",
+            effective.effectiveCertificates !== null
+              ? `${num(effective.effectiveCertificates)}${
+                  effective.exempt ? " (exempt)" : ""
+                }`
+              : "N/A",
+            `${eur(item.price)} / tCO2e`,
+            effective.effectiveCost !== null
+              ? `${eur(effective.effectiveCost)}${
+                  effective.exempt ? " (exempt)" : ""
+                }`
+              : "N/A",
+          ];
+        }),
+        theme: "grid",
+        headStyles: { fillColor: [15, 23, 42] },
+        styles: {
+          fontSize: 7.1,
+          cellPadding: 1.8,
+          valign: "top",
+          overflow: "linebreak",
+        },
+        columnStyles: {
+          0: { cellWidth: 62 },
+          1: { cellWidth: 38 },
+          2: { cellWidth: 34 },
+          3: { cellWidth: 20, halign: "right" },
+          4: { cellWidth: 27, halign: "right" },
+          5: { cellWidth: 25, halign: "right" },
+          6: { cellWidth: 27, halign: "right" },
+          7: { cellWidth: 27, halign: "right" },
+          8: { cellWidth: 27, halign: "right" },
+        },
+        margin: { left: 8, right: 8, bottom: 14 },
+        didDrawPage: () => {
+          const pageNumber = doc.getNumberOfPages();
+          const pageHeight = doc.internal.pageSize.getHeight();
+
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(7);
+          doc.setTextColor(100, 116, 139);
+          doc.text(
+            "Green Engineering Tools — CBAM portfolio planning estimate",
+            8,
+            pageHeight - 6
+          );
+          doc.text(
+            `Page ${pageNumber}`,
+            pageWidth - 8,
+            pageHeight - 6,
+            { align: "right" }
+          );
+        },
+      });
+
+      const finalY = (doc as any).lastAutoTable.finalY + 6;
+      const pageHeight = doc.internal.pageSize.getHeight();
+
+      if (finalY > pageHeight - 25) {
+        doc.addPage();
+      }
+
+      const noteY =
+        finalY > pageHeight - 25
+          ? 18
+          : finalY;
+
+      doc.setTextColor(71, 85, 105);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7.5);
+      const note =
+        "Methodology note: annual mass-threshold treatment is evaluated separately by reporting year. " +
+        "Where a year remains within the applicable 50 t cumulative mass threshold, effective certificate " +
+        "and cost exposure is shown as zero for threshold-eligible goods. Raw calculation data is retained " +
+        "internally. Electricity and hydrogen do not use this mass-based exemption. Future regulatory data " +
+        "may change; unavailable official values are not invented by this tool.";
+      doc.text(doc.splitTextToSize(note, pageWidth - 24), 12, noteY);
+
+      const finalPageHeight = doc.internal.pageSize.getHeight();
+      doc.setFontSize(7);
+      doc.setTextColor(100, 116, 139);
+      doc.text(
+        "Green Engineering Tools — CBAM portfolio planning estimate",
+        8,
+        finalPageHeight - 6
+      );
+      doc.text(
+        `Page ${doc.getNumberOfPages()}`,
+        pageWidth - 8,
+        finalPageHeight - 6,
+        { align: "right" }
+      );
+
+      doc.save(`CBAM_Portfolio_Planning_Report_${generatedDate}.pdf`);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to generate the portfolio PDF.");
+    } finally {
+      setIsPortfolioDownloading(false);
+    }
+  };
+
+  const exportPortfolioCSV = () => {
+    if (!portfolio.length) {
+      alert("Add at least one portfolio line before exporting CSV.");
+      return;
+    }
+
+    /**
+     * Prevent spreadsheet-formula injection if supplier/product text begins
+     * with =, +, -, or @. Papa Parse handles quoting; this handles formulas.
+     */
+    const spreadsheetSafeText = (value: unknown) => {
+      const text = String(value ?? "");
+      return /^[=+\-@]/.test(text) ? `'${text}` : text;
+    };
+
+    const rows = portfolio.map((item, index) => {
+      const effective = getPortfolioEffectiveValues(item);
+      const threshold =
+        portfolioThresholdByYear.get(item.reportingYear) ?? null;
+
+      return {
+        Row: index + 1,
+        Supplier: spreadsheetSafeText(item.supplier),
+        Country: spreadsheetSafeText(item.product.country || ""),
+        CN_TARIC: spreadsheetSafeText(item.product.cn),
+        Product: spreadsheetSafeText(item.product.name),
+        Sector: sectorLabel(inferSector(item.product)),
+        Reporting_Year: item.reportingYear,
+        Production_Year: item.productionYear,
+        Price_Period: spreadsheetSafeText(item.periodLabel),
+        Certificate_Price_EUR_per_tCO2e: item.price,
+        Emissions_Mode: item.emissionsMode,
+        Imported_Mass_t: item.volume,
+        Embedded_Emissions_tCO2e: item.emissions,
+        Free_Allocation_Adjustment_tCO2e:
+          item.freeAllocationAdjustment ?? "",
+        Raw_Certificates: item.certificates ?? "",
+        Effective_Certificates_After_Threshold:
+          effective.effectiveCertificates ?? "",
+        Prior_YTD_Eligible_Mass_t: item.priorYtdEligibleMass,
+        Annual_Eligible_Mass_t:
+          threshold?.annualEligibleMass ?? "",
+        Threshold_Status:
+          threshold && item.eligibleForMassThreshold
+            ? threshold.exempt
+              ? "EXEMPT_WITHIN_50T"
+              : "NOT_EXEMPT"
+            : "NOT_APPLICABLE",
+        Raw_Estimated_Cost_EUR: item.estimatedCost ?? "",
+        Effective_Estimated_Cost_EUR:
+          effective.effectiveCost ?? "",
+        Report_Basis: "Planning estimate - not an EU Registry filing",
+      };
+    });
+
+    const csv = Papa.unparse(rows, {
+      newline: "\r\n",
+    });
+
+    const generatedDate = new Date().toISOString().slice(0, 10);
+    const blob = new Blob(["\uFEFF", csv], {
+      type: "text/csv;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = `CBAM_Portfolio_${generatedDate}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   };
 
   const generatePDF = () => {
@@ -2689,6 +3144,28 @@ export default function CbamEstimatorV3() {
                 <div className="mt-1 text-3xl font-mono font-black text-indigo-700">
                   {eur(portfolioTotal)}
                 </div>
+
+                <div className="mt-3 flex flex-wrap gap-2 sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={generatePortfolioPDF}
+                    disabled={!portfolio.length || isPortfolioDownloading}
+                    className="rounded-lg bg-slate-950 px-4 py-2 text-xs font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {isPortfolioDownloading
+                      ? "Generating PDF…"
+                      : "Download Portfolio PDF"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={exportPortfolioCSV}
+                    disabled={!portfolio.length}
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Export Portfolio CSV
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -2711,7 +3188,45 @@ export default function CbamEstimatorV3() {
                 No portfolio lines yet.
               </div>
             ) : (
-              <div className="mt-7 overflow-x-auto">
+              <>
+                <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="rounded-xl bg-slate-50 p-3">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      Lines
+                    </div>
+                    <div className="mt-1 font-mono text-lg font-black text-slate-900">
+                      {portfolioSummary.lineCount}
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 p-3">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      Total mass
+                    </div>
+                    <div className="mt-1 font-mono text-lg font-black text-slate-900">
+                      {num(portfolioSummary.totalMass)} t
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 p-3">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      Embedded emissions
+                    </div>
+                    <div className="mt-1 font-mono text-lg font-black text-slate-900">
+                      {num(portfolioSummary.totalEmissions)}
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 p-3">
+                    <div className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                      Effective certificates
+                    </div>
+                    <div className="mt-1 font-mono text-lg font-black text-slate-900">
+                      {portfolioSummary.totalEffectiveCertificates !== null
+                        ? num(portfolioSummary.totalEffectiveCertificates)
+                        : "N/A"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 overflow-x-auto">
                 <table className="w-full min-w-[900px] text-sm">
                   <thead className="bg-slate-100 text-slate-600">
                     <tr>
@@ -2727,14 +3242,7 @@ export default function CbamEstimatorV3() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {portfolio.map((item) => {
-                      const yearThreshold =
-                        portfolioThresholdByYear.get(item.reportingYear);
-
-                      const itemCost =
-                        item.eligibleForMassThreshold &&
-                        yearThreshold?.exempt
-                          ? 0
-                          : item.estimatedCost;
+                      const effective = getPortfolioEffectiveValues(item);
 
                       return (
                         <tr key={item.id}>
@@ -2759,12 +3267,18 @@ export default function CbamEstimatorV3() {
                               : "N/A"}
                           </td>
                           <td className="p-3 text-right font-mono">
-                            {item.certificates !== null
-                              ? num(item.certificates)
+                            {effective.effectiveCertificates !== null
+                              ? effective.exempt
+                                ? `${num(effective.effectiveCertificates)} (exempt)`
+                                : num(effective.effectiveCertificates)
                               : "N/A"}
                           </td>
                           <td className="p-3 text-right font-mono font-black text-indigo-700">
-                            {itemCost !== null ? eur(itemCost) : "N/A"}
+                            {effective.effectiveCost !== null
+                              ? effective.exempt
+                                ? `${eur(effective.effectiveCost)} (exempt)`
+                                : eur(effective.effectiveCost)
+                              : "N/A"}
                           </td>
                           <td className="p-3 text-center">
                             <button
@@ -2779,7 +3293,8 @@ export default function CbamEstimatorV3() {
                     })}
                   </tbody>
                 </table>
-              </div>
+                </div>
+              </>
             )}
           </section>
         )}

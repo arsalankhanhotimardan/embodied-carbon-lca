@@ -1,0 +1,3 @@
+module.exports=[41056,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"CBAM Bulk CSV Calculator | Official CN & Country Data",description:"Calculate up to 200 EU CBAM import rows using country, CN/TARIC, reporting year, production year and official EU reference data.",alternates:{canonical:"https://greenengineeringtools.com/cbam-calculator/bulk"}}])},50001,function(a){a.n(a.i(41056))}];
+
+//# sourceMappingURL=app_cbam-calculator_bulk_layout_tsx_1nrcx8y._.js.map

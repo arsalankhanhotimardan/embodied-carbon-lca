@@ -1,0 +1,3 @@
+module.exports=[34230,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"EU CBAM Electricity Calculator | MWh & Emission Factors",description:"Dedicated EU CBAM electricity planning calculator using MWh, official default emission factors when available and actual-electricity eligibility checks.",alternates:{canonical:"https://greenengineeringtools.com/cbam-calculator/electricity"}}])},54483,function(a){a.n(a.i(34230))}];
+
+//# sourceMappingURL=app_cbam-calculator_electricity_layout_tsx_02cp6eb._.js.map

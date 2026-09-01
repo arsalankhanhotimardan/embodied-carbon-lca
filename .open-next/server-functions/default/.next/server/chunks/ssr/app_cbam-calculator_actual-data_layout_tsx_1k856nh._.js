@@ -1,0 +1,3 @@
+module.exports=[82475,a=>{"use strict";a.s(["default",0,function({children:a}){return a},"metadata",0,{title:"CBAM Actual Emissions & Complex Goods Calculator",description:"Model CBAM actual emissions, process benchmarks, production routes and precursor SEFA for complex goods. Planning tool using official EU reference data.",alternates:{canonical:"https://greenengineeringtools.com/cbam-calculator/actual-data"}}])},50829,function(a){a.n(a.i(82475))}];
+
+//# sourceMappingURL=app_cbam-calculator_actual-data_layout_tsx_1k856nh._.js.map
