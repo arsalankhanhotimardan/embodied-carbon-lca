@@ -114,12 +114,6 @@
       "namedRegex": "^/sitemap\\.xml(?:/)?$"
     },
     {
-      "page": "/supplier-portal/request",
-      "regex": "^/supplier\\-portal/request(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/supplier\\-portal/request(?:/)?$"
-    },
-    {
       "page": "/terms-of-service",
       "regex": "^/terms\\-of\\-service(?:/)?$",
       "routeKeys": {},

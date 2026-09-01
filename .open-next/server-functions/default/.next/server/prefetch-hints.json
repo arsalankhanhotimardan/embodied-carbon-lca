@@ -87,25 +87,6 @@
       }
     }
   },
-  "/supplier-portal/request": {
-    "hints": 0,
-    "slots": {
-      "children": {
-        "hints": 64,
-        "slots": {
-          "children": {
-            "hints": 96,
-            "slots": {
-              "children": {
-                "hints": 160,
-                "slots": null
-              }
-            }
-          }
-        }
-      }
-    }
-  },
   "/terms-of-service": {
     "hints": 0,
     "slots": {
