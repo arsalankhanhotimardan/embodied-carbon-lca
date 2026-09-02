@@ -9,6 +9,9 @@ const OPENEPD_API_BASE = "https://openepd.buildingtransparency.org/api";
 
 type AnyObject = Record<string, any>;
 
+const isObject = (value: unknown): value is AnyObject =>
+  Boolean(value) && typeof value === "object" && !Array.isArray(value);
+
 const firstString = (...values: unknown[]): string | undefined => {
   for (const value of values) {
     if (typeof value === "string" && value.trim()) return value.trim();
@@ -16,30 +19,55 @@ const firstString = (...values: unknown[]): string | undefined => {
   return undefined;
 };
 
+/**
+ * Parse a numeric measurement without converting null/undefined to zero.
+ * openEPD Measurement objects commonly use { mean, unit }.
+ */
 const measurementNumber = (value: any): number | null => {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (!value || typeof value !== "object") return null;
+  if (value === null || value === undefined || value === "") return null;
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (typeof value === "string") {
+    const direct = Number(value.trim());
+    if (Number.isFinite(direct)) return direct;
+
+    // Accept a quantity-like string only when it starts with a number.
+    const match = value
+      .trim()
+      .match(/^([+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?)(?:\s|$)/i);
+    if (match) {
+      const parsed = Number(match[1]);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    return null;
+  }
+
+  if (!isObject(value)) return null;
 
   const candidates = [
-    value.value,
     value.mean,
+    value.value,
     value.qty,
     value.amount,
     value.result,
   ];
 
   for (const candidate of candidates) {
-    const parsed = Number(candidate);
-    if (Number.isFinite(parsed)) return parsed;
+    const parsed = measurementNumber(candidate);
+    if (parsed !== null) return parsed;
   }
+
   return null;
 };
 
 const firstNumber = (...values: any[]): number | null => {
   for (const value of values) {
-    const parsed =
-      typeof value === "object" ? measurementNumber(value) : Number(value);
-    if (Number.isFinite(parsed)) return parsed;
+    const parsed = measurementNumber(value);
+    if (parsed !== null) return parsed;
   }
   return null;
 };
@@ -49,19 +77,201 @@ const getPath = (obj: AnyObject, path: string): any =>
 
 const measurementAt = (raw: AnyObject, paths: string[]): number | null => {
   for (const path of paths) {
-    const value = getPath(raw, path);
-    const parsed = measurementNumber(value);
+    const parsed = measurementNumber(getPath(raw, path));
     if (parsed !== null) return parsed;
-
-    if (typeof value === "number" && Number.isFinite(value)) return value;
   }
   return null;
 };
 
-const impactSetFor = (raw: AnyObject, module: string) => {
+const moduleScopeAliases = (module: string): string[] => {
+  if (module === "A1A3") {
+    return ["A1A2A3", "A1A3", "A1-A3", "A1_A3", "A1/A3"];
+  }
+  return [module, module.toLowerCase()];
+};
+
+const scopesetValue = (
+  scopeSet: AnyObject | null | undefined,
+  module: string
+): number | null => {
+  if (!isObject(scopeSet)) return null;
+
+  for (const key of moduleScopeAliases(module)) {
+    const value = measurementNumber(scopeSet[key]);
+    if (value !== null) return value;
+  }
+
+  // openEPD may expose A1, A2 and A3 independently.
+  // Only aggregate them if ALL three are declared.
+  if (module === "A1A3") {
+    const split = ["A1", "A2", "A3"].map((key) =>
+      measurementNumber(scopeSet[key] ?? scopeSet[key.toLowerCase()])
+    );
+
+    if (split.every((value) => value !== null)) {
+      return (split as number[]).reduce((sum, value) => sum + value, 0);
+    }
+  }
+
+  return null;
+};
+
+type SelectedImpactSet = {
+  method: string;
+  set: AnyObject;
+} | null;
+
+const impactIndicator = (
+  set: AnyObject,
+  aliases: string[]
+): AnyObject | null => {
+  for (const alias of aliases) {
+    const candidate = set[alias];
+    if (isObject(candidate)) return candidate;
+  }
+  return null;
+};
+
+const hasAnyScopeValue = (scopeSet: AnyObject | null): boolean => {
+  if (!scopeSet) return false;
+  return [
+    "A1A2A3",
+    "A1A3",
+    "A1",
+    "A2",
+    "A3",
+    "A4",
+    "A5",
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "D",
+  ].some((key) => measurementNumber(scopeSet[key]) !== null);
+};
+
+/**
+ * openEPD standard structure:
+ * impacts -> LCIA method -> indicator -> scope -> Measurement
+ *
+ * Example from the openEPD model:
+ * impacts["TRACI 2.1"].gwp.A1A2A3.mean
+ *
+ * Select ONE LCIA method for a record so impact categories are not silently
+ * mixed across methods.
+ */
+const selectOpenEpdImpactSet = (raw: AnyObject): SelectedImpactSet => {
+  if (!isObject(raw.impacts)) return null;
+
+  const preferredMethods = [
+    "TRACI 2.2",
+    "TRACI 2.1",
+    "TRACI 2.0",
+    "IPCC AR6",
+    "IPCC AR5",
+    "EF 3.1",
+    "EF 3.0",
+    "CML 2016",
+    "CML 2012",
+    "EN 15978:2011",
+  ];
+
+  const candidates = Object.entries(raw.impacts)
+    .filter(([, value]) => isObject(value))
+    .map(([method, value]) => {
+      const set = value as AnyObject;
+
+      const gwp = impactIndicator(set, ["gwp"]);
+      const ap = impactIndicator(set, ["ap", "acidification"]);
+      const pocp = impactIndicator(set, ["pocp", "smog"]);
+      const ep = impactIndicator(set, [
+        "ep",
+        "ep-marine",
+        "ep_marine",
+        "eutrophication",
+      ]);
+      const odp = impactIndicator(set, ["odp", "ozone"]);
+
+      const score =
+        (hasAnyScopeValue(gwp) ? 100 : 0) +
+        (hasAnyScopeValue(ap) ? 10 : 0) +
+        (hasAnyScopeValue(pocp) ? 10 : 0) +
+        (hasAnyScopeValue(ep) ? 10 : 0) +
+        (hasAnyScopeValue(odp) ? 10 : 0);
+
+      const preferenceIndex = preferredMethods.findIndex(
+        (candidate) => candidate.toLowerCase() === method.toLowerCase()
+      );
+
+      return {
+        method,
+        set,
+        score,
+        preferenceIndex: preferenceIndex === -1 ? 999 : preferenceIndex,
+      };
+    })
+    .filter((candidate) => candidate.score > 0)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        a.preferenceIndex - b.preferenceIndex ||
+        a.method.localeCompare(b.method)
+    );
+
+  return candidates.length
+    ? { method: candidates[0].method, set: candidates[0].set }
+    : null;
+};
+
+const openEpdMetric = (
+  selected: SelectedImpactSet,
+  module: string,
+  aliases: string[]
+): number | null => {
+  if (!selected) return null;
+  const scopeSet = impactIndicator(selected.set, aliases);
+  return scopesetValue(scopeSet, module);
+};
+
+const openEpdPrimaryEnergy = (
+  raw: AnyObject,
+  module: string
+): number | null => {
+  if (!isObject(raw.resource_uses)) return null;
+
+  const renewable =
+    scopesetValue(raw.resource_uses.pert, module) ??
+    scopesetValue(raw.resource_uses.PERT, module);
+
+  const nonRenewable =
+    scopesetValue(raw.resource_uses.penrt, module) ??
+    scopesetValue(raw.resource_uses.PENRT, module);
+
+  // Primary energy total is only reported if both totals are available.
+  // Do not turn a partial resource-use declaration into a complete total.
+  if (renewable !== null && nonRenewable !== null) {
+    return renewable + nonRenewable;
+  }
+
+  return null;
+};
+
+const impactSetFor = (
+  raw: AnyObject,
+  module: string,
+  selectedOpenEpd: SelectedImpactSet
+) => {
   const moduleLower = module.toLowerCase();
 
-  const impact = {
+  // 1) Existing normalized/legacy structures already used by this app.
+  const legacy = {
     gwp: measurementAt(raw, [
       `modules.${module}.gwp`,
       `modules.${moduleLower}.gwp`,
@@ -119,8 +329,53 @@ const impactSetFor = (raw: AnyObject, module: string) => {
     ]),
   };
 
+  // 2) Real openEPD method-centric structure.
+  const openEpd = {
+    gwp: openEpdMetric(selectedOpenEpd, module, ["gwp"]),
+    gwpFossil: openEpdMetric(selectedOpenEpd, module, [
+      "gwp-fossil",
+      "gwp_fossil",
+      "gwpFossil",
+    ]),
+    gwpBiogenic: openEpdMetric(selectedOpenEpd, module, [
+      "gwp-biogenic",
+      "gwp_biogenic",
+      "gwpBiogenic",
+    ]),
+    gwpLuluc: openEpdMetric(selectedOpenEpd, module, [
+      "gwp-luluc",
+      "gwp_luluc",
+      "gwpLuluc",
+    ]),
+    acidification: openEpdMetric(selectedOpenEpd, module, [
+      "ap",
+      "acidification",
+    ]),
+    smog: openEpdMetric(selectedOpenEpd, module, ["pocp", "smog"]),
+    eutrophication: openEpdMetric(selectedOpenEpd, module, [
+      "ep",
+      "ep-marine",
+      "ep_marine",
+      "eutrophication",
+    ]),
+    ozone: openEpdMetric(selectedOpenEpd, module, ["odp", "ozone"]),
+    energy: openEpdPrimaryEnergy(raw, module),
+  };
+
+  const merged = {
+    gwp: legacy.gwp ?? openEpd.gwp,
+    gwpFossil: legacy.gwpFossil ?? openEpd.gwpFossil,
+    gwpBiogenic: legacy.gwpBiogenic ?? openEpd.gwpBiogenic,
+    gwpLuluc: legacy.gwpLuluc ?? openEpd.gwpLuluc,
+    acidification: legacy.acidification ?? openEpd.acidification,
+    smog: legacy.smog ?? openEpd.smog,
+    eutrophication: legacy.eutrophication ?? openEpd.eutrophication,
+    ozone: legacy.ozone ?? openEpd.ozone,
+    energy: legacy.energy ?? openEpd.energy,
+  };
+
   return Object.fromEntries(
-    Object.entries(impact).filter(([, value]) => value !== null)
+    Object.entries(merged).filter(([, value]) => value !== null)
   );
 };
 
@@ -147,15 +402,22 @@ const mapEc3Result = (raw: AnyObject) => {
     firstString(raw.product_name, raw.name, raw.material_name) ||
     "Unnamed EC3 result";
 
-  const id =
-    firstString(
-      raw.epd?.id,
-      raw.openepd?.id,
-      raw.openepd_id,
-      raw.epd_id,
-      raw.uuid,
-      raw.id
-    ) || stableFallbackId(raw);
+  // openEPD's canonical identifier is commonly exposed as open_xpd_uuid.
+  // Keep legacy/nested candidates for compatibility with EC3 material search.
+  const openXpdId = firstString(
+    raw.open_xpd_uuid,
+    raw.openXpdUuid,
+    raw.epd?.open_xpd_uuid,
+    raw.openepd?.open_xpd_uuid,
+    raw.epd?.id,
+    raw.openepd?.id,
+    raw.openepd_id,
+    raw.epd_id,
+    raw.uuid,
+    raw.id
+  );
+
+  const id = openXpdId || stableFallbackId(raw);
 
   const declaredUnit =
     firstString(
@@ -185,7 +447,9 @@ const mapEc3Result = (raw: AnyObject) => {
     raw.product_classes?.["io.cqd.ec3"]
   );
 
+  const selectedOpenEpd = selectOpenEpdImpactSet(raw);
   const modules: Record<string, any> = {};
+
   [
     "A1A3",
     "A4",
@@ -203,37 +467,34 @@ const mapEc3Result = (raw: AnyObject) => {
     "C4",
     "D",
   ].forEach((module) => {
-    const impact = impactSetFor(raw, module);
+    const impact = impactSetFor(raw, module, selectedOpenEpd);
     if (Object.keys(impact).length) modules[module] = impact;
   });
 
   /**
-   * EC3's material-search result commonly exposes the product GWP as
-   * cradle-to-gate A1-A3. Preserve it ONLY as A1-A3 if a module-specific
-   * value was not already returned. Never invent A4/A5/B/C/D values.
+   * Some EC3 search results expose a single product GWP field rather than the
+   * full openEPD impact structure. Use it ONLY as A1-A3 if A1-A3 GWP was not
+   * already obtained. Never copy it into later lifecycle stages.
    */
-  if (!modules.A1A3) {
+  if (
+    !modules.A1A3 ||
+    typeof modules.A1A3.gwp !== "number" ||
+    !Number.isFinite(modules.A1A3.gwp)
+  ) {
     const gwp = firstNumber(
       raw.gwp,
       raw.gwp?.value,
       raw.gwp?.mean,
-      raw.impacts?.gwp,
       raw.gwp_per_declared_unit
     );
 
-    const acidification = firstNumber(
-      raw.traci_acidification,
-      raw.impacts?.acidification
-    );
-    const smog = firstNumber(raw.traci_smog, raw.impacts?.smog, raw.impacts?.pocp);
-    const eutrophication = firstNumber(
-      raw.traci_eutrophication,
-      raw.impacts?.eutrophication
-    );
-    const ozone = firstNumber(raw.traci_ozone, raw.impacts?.ozone, raw.impacts?.odp);
-    const energy = firstNumber(raw.traci_energy, raw.impacts?.energy);
+    const acidification = firstNumber(raw.traci_acidification);
+    const smog = firstNumber(raw.traci_smog);
+    const eutrophication = firstNumber(raw.traci_eutrophication);
+    const ozone = firstNumber(raw.traci_ozone);
+    const energy = firstNumber(raw.traci_energy);
 
-    const a1a3 = Object.fromEntries(
+    const fallbackA1A3 = Object.fromEntries(
       Object.entries({
         gwp,
         acidification,
@@ -244,7 +505,12 @@ const mapEc3Result = (raw: AnyObject) => {
       }).filter(([, value]) => value !== null)
     );
 
-    if (Object.keys(a1a3).length) modules.A1A3 = a1a3;
+    if (Object.keys(fallbackA1A3).length) {
+      modules.A1A3 = {
+        ...fallbackA1A3,
+        ...(modules.A1A3 || {}),
+      };
+    }
   }
 
   const plant = Array.isArray(raw.plants)
@@ -257,10 +523,12 @@ const mapEc3Result = (raw: AnyObject) => {
 
   return {
     id,
+    open_xpd_uuid: openXpdId,
     name,
     product_name: name,
     manufacturer,
     category,
+    source: "EC3",
     declared_unit: declaredUnit,
     declared_quantity: declaredQuantity,
     mass_kg_per_declared_unit:
@@ -287,17 +555,15 @@ const mapEc3Result = (raw: AnyObject) => {
     valid_until: firstString(raw.valid_until, raw.expiry_date),
     modules,
 
-    // Compatibility fields used by the older frontend.
+    // Compatibility fields used by the existing frontend.
     gwp: modules.A1A3?.gwp ?? null,
     traci_acidification: modules.A1A3?.acidification ?? null,
     traci_smog: modules.A1A3?.smog ?? null,
 
-    /**
-     * Keep the source record for audit/debugging. Your V2 adapter stores this
-     * as metadata; calculations use normalized fields above.
-     */
     metadata: {
-      source: "Building Transparency EC3",
+      source: "Building Transparency EC3/openEPD",
+      open_xpd_uuid: openXpdId,
+      lcia_method: selectedOpenEpd?.method ?? null,
       raw,
     },
   };
@@ -327,15 +593,22 @@ export async function GET(request: Request) {
   }
 
   try {
-    /**
-     * Detail mode: after the engineer selects a specific EC3/openEPD ID,
-     * request the complete digital EPD object directly from openEPD.
-     */
     if (epdId) {
       if (!/^[a-zA-Z0-9_-]{4,120}$/.test(epdId)) {
         return NextResponse.json(
           { success: false, error: "Invalid EPD id." },
           { status: 400 }
+        );
+      }
+
+      if (epdId.startsWith("ec3-search-")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "This EC3 search result does not expose a usable openEPD identifier for detail enrichment.",
+          },
+          { status: 422 }
         );
       }
 
@@ -368,23 +641,20 @@ export async function GET(request: Request) {
       }
 
       const raw = await detailResponse.json();
+      const mapped = mapEc3Result(raw);
 
       return NextResponse.json(
         {
           success: true,
-          data: mapEc3Result(raw),
+          data: mapped,
           provider: "Building Transparency openEPD",
           detail: true,
+          lciaMethod: mapped.metadata?.lcia_method ?? null,
         },
         { headers: { "Cache-Control": "no-store" } }
       );
     }
 
-    /**
-     * Search mode: preserve the EC3 material-search endpoint already working
-     * in your existing application. The selected result can then be enriched
-     * through detail mode above.
-     */
     const url = new URL(EC3_MATERIALS_URL);
     url.searchParams.set("name__like", searchQuery!);
     url.searchParams.set("page_size", "20");

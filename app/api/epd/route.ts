@@ -54,6 +54,28 @@ const moduleMetric = (
   metric: string
 ): number | null => finiteOrNull(modules?.[module]?.[metric]);
 
+const isNonEmptyObject = (value: unknown): value is Record<string, any> =>
+  Boolean(value) &&
+  typeof value === "object" &&
+  !Array.isArray(value) &&
+  Object.keys(value as Record<string, any>).length > 0;
+
+const isEc3Payload = (
+  source: string,
+  metadata: Record<string, any>
+): boolean => {
+  const normalizedSource = source.trim().toLowerCase();
+  const metadataSource = String(metadata?.source || "")
+    .trim()
+    .toLowerCase();
+
+  return (
+    normalizedSource === "ec3" ||
+    metadataSource.includes("building transparency") ||
+    metadataSource.includes("openepd")
+  );
+};
+
 export async function GET() {
   try {
     const result = await db.query(`
@@ -142,50 +164,64 @@ export async function POST(request: Request) {
       );
     }
 
-    const saved: string[] = [];
-
-    for (const material of materials) {
+    /**
+     * Validate the entire batch BEFORE any write so a later invalid item does
+     * not leave a partially-written batch.
+     */
+    const prepared = materials.map((material, index) => {
       const externalId = String(material.id || "").trim();
       const materialName = String(material.material_name || "").trim();
 
       if (!externalId || !materialName) {
-        return NextResponse.json(
-          {
-            success: false,
-            error: "Each EPD requires id and material_name.",
-          },
-          { status: 400 }
+        throw new Error(
+          `VALIDATION: Item ${index + 1} requires id and material_name.`
         );
       }
 
-      const source = String(material.source || "EPD").trim().slice(0, 50);
-
-      /**
-       * Building Transparency currently requires the appropriate API rights
-       * before EC3 data is stored/cached in a production application.
-       */
-      if (source === "EC3" && !isEc3PersistenceAllowed()) {
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              "EC3 persistence is disabled. Set EC3_ALLOW_PERSISTENCE=true only when your Building Transparency agreement permits storage/caching.",
-          },
-          { status: 403 }
-        );
-      }
-
+      const rawSource = String(material.source || "EPD").trim().slice(0, 50);
       const aliases = cleanAliases(material.aliases, materialName);
-      const modules =
-        material.modules && typeof material.modules === "object"
-          ? material.modules
-          : {};
-      const metadata =
-        material.metadata && typeof material.metadata === "object"
-          ? material.metadata
-          : {};
+      const modules = isNonEmptyObject(material.modules)
+        ? material.modules
+        : {};
+      const metadata = isNonEmptyObject(material.metadata)
+        ? material.metadata
+        : {};
 
-      // Populate legacy columns from the same module source for backwards compatibility.
+      const ec3 = isEc3Payload(rawSource, metadata);
+
+      if (ec3 && !isEc3PersistenceAllowed()) {
+        throw new Error(
+          "EC3_DISABLED: EC3 persistence is disabled. Set EC3_ALLOW_PERSISTENCE=true only when your Building Transparency agreement permits storage/caching."
+        );
+      }
+
+      const source = ec3 ? "EC3" : rawSource;
+
+      return {
+        material,
+        externalId,
+        materialName,
+        aliases,
+        modules,
+        metadata,
+        source,
+      };
+    });
+
+    const saved: string[] = [];
+
+    for (const item of prepared) {
+      const {
+        material,
+        externalId,
+        materialName,
+        aliases,
+        modules,
+        metadata,
+        source,
+      } = item;
+
+      // Populate legacy columns from the same normalized module source.
       const gwpMfg = moduleMetric(modules, "A1A3", "gwp");
       const gwpCon = moduleMetric(modules, "A5", "gwp");
       const gwpUse = moduleMetric(modules, "B1", "gwp");
@@ -193,9 +229,16 @@ export async function POST(request: Request) {
       const gwpBiogenic = moduleMetric(modules, "A1A3", "gwpBiogenic");
       const acidification = moduleMetric(modules, "A1A3", "acidification");
       const smog = moduleMetric(modules, "A1A3", "smog");
-      const eutrophication = moduleMetric(modules, "A1A3", "eutrophication");
+      const eutrophication = moduleMetric(
+        modules,
+        "A1A3",
+        "eutrophication"
+      );
       const ozone = moduleMetric(modules, "A1A3", "ozone");
       const energy = moduleMetric(modules, "A1A3", "energy");
+
+      const incomingDeclaredUnit =
+        String(material.declared_unit || "").trim() || "unit";
 
       await db.query(
         `
@@ -247,30 +290,97 @@ export async function POST(request: Request) {
           ),
           manufacturer = COALESCE(EXCLUDED.manufacturer, epd_materials.manufacturer),
           category = COALESCE(EXCLUDED.category, epd_materials.category),
-          source = EXCLUDED.source,
-          declared_unit = COALESCE(EXCLUDED.declared_unit, epd_materials.declared_unit),
-          declared_quantity = COALESCE(EXCLUDED.declared_quantity, epd_materials.declared_quantity),
-          mass_kg_per_declared_unit = COALESCE(EXCLUDED.mass_kg_per_declared_unit, epd_materials.mass_kg_per_declared_unit),
-          density_kg_m3 = COALESCE(EXCLUDED.density_kg_m3, epd_materials.density_kg_m3),
-          lifespan_years = COALESCE(EXCLUDED.lifespan_years, epd_materials.lifespan_years),
+
+          -- Do not downgrade a known EC3 record to a generic source label.
+          source = CASE
+            WHEN epd_materials.source = 'EC3' AND EXCLUDED.source <> 'EC3'
+              THEN epd_materials.source
+            ELSE EXCLUDED.source
+          END,
+
+          -- A sparse search result often carries the generic fallback "unit".
+          -- Do not let it overwrite a richer declared basis already stored.
+          declared_unit = CASE
+            WHEN LOWER(TRIM(COALESCE(EXCLUDED.declared_unit, ''))) IN ('', 'unit', '1 unit')
+                 AND epd_materials.declared_unit IS NOT NULL
+              THEN epd_materials.declared_unit
+            ELSE COALESCE(EXCLUDED.declared_unit, epd_materials.declared_unit)
+          END,
+
+          declared_quantity = CASE
+            WHEN LOWER(TRIM(COALESCE(EXCLUDED.declared_unit, ''))) IN ('', 'unit', '1 unit')
+                 AND epd_materials.declared_quantity IS NOT NULL
+              THEN epd_materials.declared_quantity
+            ELSE COALESCE(EXCLUDED.declared_quantity, epd_materials.declared_quantity)
+          END,
+
+          mass_kg_per_declared_unit = COALESCE(
+            EXCLUDED.mass_kg_per_declared_unit,
+            epd_materials.mass_kg_per_declared_unit
+          ),
+          density_kg_m3 = COALESCE(
+            EXCLUDED.density_kg_m3,
+            epd_materials.density_kg_m3
+          ),
+          lifespan_years = COALESCE(
+            EXCLUDED.lifespan_years,
+            epd_materials.lifespan_years
+          ),
           geography = COALESCE(EXCLUDED.geography, epd_materials.geography),
           plant = COALESCE(EXCLUDED.plant, epd_materials.plant),
           pcr = COALESCE(EXCLUDED.pcr, epd_materials.pcr),
-          program_operator = COALESCE(EXCLUDED.program_operator, epd_materials.program_operator),
+          program_operator = COALESCE(
+            EXCLUDED.program_operator,
+            epd_materials.program_operator
+          ),
           valid_until = COALESCE(EXCLUDED.valid_until, epd_materials.valid_until),
-          modules = COALESCE(EXCLUDED.modules, epd_materials.modules),
-          metadata = COALESCE(EXCLUDED.metadata, epd_materials.metadata),
-          weight_kg_per_unit = COALESCE(EXCLUDED.weight_kg_per_unit, epd_materials.weight_kg_per_unit),
+
+          -- IMPORTANT: '{}' is not NULL. The old upsert could replace a rich
+          -- EPD with an empty modules object. Preserve the rich record instead.
+          modules = CASE
+            WHEN EXCLUDED.modules IS NOT NULL
+                 AND EXCLUDED.modules <> '{}'::jsonb
+              THEN EXCLUDED.modules
+            ELSE epd_materials.modules
+          END,
+
+          -- Merge audit metadata instead of replacing it with an empty object.
+          metadata =
+            COALESCE(epd_materials.metadata, '{}'::jsonb)
+            || COALESCE(EXCLUDED.metadata, '{}'::jsonb),
+
+          weight_kg_per_unit = COALESCE(
+            EXCLUDED.weight_kg_per_unit,
+            epd_materials.weight_kg_per_unit
+          ),
           gwp_mfg = COALESCE(EXCLUDED.gwp_mfg, epd_materials.gwp_mfg),
           gwp_con = COALESCE(EXCLUDED.gwp_con, epd_materials.gwp_con),
           gwp_use = COALESCE(EXCLUDED.gwp_use, epd_materials.gwp_use),
           gwp_eol = COALESCE(EXCLUDED.gwp_eol, epd_materials.gwp_eol),
-          gwp_biogenic = COALESCE(EXCLUDED.gwp_biogenic, epd_materials.gwp_biogenic),
-          traci_acidification = COALESCE(EXCLUDED.traci_acidification, epd_materials.traci_acidification),
-          traci_smog = COALESCE(EXCLUDED.traci_smog, epd_materials.traci_smog),
-          traci_eutrophication = COALESCE(EXCLUDED.traci_eutrophication, epd_materials.traci_eutrophication),
-          traci_ozone = COALESCE(EXCLUDED.traci_ozone, epd_materials.traci_ozone),
-          traci_energy = COALESCE(EXCLUDED.traci_energy, epd_materials.traci_energy),
+          gwp_biogenic = COALESCE(
+            EXCLUDED.gwp_biogenic,
+            epd_materials.gwp_biogenic
+          ),
+          traci_acidification = COALESCE(
+            EXCLUDED.traci_acidification,
+            epd_materials.traci_acidification
+          ),
+          traci_smog = COALESCE(
+            EXCLUDED.traci_smog,
+            epd_materials.traci_smog
+          ),
+          traci_eutrophication = COALESCE(
+            EXCLUDED.traci_eutrophication,
+            epd_materials.traci_eutrophication
+          ),
+          traci_ozone = COALESCE(
+            EXCLUDED.traci_ozone,
+            epd_materials.traci_ozone
+          ),
+          traci_energy = COALESCE(
+            EXCLUDED.traci_energy,
+            epd_materials.traci_energy
+          ),
           updated_at = NOW()
         `,
         [
@@ -280,7 +390,7 @@ export async function POST(request: Request) {
           material.manufacturer || null,
           material.category || null,
           source,
-          material.declared_unit || "unit",
+          incomingDeclaredUnit,
           finiteOrNull(material.declared_quantity) ?? 1,
           finiteOrNull(material.mass_kg_per_declared_unit),
           finiteOrNull(material.density_kg_m3),
@@ -315,6 +425,23 @@ export async function POST(request: Request) {
       count: saved.length,
     });
   } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to persist EPD data.";
+
+    if (message.startsWith("VALIDATION:")) {
+      return NextResponse.json(
+        { success: false, error: message.replace(/^VALIDATION:\s*/, "") },
+        { status: 400 }
+      );
+    }
+
+    if (message.startsWith("EC3_DISABLED:")) {
+      return NextResponse.json(
+        { success: false, error: message.replace(/^EC3_DISABLED:\s*/, "") },
+        { status: 403 }
+      );
+    }
+
     console.error("EPD POST database error:", error);
     return NextResponse.json(
       { success: false, error: "Failed to persist EPD data." },

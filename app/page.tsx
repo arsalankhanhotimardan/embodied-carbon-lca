@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
@@ -34,6 +34,9 @@ import {
 // - GET /api/ec3?search=...
 // Optional API for cross-user alias memory:
 // - GET/POST /api/material-mappings
+// Project persistence:
+// - POST /api/lca/projects
+// - GET/PUT/DELETE /api/lca/projects/[id]
 // ============================================================================
 
 type TransportMode = "truck" | "rail" | "ship";
@@ -90,6 +93,7 @@ interface EpdRecord {
   source: "EC3" | "EPD" | "Generic" | "Custom" | "Legacy";
   declaredUnit: string;
   declaredQuantity: number;
+  declaredUnitWasMissing?: boolean;
   massKgPerDeclaredUnit?: number | null;
   densityKgM3?: number | null;
   referenceServiceLifeYears?: number | null;
@@ -110,6 +114,7 @@ interface BomRow {
   unit: string;
   distanceKm: number;
   mode: TransportMode;
+  transportModeWasDefaulted?: boolean;
   thicknessM?: number | null;
   costPerInputUnit: number;
 }
@@ -137,9 +142,14 @@ interface ProjectReport {
   aToCPlusD: ImpactSet;
   totalCost: number;
   warnings: string[];
-  mappedRows: number;
-  unmappedRows: number;
-  mappedQuantityShare: number;
+  epdMatchedRows: number;
+  calculableRows: number;
+  rowsWithGwp: number;
+  rowsWithCompleteCoreGwp: number;
+  epdMatchShare: number;
+  calculableShare: number;
+  gwpRowShare: number;
+  coreGwpCompleteShare: number;
 }
 
 interface MaterialMapping {
@@ -152,12 +162,44 @@ interface PendingUpload {
   type: ModelType;
   data: Record<string, unknown>[];
   headers: string[];
+  sourceFileName: string;
 }
 
 interface PendingReconciliation {
   type: ModelType;
   rows: BomRow[];
   unknownAliases: string[];
+  sourceFileName: string;
+}
+
+interface SavedProjectRef {
+  id: string;
+  name: string;
+  editToken: string;
+  updatedAt?: string;
+}
+
+interface SavedProjectPayload {
+  id: string;
+  name: string;
+  schemaVersion: number;
+  appVersion: string;
+  calculationEngineVersion: string;
+  studyPeriodYears: number;
+  floorAreaM2: number;
+  annualEnergyKwh: number;
+  gridIntensity: number;
+  baselineRows: BomRow[];
+  proposedRows: BomRow[];
+  metadata?: {
+    baselineSourceName?: string | null;
+    proposedSourceName?: string | null;
+    baselineFingerprint?: string | null;
+    proposedFingerprint?: string | null;
+    ec3SessionOnlyRows?: number;
+  };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 const MODULE_ORDER: LcaModule[] = [
@@ -179,6 +221,19 @@ const MODULE_ORDER: LcaModule[] = [
 ];
 
 const A_TO_C_MODULES: LcaModule[] = MODULE_ORDER.filter((m) => m !== "D");
+
+// Conservative report-completeness boundary used for data-quality gating.
+// This is a reporting safeguard, not a claim that every certification scheme
+// requires the exact same set of modules.
+const CORE_GWP_BOUNDARY: LcaModule[] = [
+  "A1A3",
+  "A4",
+  "A5",
+  "C1",
+  "C2",
+  "C3",
+  "C4",
+];
 const METRICS: ImpactMetric[] = [
   "gwp",
   "gwpFossil",
@@ -201,6 +256,43 @@ const TRANSPORT_GWP_KG_PER_TKM: Record<TransportMode, number> = {
 
 const EC3_PERSISTENCE_ALLOWED =
   process.env.NEXT_PUBLIC_EC3_PERSISTENCE_ALLOWED === "true";
+
+const LCA_APP_VERSION = "LCA-V2.6";
+const LCA_CALC_ENGINE_VERSION = "LCA-V2.5";
+const PROJECT_INDEX_KEY = "lca_v2_6_saved_projects";
+
+const modelFingerprint = (rows: BomRow[]): string => {
+  const normalized = rows
+    .map((row) => [
+      normalizeName(row.materialName),
+      Number(row.quantity.toFixed(9)),
+      canonicalUnit(row.unit),
+      Number(row.distanceKm.toFixed(6)),
+      row.mode,
+      row.thicknessM == null ? null : Number(row.thicknessM.toFixed(9)),
+      row.epdId || "",
+      Number(row.costPerInputUnit.toFixed(6)),
+    ])
+    .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+
+  const source = JSON.stringify(normalized);
+  let hash = 2166136261;
+
+  for (let i = 0; i < source.length; i += 1) {
+    hash ^= source.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return `fnv1a-${(hash >>> 0).toString(16).padStart(8, "0")}`;
+};
+
+const safeLocalStorageSet = (key: string, value: string) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch (error) {
+    console.warn(`Local cache "${key}" could not be updated.`, error);
+  }
+};
 
 const CSI_DIVISIONS = [
   "Div 03: Concrete",
@@ -255,49 +347,142 @@ const normalizeName = (value: string): string =>
 const slugId = (value: string): string =>
   normalizeName(value).replace(/\s+/g, "-").slice(0, 80) || `epd-${Date.now()}`;
 
+const splitQuantityAndUnit = (
+  raw: string | undefined | null
+): { quantityFromUnit: number | null; unitText: string; wasMissing: boolean } => {
+  const original = String(raw ?? "").trim();
+  if (!original) {
+    return { quantityFromUnit: null, unitText: "unit", wasMissing: true };
+  }
+
+  const normalized = original
+    .replace(/,/g, "")
+    .replace(/[×x]\s*10\^?\s*([+-]?\d+)/gi, "e$1")
+    .trim();
+
+  // EPD feeds sometimes combine the reference quantity and unit in one field,
+  // e.g. "1 metric ton", "1.0 tonne", or "1000 kg".
+  const match = normalized.match(
+    /^([+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?)\s*(.+)$/i
+  );
+
+  if (match) {
+    const parsed = Number(match[1]);
+    if (Number.isFinite(parsed) && parsed > 0 && match[2].trim()) {
+      return {
+        quantityFromUnit: parsed,
+        unitText: match[2].trim(),
+        wasMissing: false,
+      };
+    }
+  }
+
+  return { quantityFromUnit: null, unitText: original, wasMissing: false };
+};
+
 const canonicalUnit = (raw: string): string => {
-  const v = String(raw || "unit")
+  const basis = splitQuantityAndUnit(raw);
+  const v = basis.unitText
     .toLowerCase()
     .trim()
-    .replace(/^1\s*/, "")
     .replace(/²/g, "2")
     .replace(/³/g, "3")
-    .replace(/\s+/g, "");
+    .replace(/[·*]/g, "")
+    .replace(/\./g, "")
+    .replace(/[\s_-]+/g, "");
 
   const aliases: Record<string, string> = {
+    g: "g",
+    gram: "g",
+    grams: "g",
     kg: "kg",
     kilogram: "kg",
     kilograms: "kg",
+    kilogramme: "kg",
+    kilogrammes: "kg",
     t: "t",
     ton: "t",
+    tons: "t",
     tonne: "t",
     tonnes: "t",
+    metricton: "t",
+    metrictons: "t",
+    metrictonne: "t",
+    metrictonnes: "t",
     lb: "lb",
     lbs: "lb",
     pound: "lb",
     pounds: "lb",
+    oz: "oz",
+    ounce: "oz",
+    ounces: "oz",
+
     m3: "m3",
     "m^3": "m3",
+    cbm: "m3",
     cubicmeter: "m3",
+    cubicmeters: "m3",
     cubicmetre: "m3",
+    cubicmetres: "m3",
     ft3: "ft3",
     "ft^3": "ft3",
+    cubicfoot: "ft3",
+    cubicfeet: "ft3",
+    yd3: "yd3",
+    "yd^3": "yd3",
+    cubicyard: "yd3",
+    cubicyards: "yd3",
+    l: "l",
+    liter: "l",
+    liters: "l",
+    litre: "l",
+    litres: "l",
+
     m2: "m2",
     "m^2": "m2",
+    sqm: "m2",
     squaremeter: "m2",
+    squaremeters: "m2",
     squaremetre: "m2",
+    squaremetres: "m2",
     ft2: "ft2",
     "ft^2": "ft2",
+    sqft: "ft2",
+    squarefoot: "ft2",
+    squarefeet: "ft2",
+    yd2: "yd2",
+    "yd^2": "yd2",
+    squareyard: "yd2",
+    squareyards: "yd2",
+
+    mm: "mm",
+    millimeter: "mm",
+    millimeters: "mm",
+    millimetre: "mm",
+    millimetres: "mm",
+    cm: "cm",
+    centimeter: "cm",
+    centimeters: "cm",
+    centimetre: "cm",
+    centimetres: "cm",
     m: "m",
     meter: "m",
+    meters: "m",
     metre: "m",
+    metres: "m",
+    in: "in",
+    inch: "in",
+    inches: "in",
     ft: "ft",
+    foot: "ft",
     feet: "ft",
+
     unit: "unit",
     units: "unit",
     ea: "unit",
     each: "unit",
     pcs: "unit",
+    pc: "unit",
     piece: "unit",
     pieces: "unit",
   };
@@ -310,18 +495,55 @@ type UnitDimension = "mass" | "volume" | "area" | "length" | "count" | "unknown"
 const unitInfo = (unitRaw: string): { unit: string; dimension: UnitDimension; toSI: number } => {
   const unit = canonicalUnit(unitRaw);
   const info: Record<string, { dimension: UnitDimension; toSI: number }> = {
+    g: { dimension: "mass", toSI: 0.001 },
     kg: { dimension: "mass", toSI: 1 },
     t: { dimension: "mass", toSI: 1000 },
     lb: { dimension: "mass", toSI: 0.45359237 },
+    oz: { dimension: "mass", toSI: 0.028349523125 },
+
     m3: { dimension: "volume", toSI: 1 },
     ft3: { dimension: "volume", toSI: 0.028316846592 },
+    yd3: { dimension: "volume", toSI: 0.764554857984 },
+    l: { dimension: "volume", toSI: 0.001 },
+
     m2: { dimension: "area", toSI: 1 },
     ft2: { dimension: "area", toSI: 0.09290304 },
+    yd2: { dimension: "area", toSI: 0.83612736 },
+
+    mm: { dimension: "length", toSI: 0.001 },
+    cm: { dimension: "length", toSI: 0.01 },
     m: { dimension: "length", toSI: 1 },
+    in: { dimension: "length", toSI: 0.0254 },
     ft: { dimension: "length", toSI: 0.3048 },
+
     unit: { dimension: "count", toSI: 1 },
   };
   return { unit, ...(info[unit] || { dimension: "unknown", toSI: 1 }) };
+};
+
+const normalizeDeclaredBasis = (
+  rawUnit: string | undefined,
+  explicitQuantity: number | null
+): { declaredUnit: string; declaredQuantity: number; declaredUnitWasMissing: boolean } => {
+  const parsed = splitQuantityAndUnit(rawUnit);
+  const explicit =
+    typeof explicitQuantity === "number" && Number.isFinite(explicitQuantity) && explicitQuantity > 0
+      ? explicitQuantity
+      : null;
+
+  // If the API/database returned its generic default of 1 but the unit string
+  // itself clearly declares another basis (e.g. "1000 kg"), preserve the basis
+  // encoded in the unit string.
+  const declaredQuantity =
+    parsed.quantityFromUnit && (!explicit || explicit === 1)
+      ? parsed.quantityFromUnit
+      : explicit ?? parsed.quantityFromUnit ?? 1;
+
+  return {
+    declaredUnit: parsed.unitText || "unit",
+    declaredQuantity,
+    declaredUnitWasMissing: parsed.wasMissing,
+  };
 };
 
 const convertQuantity = (
@@ -334,18 +556,70 @@ const convertQuantity = (
   const from = unitInfo(fromUnitRaw);
   const to = unitInfo(toUnitRaw);
 
+  if (!Number.isFinite(quantity) || quantity < 0) {
+    return {
+      value: null,
+      warning: `Quantity "${quantity}" is invalid. Use a non-negative finite project quantity.`,
+    };
+  }
+
+  if (epd.declaredUnitWasMissing) {
+    return {
+      value: null,
+      warning:
+        "The selected dataset does not report a usable declared unit. Select another EPD or correct the dataset metadata before calculating.",
+    };
+  }
+
+  if (from.dimension === "unknown") {
+    return {
+      value: null,
+      warning: `Input unit "${fromUnitRaw}" is not supported. Correct the CSV/BIM unit mapping.`,
+    };
+  }
+
+  if (to.dimension === "unknown") {
+    return {
+      value: null,
+      warning: `EPD declared unit "${toUnitRaw}" is not supported. Select another EPD or correct the dataset metadata.`,
+    };
+  }
+
   if (from.unit === to.unit) return { value: quantity };
 
-  if (from.dimension === to.dimension && from.dimension !== "unknown") {
+  if (from.dimension === to.dimension) {
     const si = quantity * from.toSI;
     return { value: si / to.toSI };
   }
 
-  const density = epd.densityKgM3 ?? null;
-  const thickness = row.thicknessM ?? null;
+  const density =
+    typeof epd.densityKgM3 === "number" && epd.densityKgM3 > 0
+      ? epd.densityKgM3
+      : null;
+  const thickness =
+    typeof row.thicknessM === "number" && row.thicknessM > 0
+      ? row.thicknessM
+      : null;
+  const massPerDeclaredUnit =
+    typeof epd.massKgPerDeclaredUnit === "number" && epd.massKgPerDeclaredUnit > 0
+      ? epd.massKgPerDeclaredUnit
+      : null;
 
-  // Mass <-> volume using verified/material density.
-  if (density && density > 0) {
+  // Count <-> mass when the EPD reports a mass per declared unit.
+  if (massPerDeclaredUnit) {
+    if (from.dimension === "mass" && to.dimension === "count") {
+      const kg = quantity * from.toSI;
+      return { value: kg / massPerDeclaredUnit / to.toSI };
+    }
+    if (from.dimension === "count" && to.dimension === "mass") {
+      const count = quantity * from.toSI;
+      const kg = count * massPerDeclaredUnit;
+      return { value: kg / to.toSI };
+    }
+  }
+
+  // Mass <-> volume using dataset/material density.
+  if (density) {
     if (from.dimension === "mass" && to.dimension === "volume") {
       const kg = quantity * from.toSI;
       const m3 = kg / density;
@@ -359,7 +633,7 @@ const convertQuantity = (
   }
 
   // Area <-> volume only when thickness is known.
-  if (thickness && thickness > 0) {
+  if (thickness) {
     if (from.dimension === "area" && to.dimension === "volume") {
       const m2 = quantity * from.toSI;
       const m3 = m2 * thickness;
@@ -372,9 +646,48 @@ const convertQuantity = (
     }
   }
 
+  // Area <-> mass requires both thickness and density.
+  if (thickness && density) {
+    if (from.dimension === "area" && to.dimension === "mass") {
+      const m2 = quantity * from.toSI;
+      const kg = m2 * thickness * density;
+      return { value: kg / to.toSI };
+    }
+    if (from.dimension === "mass" && to.dimension === "area") {
+      const kg = quantity * from.toSI;
+      const m2 = kg / density / thickness;
+      return { value: m2 / to.toSI };
+    }
+  }
+
+  if (to.dimension === "count") {
+    return {
+      value: null,
+      warning: `The selected EPD uses a count-based declared unit ("${toUnitRaw}"), but the project quantity is ${fromUnitRaw}. A verified mass-per-unit or compatible count quantity is required.`,
+    };
+  }
+
+  const needsDensity =
+    (from.dimension === "mass" && to.dimension === "volume") ||
+    (from.dimension === "volume" && to.dimension === "mass");
+  const needsThickness =
+    (from.dimension === "area" && to.dimension === "volume") ||
+    (from.dimension === "volume" && to.dimension === "area");
+  const needsBoth =
+    (from.dimension === "area" && to.dimension === "mass") ||
+    (from.dimension === "mass" && to.dimension === "area");
+
+  const requirement = needsBoth
+    ? "verified density and thickness"
+    : needsDensity
+    ? "verified density"
+    : needsThickness
+    ? "thickness"
+    : "a compatible declared unit";
+
   return {
     value: null,
-    warning: `Cannot convert ${quantity} ${fromUnitRaw} to EPD declared unit ${toUnitRaw}. Add density/thickness or correct the unit mapping.`,
+    warning: `Cannot convert ${quantity} ${fromUnitRaw} to EPD declared unit ${toUnitRaw}. This conversion requires ${requirement}; no value was assumed.`,
   };
 };
 
@@ -390,11 +703,21 @@ const getMassKg = (
     return row.quantity * from.toSI * epd.densityKgM3;
   }
 
-  if (from.dimension === "area" && row.thicknessM && epd.densityKgM3) {
+  if (
+    from.dimension === "area" &&
+    row.thicknessM &&
+    row.thicknessM > 0 &&
+    epd.densityKgM3 &&
+    epd.densityKgM3 > 0
+  ) {
     return row.quantity * from.toSI * row.thicknessM * epd.densityKgM3;
   }
 
-  if (declaredQuantity !== null && epd.massKgPerDeclaredUnit && epd.massKgPerDeclaredUnit > 0) {
+  if (
+    declaredQuantity !== null &&
+    epd.massKgPerDeclaredUnit &&
+    epd.massKgPerDeclaredUnit > 0
+  ) {
     return declaredQuantity * epd.massKgPerDeclaredUnit;
   }
 
@@ -427,31 +750,86 @@ const sumModules = (
   selected: LcaModule[]
 ): ImpactSet => addImpact(...selected.map((module) => modules[module]));
 
+const moduleKeyCandidates = (module: LcaModule): string[] => {
+  if (module === "A1A3") {
+    return ["A1A3", "A1-A3", "A1_A3", "A1/A3", "a1a3", "a1-a3", "a1_a3"];
+  }
+  return [module, module.toLowerCase()];
+};
+
+const compactImpact = (impact: Partial<Record<ImpactMetric, unknown>> | undefined | null): ImpactSet => {
+  const out: ImpactSet = {};
+  if (!impact) return out;
+  METRICS.forEach((metric) => {
+    const value = nOrNull(impact[metric]);
+    if (value !== null) out[metric] = value;
+  });
+  return out;
+};
+
 const moduleValue = (
   raw: any,
   module: LcaModule,
   metric: ImpactMetric,
   aliases: string[] = []
 ): number | null => {
-  const candidates: unknown[] = [
-    raw?.modules?.[module]?.[metric],
-    raw?.impacts?.[module]?.[metric],
-    raw?.lca_modules?.[module]?.[metric],
+  const candidates: unknown[] = [];
+  const containers = [
+    raw?.modules,
+    raw?.impacts,
+    raw?.lca_modules,
+    raw?.lifecycle_modules,
   ];
+
+  for (const container of containers) {
+    if (!container || typeof container !== "object") continue;
+    for (const key of moduleKeyCandidates(module)) {
+      candidates.push(container?.[key]?.[metric]);
+    }
+
+    // Some digital EPD payloads expose A1, A2 and A3 separately rather than
+    // a pre-combined A1-A3 object. Only aggregate when all three values exist.
+    if (module === "A1A3") {
+      const split = ["A1", "A2", "A3"].map((key) =>
+        firstNumber(
+          container?.[key]?.[metric],
+          container?.[key.toLowerCase()]?.[metric]
+        )
+      );
+      if (split.every((value) => value !== null)) {
+        candidates.push((split as number[]).reduce((sum, value) => sum + value, 0));
+      }
+    }
+  }
+
   aliases.forEach((alias) => {
+    if (!alias) return;
     candidates.push(raw?.[alias]);
     candidates.push(raw?.[alias.toLowerCase()]);
   });
+
   return firstNumber(...candidates);
 };
 
-const compactImpact = (impact: ImpactSet): ImpactSet => {
-  const out: ImpactSet = {};
+const extractModuleImpact = (raw: any, module: LcaModule): ImpactSet => {
+  const impact: Partial<Record<ImpactMetric, unknown>> = {};
   METRICS.forEach((metric) => {
-    const value = impact[metric];
-    if (typeof value === "number" && Number.isFinite(value)) out[metric] = value;
+    const value = moduleValue(raw, module, metric);
+    if (value !== null) impact[metric] = value;
   });
-  return out;
+  return compactImpact(impact);
+};
+
+const hasNumericImpact = (impact: ImpactSet | undefined, metric?: ImpactMetric): boolean => {
+  if (!impact) return false;
+  if (metric) {
+    const value = impact[metric];
+    return typeof value === "number" && Number.isFinite(value);
+  }
+  return METRICS.some((key) => {
+    const value = impact[key];
+    return typeof value === "number" && Number.isFinite(value);
+  });
 };
 
 const guessCategory = (name: string, rawCategory?: string): string => {
@@ -471,11 +849,27 @@ const guessCategory = (name: string, rawCategory?: string): string => {
 const adaptStoredEpd = (raw: any): EpdRecord => {
   const name = firstString(raw?.name, raw?.material_name, raw?.product_name) || "Unnamed EPD";
   const id = firstString(raw?.id, raw?.epd_id, raw?.uuid) || `stored-${slugId(name)}`;
-  const declaredUnit = firstString(raw?.declaredUnit, raw?.declared_unit, raw?.unit) || "unit";
+
+  const rawDeclaredUnit = firstString(raw?.declaredUnit, raw?.declared_unit, raw?.unit);
+  const explicitDeclaredQuantity = firstNumber(
+    raw?.declaredQuantity,
+    raw?.declared_quantity,
+    raw?.reference_quantity
+  );
+  const basis = normalizeDeclaredBasis(rawDeclaredUnit, explicitDeclaredQuantity);
 
   const legacyA1A3: ImpactSet = compactImpact({
-    gwp: firstNumber(raw?.gwp_a1a3, raw?.gwp_mfg, raw?.phases?.manufacturing),
+    // `gwp` is intentionally accepted as A1-A3 only for legacy/simple records.
+    // It is never copied into other lifecycle modules.
+    gwp: firstNumber(
+      raw?.gwp_a1a3,
+      raw?.gwp_mfg,
+      raw?.gwp,
+      raw?.phases?.manufacturing
+    ),
+    gwpFossil: firstNumber(raw?.gwp_fossil, raw?.gwpFossil),
     gwpBiogenic: firstNumber(raw?.gwp_biogenic, raw?.biogenic),
+    gwpLuluc: firstNumber(raw?.gwp_luluc, raw?.gwpLuluc),
     acidification: firstNumber(raw?.traci_acidification, raw?.traci?.acidification),
     smog: firstNumber(raw?.traci_smog, raw?.traci?.smog),
     eutrophication: firstNumber(raw?.traci_eutrophication, raw?.traci?.eutrophication),
@@ -485,31 +879,55 @@ const adaptStoredEpd = (raw: any): EpdRecord => {
 
   const modules: Partial<Record<LcaModule, ImpactSet>> = {};
   MODULE_ORDER.forEach((module) => {
-    const src = raw?.modules?.[module];
-    if (src && typeof src === "object") modules[module] = compactImpact(src);
+    const impact = extractModuleImpact(raw, module);
+    if (Object.keys(impact).length) modules[module] = impact;
   });
 
-  if (!modules.A1A3 && Object.keys(legacyA1A3).length) modules.A1A3 = legacyA1A3;
-  if (!modules.A5) {
-    const gwp = firstNumber(raw?.gwp_a5, raw?.gwp_con, raw?.phases?.construction);
-    if (gwp !== null) modules.A5 = { gwp };
+  if (Object.keys(legacyA1A3).length) {
+    modules.A1A3 = {
+      ...legacyA1A3,
+      ...(modules.A1A3 || {}),
+    };
   }
-  if (!modules.B1) {
-    const gwp = firstNumber(raw?.gwp_b1, raw?.gwp_use, raw?.phases?.use);
-    if (gwp !== null) modules.B1 = { gwp };
-  }
-  if (!modules.C4) {
-    const gwp = firstNumber(raw?.gwp_c4, raw?.gwp_eol, raw?.phases?.eol);
-    if (gwp !== null) modules.C4 = { gwp };
-  }
+
+  const legacySingleModuleGwp: Partial<Record<LcaModule, number | null>> = {
+    A5: firstNumber(raw?.gwp_a5, raw?.gwp_con, raw?.phases?.construction),
+    B1: firstNumber(raw?.gwp_b1, raw?.gwp_use, raw?.phases?.use),
+    C4: firstNumber(raw?.gwp_c4, raw?.gwp_eol, raw?.phases?.eol),
+  };
+
+  (["A5", "B1", "C4"] as LcaModule[]).forEach((module) => {
+    const gwp = legacySingleModuleGwp[module];
+    if (gwp !== null && gwp !== undefined && !hasNumericImpact(modules[module], "gwp")) {
+      modules[module] = { ...(modules[module] || {}), gwp };
+    }
+  });
 
   const aliases = Array.from(
     new Set([
       name,
-      ...(Array.isArray(raw?.aliases) ? raw.aliases.filter((x: unknown) => typeof x === "string") : []),
-      ...(Array.isArray(raw?.material_aliases) ? raw.material_aliases.filter((x: unknown) => typeof x === "string") : []),
+      ...(Array.isArray(raw?.aliases)
+        ? raw.aliases.filter((x: unknown): x is string => typeof x === "string")
+        : []),
+      ...(Array.isArray(raw?.material_aliases)
+        ? raw.material_aliases.filter((x: unknown): x is string => typeof x === "string")
+        : []),
     ])
   );
+
+  const rawSource = String(raw?.source || "").trim();
+  const source: EpdRecord["source"] =
+    rawSource === "EC3"
+      ? "EC3"
+      : rawSource === "Custom"
+      ? "Custom"
+      : rawSource === "Generic"
+      ? "Generic"
+      : rawSource === "EPD"
+      ? "EPD"
+      : Object.keys(modules).length
+      ? "EPD"
+      : "Legacy";
 
   return {
     id,
@@ -517,65 +935,98 @@ const adaptStoredEpd = (raw: any): EpdRecord => {
     aliases,
     manufacturer: firstString(raw?.manufacturer, raw?.manufacturer_name),
     category: guessCategory(name, firstString(raw?.category, raw?.csi_category)),
-    source: raw?.source === "EC3" ? "EC3" : raw?.source === "Custom" ? "Custom" : raw?.modules ? "EPD" : "Legacy",
-    declaredUnit,
-    declaredQuantity: firstNumber(raw?.declaredQuantity, raw?.declared_quantity, raw?.reference_quantity) || 1,
-    massKgPerDeclaredUnit: firstNumber(raw?.massKgPerDeclaredUnit, raw?.mass_kg_per_declared_unit, raw?.weight_kg_per_unit),
+    source,
+    declaredUnit: basis.declaredUnit,
+    declaredQuantity: basis.declaredQuantity,
+    declaredUnitWasMissing:
+      Boolean(raw?.declaredUnitWasMissing) ||
+      Boolean(raw?.metadata?.declaredUnitWasMissing) ||
+      basis.declaredUnitWasMissing,
+    massKgPerDeclaredUnit: firstNumber(
+      raw?.massKgPerDeclaredUnit,
+      raw?.mass_kg_per_declared_unit,
+      raw?.weight_kg_per_unit
+    ),
     densityKgM3: firstNumber(raw?.densityKgM3, raw?.density_kg_m3, raw?.density),
-    referenceServiceLifeYears: firstNumber(raw?.referenceServiceLifeYears, raw?.rsl_years, raw?.lifespan_years, raw?.lifespan),
+    referenceServiceLifeYears: firstNumber(
+      raw?.referenceServiceLifeYears,
+      raw?.reference_service_life_years,
+      raw?.rsl_years,
+      raw?.lifespan_years,
+      raw?.lifespan
+    ),
     geography: firstString(raw?.geography, raw?.region),
     plant: firstString(raw?.plant, raw?.facility),
     pcr: firstString(raw?.pcr),
     programOperator: firstString(raw?.programOperator, raw?.program_operator),
     validUntil: firstString(raw?.validUntil, raw?.valid_until, raw?.expiry_date),
     modules,
-    metadata: raw,
+    metadata:
+      raw?.metadata && typeof raw.metadata === "object" ? raw.metadata : raw,
   };
 };
 
 const adaptEc3Result = (raw: any, localAlias: string): EpdRecord => {
   const name = firstString(raw?.name, raw?.product_name, raw?.material_name) || localAlias;
   const id = firstString(raw?.id, raw?.epd_id, raw?.uuid) || `ec3-${slugId(name)}`;
-  const declaredUnit = firstString(raw?.declared_unit, raw?.declaredUnit, raw?.unit) || "unit";
-  const modules: Partial<Record<LcaModule, ImpactSet>> = {};
 
+  const rawDeclaredUnit = firstString(raw?.declared_unit, raw?.declaredUnit, raw?.unit);
+  const explicitDeclaredQuantity = firstNumber(
+    raw?.declared_quantity,
+    raw?.declaredQuantity,
+    raw?.reference_quantity
+  );
+  const basis = normalizeDeclaredBasis(rawDeclaredUnit, explicitDeclaredQuantity);
+
+  const modules: Partial<Record<LcaModule, ImpactSet>> = {};
   MODULE_ORDER.forEach((module) => {
-    const impact: ImpactSet = compactImpact({
+    const impact: Partial<Record<ImpactMetric, unknown>> = {
       gwp: moduleValue(raw, module, "gwp", [
         `gwp_${module.toLowerCase()}`,
         module === "A1A3" ? "gwp" : "",
       ].filter(Boolean)),
-      gwpFossil: moduleValue(raw, module, "gwpFossil", [`gwp_fossil_${module.toLowerCase()}`]),
-      gwpBiogenic: moduleValue(raw, module, "gwpBiogenic", [`gwp_biogenic_${module.toLowerCase()}`]),
-      gwpLuluc: moduleValue(raw, module, "gwpLuluc", [`gwp_luluc_${module.toLowerCase()}`]),
-      acidification: moduleValue(raw, module, "acidification", [`acidification_${module.toLowerCase()}`]),
+      gwpFossil: moduleValue(raw, module, "gwpFossil", [
+        `gwp_fossil_${module.toLowerCase()}`,
+      ]),
+      gwpBiogenic: moduleValue(raw, module, "gwpBiogenic", [
+        `gwp_biogenic_${module.toLowerCase()}`,
+      ]),
+      gwpLuluc: moduleValue(raw, module, "gwpLuluc", [
+        `gwp_luluc_${module.toLowerCase()}`,
+      ]),
+      acidification: moduleValue(raw, module, "acidification", [
+        `acidification_${module.toLowerCase()}`,
+      ]),
       smog: moduleValue(raw, module, "smog", [`smog_${module.toLowerCase()}`]),
-      eutrophication: moduleValue(raw, module, "eutrophication", [`eutrophication_${module.toLowerCase()}`]),
+      eutrophication: moduleValue(raw, module, "eutrophication", [
+        `eutrophication_${module.toLowerCase()}`,
+      ]),
       ozone: moduleValue(raw, module, "ozone", [`ozone_${module.toLowerCase()}`]),
       energy: moduleValue(raw, module, "energy", [`energy_${module.toLowerCase()}`]),
-    });
-    if (Object.keys(impact).length) modules[module] = impact;
+    };
+    const compact = compactImpact(impact);
+    if (Object.keys(compact).length) modules[module] = compact;
   });
 
-  // Compatibility with the current EC3 proxy response in your existing UI:
-  // if it returns only one GWP value, preserve it as A1-A3 ONLY.
-  // Do not fabricate A4/A5/C4/TRACI values.
-  if (!modules.A1A3) {
-    const gwp = firstNumber(raw?.gwp, raw?.gwp_a1a3);
-    const acid = firstNumber(raw?.traci_acidification);
-    const smog = firstNumber(raw?.traci_smog);
-    const eutro = firstNumber(raw?.traci_eutrophication);
-    const ozone = firstNumber(raw?.traci_ozone);
-    const energy = firstNumber(raw?.traci_energy);
-    const impact = compactImpact({
-      gwp,
-      acidification: acid,
-      smog,
-      eutrophication: eutro,
-      ozone,
-      energy,
-    });
-    if (Object.keys(impact).length) modules.A1A3 = impact;
+  // Compatibility with simple EC3 proxy/search responses. A single generic
+  // GWP value is treated as A1-A3 ONLY; it is never duplicated into A4/A5/C/D.
+  const simpleA1A3 = compactImpact({
+    gwp: firstNumber(raw?.gwp, raw?.gwp_a1a3),
+    gwpFossil: firstNumber(raw?.gwp_fossil, raw?.gwpFossil),
+    gwpBiogenic: firstNumber(raw?.gwp_biogenic, raw?.gwpBiogenic),
+    gwpLuluc: firstNumber(raw?.gwp_luluc, raw?.gwpLuluc),
+    acidification: firstNumber(raw?.traci_acidification),
+    smog: firstNumber(raw?.traci_smog),
+    eutrophication: firstNumber(raw?.traci_eutrophication),
+    ozone: firstNumber(raw?.traci_ozone),
+    energy: firstNumber(raw?.traci_energy),
+  });
+
+  if (Object.keys(simpleA1A3).length) {
+    modules.A1A3 = {
+      ...simpleA1A3,
+      ...(modules.A1A3 || {}),
+    };
   }
 
   return {
@@ -585,18 +1036,32 @@ const adaptEc3Result = (raw: any, localAlias: string): EpdRecord => {
     manufacturer: firstString(raw?.manufacturer, raw?.manufacturer_name),
     category: guessCategory(name, firstString(raw?.category)),
     source: "EC3",
-    declaredUnit,
-    declaredQuantity: firstNumber(raw?.declared_quantity, raw?.reference_quantity) || 1,
-    massKgPerDeclaredUnit: firstNumber(raw?.mass_kg_per_declared_unit, raw?.weight_kg_per_unit),
-    densityKgM3: firstNumber(raw?.density_kg_m3, raw?.density),
-    referenceServiceLifeYears: firstNumber(raw?.reference_service_life_years, raw?.rsl_years, raw?.lifespan_years),
+    declaredUnit: basis.declaredUnit,
+    declaredQuantity: basis.declaredQuantity,
+    declaredUnitWasMissing:
+      Boolean(raw?.declaredUnitWasMissing) ||
+      Boolean(raw?.metadata?.declaredUnitWasMissing) ||
+      basis.declaredUnitWasMissing,
+    massKgPerDeclaredUnit: firstNumber(
+      raw?.mass_kg_per_declared_unit,
+      raw?.massKgPerDeclaredUnit,
+      raw?.weight_kg_per_unit
+    ),
+    densityKgM3: firstNumber(raw?.density_kg_m3, raw?.densityKgM3, raw?.density),
+    referenceServiceLifeYears: firstNumber(
+      raw?.reference_service_life_years,
+      raw?.referenceServiceLifeYears,
+      raw?.rsl_years,
+      raw?.lifespan_years
+    ),
     geography: firstString(raw?.geography, raw?.region),
     plant: firstString(raw?.plant, raw?.facility),
     pcr: firstString(raw?.pcr),
-    programOperator: firstString(raw?.program_operator),
-    validUntil: firstString(raw?.valid_until, raw?.expiry_date),
+    programOperator: firstString(raw?.program_operator, raw?.programOperator),
+    validUntil: firstString(raw?.valid_until, raw?.validUntil, raw?.expiry_date),
     modules,
-    metadata: raw,
+    metadata:
+      raw?.metadata && typeof raw.metadata === "object" ? raw.metadata : raw,
   };
 };
 
@@ -618,7 +1083,10 @@ const epdToApiPayload = (epd: EpdRecord) => ({
   program_operator: epd.programOperator,
   valid_until: epd.validUntil,
   modules: epd.modules,
-  metadata: epd.metadata,
+  metadata: {
+    ...(epd.metadata || {}),
+    declaredUnitWasMissing: Boolean(epd.declaredUnitWasMissing),
+  },
 });
 
 const countReplacements = (buildingLife: number, rsl?: number | null): number => {
@@ -633,6 +1101,8 @@ const calculateLine = (
   buildingLife: number
 ): CalculatedLine => {
   const warnings: string[] = [];
+  const cost = row.quantity * row.costPerInputUnit;
+
   if (!epd) {
     return {
       row,
@@ -644,16 +1114,21 @@ const calculateLine = (
       aToC: {},
       moduleD: {},
       aToCPlusD: {},
-      cost: row.quantity * row.costPerInputUnit,
+      cost,
       carbonPerDollar: null,
-      warnings: ["Material is not mapped to a verified dataset."],
+      warnings: ["Material is not mapped to an available EPD/dataset."],
     };
   }
 
-  const converted = convertQuantity(row.quantity, row.unit, epd.declaredUnit, epd, row);
+  const converted = convertQuantity(
+    row.quantity,
+    row.unit,
+    epd.declaredUnit,
+    epd,
+    row
+  );
   if (converted.warning) warnings.push(converted.warning);
   const declaredQuantity = converted.value;
-  const cost = row.quantity * row.costPerInputUnit;
 
   if (declaredQuantity === null) {
     return {
@@ -672,33 +1147,66 @@ const calculateLine = (
     };
   }
 
-  const dq = declaredQuantity / Math.max(epd.declaredQuantity || 1, 1e-12);
-  const replacementCount = countReplacements(buildingLife, epd.referenceServiceLifeYears);
+  const dq = declaredQuantity / Math.max(epd.declaredQuantity, 1e-12);
+  const replacementCount = countReplacements(
+    buildingLife,
+    epd.referenceServiceLifeYears
+  );
   const massKg = getMassKg(row, epd, declaredQuantity);
   const modules: Partial<Record<LcaModule, ImpactSet>> = {};
 
-  // Initial product and installation stages.
-  ["A1A3", "A5", "B1", "B2", "B3", "B5", "B7", "C1", "C2", "C3", "C4"].forEach((m) => {
-    const module = m as LcaModule;
-    if (epd.modules[module]) modules[module] = scaleImpact(epd.modules[module], dq);
+  // Initial product, use and end-of-life stages. Missing values remain missing.
+  (
+    [
+      "A1A3",
+      "A5",
+      "B1",
+      "B2",
+      "B3",
+      "B5",
+      "B7",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+    ] as LcaModule[]
+  ).forEach((module) => {
+    if (epd.modules[module]) {
+      const scaled = scaleImpact(epd.modules[module], dq);
+      if (Object.keys(scaled).length) modules[module] = scaled;
+    }
   });
 
-  // A4 route scenario: calculate GWP from actual model quantity + distance when mass is known.
-  // Preserve any non-GWP indicators provided by the EPD A4 record.
+  // A4 route scenario: only run when the user actually supplied a positive
+  // distance. CSVs without a distance field now default to 0 km, not 300 km.
+  // Preserve non-GWP EPD A4 indicators when a route scenario is applied.
   if (epd.modules.A4 || row.distanceKm > 0) {
     const a4 = scaleImpact(epd.modules.A4, dq);
+
     if (row.distanceKm > 0) {
       if (massKg !== null) {
-        a4.gwp = (massKg / 1000) * row.distanceKm * TRANSPORT_GWP_KG_PER_TKM[row.mode];
+        const factor = TRANSPORT_GWP_KG_PER_TKM[row.mode];
+        a4.gwp = (massKg / 1000) * row.distanceKm * factor;
+        if (row.transportModeWasDefaulted) {
+          warnings.push(
+            "A4 transport mode was missing or unsupported; truck was used as a visible planning default. Select/verify the transport mode before formal reporting."
+          );
+        }
+        warnings.push(
+          `A4 route GWP uses the calculator's planning ${row.mode} factor (${factor} kg CO2e/t-km) for ${row.distanceKm} km. Review/replace this assumption for formal reporting.`
+        );
       } else {
-        warnings.push("A4 route GWP could not be calculated because material mass is unknown; EPD A4 (if present) was retained.");
+        warnings.push(
+          "A4 route GWP could not be calculated because material mass is unknown; EPD A4 (if present) was retained."
+        );
       }
     }
+
     if (Object.keys(a4).length) modules.A4 = a4;
   }
 
-  // B4 replacement package: impacts caused by replacement events during the study period.
-  // We do NOT multiply the original A modules by replacements.
+  // B4 replacement package: impacts caused by replacement events during the
+  // study period. The initial A modules are not multiplied by replacement count.
   if (replacementCount > 0) {
     const replacementPackage = addImpact(
       scaleImpact(epd.modules.A1A3, dq),
@@ -709,18 +1217,56 @@ const calculateLine = (
       scaleImpact(epd.modules.C3, dq),
       scaleImpact(epd.modules.C4, dq)
     );
-    modules.B4 = scaleImpact(replacementPackage, replacementCount);
+    const b4 = scaleImpact(replacementPackage, replacementCount);
+    if (Object.keys(b4).length) modules.B4 = b4;
   } else if (epd.modules.B4) {
-    modules.B4 = scaleImpact(epd.modules.B4, dq);
+    const b4 = scaleImpact(epd.modules.B4, dq);
+    if (Object.keys(b4).length) modules.B4 = b4;
   }
 
-  // Module D is reported separately. Include the final product + replacement products.
-  if (epd.modules.D) modules.D = scaleImpact(epd.modules.D, dq * (1 + replacementCount));
+  // Module D is outside the A-C total.
+  if (epd.modules.D) {
+    const moduleD = scaleImpact(
+      epd.modules.D,
+      dq * (1 + replacementCount)
+    );
+    if (Object.keys(moduleD).length) modules.D = moduleD;
+  }
+
+  const availableGwpModules = A_TO_C_MODULES.filter((module) =>
+    hasNumericImpact(modules[module], "gwp")
+  );
+
+  if (!hasNumericImpact(modules.A1A3, "gwp")) {
+    warnings.push(
+      "Dataset is unit-compatible but does not provide a supported A1-A3 GWP value. No A1-A3 value was invented."
+    );
+  }
+
+  if (availableGwpModules.length === 0) {
+    warnings.push(
+      "No supported A-C GWP values are available from this dataset for the selected quantity."
+    );
+  } else {
+    // A-C is an available-module sum. Explicitly warn when the result should
+    // not be interpreted as a complete lifecycle boundary.
+    const missingCore = CORE_GWP_BOUNDARY.filter(
+      (module) => !hasNumericImpact(modules[module], "gwp")
+    );
+    if (missingCore.length) {
+      warnings.push(
+        `A-C GWP is a sum of available modules only. Missing GWP modules: ${missingCore.join(
+          ", "
+        )}.`
+      );
+    }
+  }
 
   const aToC = sumModules(modules, A_TO_C_MODULES);
   const moduleD = modules.D || emptyImpact();
   const aToCPlusD = addImpact(aToC, moduleD);
-  const carbonPerDollar = cost > 0 && typeof aToC.gwp === "number" ? aToC.gwp / cost : null;
+  const carbonPerDollar =
+    cost > 0 && typeof aToC.gwp === "number" ? aToC.gwp / cost : null;
 
   return {
     row,
@@ -747,15 +1293,28 @@ const calculateProject = (
 ): ProjectReport | null => {
   if (!rows.length) return null;
 
-  const lines = rows.map((row) => calculateLine(row, row.epdId ? epdById.get(row.epdId) : undefined, buildingLife));
+  const lines = rows.map((row) =>
+    calculateLine(
+      row,
+      row.epdId ? epdById.get(row.epdId) : undefined,
+      buildingLife
+    )
+  );
+
   const moduleTotals: Partial<Record<LcaModule, ImpactSet>> = {};
   MODULE_ORDER.forEach((module) => {
     const total = addImpact(...lines.map((line) => line.modules[module]));
     if (Object.keys(total).length) moduleTotals[module] = total;
   });
 
-  // Operational energy is a project-level B6 scenario, not multiplied across materials.
-  if (annualEnergyKwh > 0 && buildingLife > 0 && gridIntensity >= 0) {
+  // Operational energy is a project-level B6 scenario, not multiplied across
+  // material rows. A zero annual-energy input intentionally leaves B6 absent.
+  if (
+    annualEnergyKwh > 0 &&
+    buildingLife > 0 &&
+    Number.isFinite(gridIntensity) &&
+    gridIntensity >= 0
+  ) {
     const operationalGwp = annualEnergyKwh * buildingLife * gridIntensity;
     moduleTotals.B6 = addImpact(moduleTotals.B6, { gwp: operationalGwp });
   }
@@ -764,13 +1323,35 @@ const calculateProject = (
   const moduleD = moduleTotals.D || {};
   const aToCPlusD = addImpact(aToC, moduleD);
   const totalCost = lines.reduce((sum, line) => sum + line.cost, 0);
-  const warnings = lines.flatMap((line) => line.warnings.map((warning) => `${line.row.materialName}: ${warning}`));
-  const mappedRows = lines.filter((line) => !!line.epd && line.declaredQuantity !== null).length;
-  const unmappedRows = lines.length - mappedRows;
-  const totalQty = rows.reduce((sum, row) => sum + Math.abs(row.quantity), 0);
-  const mappedQty = lines
-    .filter((line) => !!line.epd && line.declaredQuantity !== null)
-    .reduce((sum, line) => sum + Math.abs(line.row.quantity), 0);
+  const warnings = lines.flatMap((line) =>
+    line.warnings.map((warning) => `${line.row.materialName}: ${warning}`)
+  );
+
+  // Keep these concepts separate. A row can have an EPD match but still be
+  // non-calculable because of incompatible units, and it can be calculable
+  // while the selected dataset still has no supported GWP.
+  const epdMatchedRows = lines.filter((line) => !!line.epd).length;
+  const calculableRows = lines.filter(
+    (line) => !!line.epd && line.declaredQuantity !== null
+  ).length;
+  const rowsWithGwp = lines.filter(
+    (line) =>
+      !!line.epd &&
+      line.declaredQuantity !== null &&
+      typeof line.aToC.gwp === "number" &&
+      Number.isFinite(line.aToC.gwp)
+  ).length;
+
+  const rowsWithCompleteCoreGwp = lines.filter(
+    (line) =>
+      !!line.epd &&
+      line.declaredQuantity !== null &&
+      CORE_GWP_BOUNDARY.every((module) =>
+        hasNumericImpact(line.modules[module], "gwp")
+      )
+  ).length;
+
+  const rowCount = lines.length;
 
   return {
     lines,
@@ -780,9 +1361,15 @@ const calculateProject = (
     aToCPlusD,
     totalCost,
     warnings,
-    mappedRows,
-    unmappedRows,
-    mappedQuantityShare: totalQty > 0 ? (mappedQty / totalQty) * 100 : 0,
+    epdMatchedRows,
+    calculableRows,
+    rowsWithGwp,
+    rowsWithCompleteCoreGwp,
+    epdMatchShare: rowCount > 0 ? (epdMatchedRows / rowCount) * 100 : 0,
+    calculableShare: rowCount > 0 ? (calculableRows / rowCount) * 100 : 0,
+    gwpRowShare: rowCount > 0 ? (rowsWithGwp / rowCount) * 100 : 0,
+    coreGwpCompleteShare:
+      rowCount > 0 ? (rowsWithCompleteCoreGwp / rowCount) * 100 : 0,
   };
 };
 
@@ -815,9 +1402,106 @@ const fmt = (value: number | null | undefined, digits = 0): string =>
     ? value.toLocaleString(undefined, { maximumFractionDigits: digits })
     : "N/A";
 
+const fmtMetricValue = (
+  metric: ImpactMetric,
+  value: number | null | undefined
+): string => {
+  if (typeof value !== "number" || !Number.isFinite(value)) return "N/A";
+
+  // Small impact-category values (especially ozone depletion) need more
+  // precision than the default 3 decimals or the UI can visually imply a
+  // different reduction than the underlying calculation.
+  if (metric === "ozone") return fmt(value, 6);
+  if (Math.abs(value) > 0 && Math.abs(value) < 0.01) return fmt(value, 6);
+  if (Math.abs(value) < 1) return fmt(value, 4);
+  return fmt(value, 3);
+};
+
+const fmtPercent = (value: number | null | undefined, digits = 2): string =>
+  typeof value === "number" && Number.isFinite(value)
+    ? `${fmt(value, digits)}%`
+    : "N/A";
+
+// jsPDF's built-in Helvetica font is not a full Unicode font. Keep the web UI
+// rich, but sanitize PDF-only text so subscripts/comparison symbols never corrupt.
+const pdfSafeText = (value: unknown): string =>
+  String(value ?? "")
+    .replace(/₂/g, "2")
+    .replace(/₃/g, "3")
+    .replace(/²/g, "2")
+    .replace(/³/g, "3")
+    .replace(/≥/g, ">=")
+    .replace(/≤/g, "<=")
+    .replace(/[—–]/g, "-")
+    .replace(/×/g, "x")
+    .replace(/…/g, "...")
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"');
+
 const reductionPct = (baseline?: number | null, proposed?: number | null): number | null => {
   if (typeof baseline !== "number" || typeof proposed !== "number" || baseline === 0) return null;
   return ((baseline - proposed) / baseline) * 100;
+};
+
+const moduleDChangeLabel = (
+  baseline?: number | null,
+  proposed?: number | null
+): string => {
+  if (
+    typeof baseline !== "number" ||
+    typeof proposed !== "number" ||
+    !Number.isFinite(baseline) ||
+    !Number.isFinite(proposed)
+  ) {
+    return "N/A";
+  }
+
+  if (baseline < 0 && proposed < 0) {
+    const baselineCredit = Math.abs(baseline);
+    const proposedCredit = Math.abs(proposed);
+    if (baselineCredit === 0) return "N/A";
+
+    const creditChange =
+      ((baselineCredit - proposedCredit) / baselineCredit) * 100;
+
+    if (Math.abs(creditChange) < 0.000001) return "No change";
+    return creditChange > 0
+      ? `${fmt(Math.abs(creditChange), 2)}% less credit`
+      : `${fmt(Math.abs(creditChange), 2)}% more credit`;
+  }
+
+  if ((baseline < 0 && proposed >= 0) || (baseline >= 0 && proposed < 0)) {
+    return "Sign change";
+  }
+
+  return fmtPercent(reductionPct(baseline, proposed), 2);
+};
+
+const parseDistanceKm = (value: unknown, header: string | undefined): number => {
+  const parsed = nOrNull(value);
+  if (parsed === null || parsed <= 0) return 0;
+
+  const key = String(header || "").toLowerCase();
+  if (/(mile|miles|\bmi\b)/.test(key)) return parsed * 1.609344;
+  if (/(meter|metre|_m\b|\(m\))/.test(key) && !/(km|kilometer|kilometre)/.test(key)) {
+    return parsed / 1000;
+  }
+  return parsed;
+};
+
+const parseThicknessM = (value: unknown, header: string | undefined): number | null => {
+  const parsed = nOrNull(value);
+  if (parsed === null || parsed <= 0) return null;
+
+  const key = String(header || "").toLowerCase();
+  if (/(mm|millimeter|millimetre)/.test(key)) return parsed / 1000;
+  if (/(cm|centimeter|centimetre)/.test(key)) return parsed / 100;
+  if (/(inch|inches|_in\b|\(in\))/.test(key)) return parsed * 0.0254;
+  if (/(ft|feet|foot)/.test(key)) return parsed * 0.3048;
+
+  // Generic "Thickness" remains interpreted as metres because BomRow stores
+  // thicknessM. Prefer explicit Thickness_m / Thickness_mm headers in imports.
+  return parsed;
 };
 
 
@@ -1117,6 +1801,17 @@ function LcaEngineComponent() {
 
   const [baselineRows, setBaselineRows] = useState<BomRow[]>([]);
   const [proposedRows, setProposedRows] = useState<BomRow[]>([]);
+  const [baselineSourceName, setBaselineSourceName] = useState("");
+  const [proposedSourceName, setProposedSourceName] = useState("");
+
+  const [projectName, setProjectName] = useState("Untitled LCA Project");
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const [projectToken, setProjectToken] = useState<string | null>(null);
+  const [savedProjects, setSavedProjects] = useState<SavedProjectRef[]>([]);
+  const [showProjectManager, setShowProjectManager] = useState(false);
+  const [isProjectBusy, setIsProjectBusy] = useState(false);
+  const [projectStatus, setProjectStatus] = useState("");
+
   const [activeView, setActiveView] = useState<ActiveView>("proposed");
   const [tab, setTab] = useState<DashboardTab>("overview");
 
@@ -1154,10 +1849,23 @@ function LcaEngineComponent() {
 
   const aliasToEpdId = useMemo(() => {
     const map = new Map<string, string>();
+    const availableIds = new Set(epds.map((epd) => epd.id));
+
     epds.forEach((epd) => {
-      [epd.name, ...epd.aliases].forEach((alias) => map.set(normalizeName(alias), epd.id));
+      [epd.name, ...epd.aliases].forEach((alias) =>
+        map.set(normalizeName(alias), epd.id)
+      );
     });
-    materialMappings.forEach((mapping) => map.set(mapping.normalizedAlias, mapping.epdId));
+
+    // Ignore stale alias mappings whose referenced EPD is not actually
+    // available in the current session/database. Otherwise the CSV row looks
+    // "resolved" and skips reconciliation even though calculation receives no EPD.
+    materialMappings.forEach((mapping) => {
+      if (availableIds.has(mapping.epdId)) {
+        map.set(mapping.normalizedAlias, mapping.epdId);
+      }
+    });
+
     return map;
   }, [epds, materialMappings]);
 
@@ -1221,28 +1929,72 @@ function LcaEngineComponent() {
       const mappingArray = Array.from(loadedMappings.values());
       setEpds(epdArray);
       setMaterialMappings(mappingArray);
-      localStorage.setItem("lca_v2_epd_cache", JSON.stringify(epdArray));
-      localStorage.setItem("lca_v2_alias_cache", JSON.stringify(mappingArray));
+      safeLocalStorageSet("lca_v2_epd_cache", JSON.stringify(epdArray));
+      safeLocalStorageSet("lca_v2_alias_cache", JSON.stringify(mappingArray));
       setIsLoading(false);
     };
     load();
   }, []);
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(PROJECT_INDEX_KEY);
+      if (!raw) return;
+
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return;
+
+      const clean = parsed
+        .filter(
+          (item: any) =>
+            item &&
+            typeof item.id === "string" &&
+            typeof item.name === "string" &&
+            typeof item.editToken === "string"
+        )
+        .slice(0, 100);
+
+      setSavedProjects(clean);
+    } catch (error) {
+      console.warn("Saved project index could not be read.", error);
+    }
+  }, []);
+
   const resolveEpdId = (materialName: string): string | undefined => aliasToEpdId.get(normalizeName(materialName));
 
-  const parseCsvRows = (data: Record<string, unknown>[], mapping: typeof columnMapping): BomRow[] => {
+  const parseCsvRows = (
+    data: Record<string, unknown>[],
+    mapping: typeof columnMapping
+  ): BomRow[] => {
     return data
       .map((raw, index) => {
         const materialName = String(raw[mapping.material] ?? "").trim();
         const quantity = n(raw[mapping.quantity], 0);
         const unit = String(raw[mapping.unit] ?? "unit").trim() || "unit";
 
-        const distanceKey = Object.keys(raw).find((key) => /distance|transport.*km|km/i.test(key));
-        const modeKey = Object.keys(raw).find((key) => /mode|transport.*type/i.test(key));
-        const thicknessKey = Object.keys(raw).find((key) => /thickness/i.test(key));
-        const costKey = Object.keys(raw).find((key) => /unit.*cost|cost.*unit|price/i.test(key));
-        const rawMode = modeKey ? String(raw[modeKey] ?? "truck").toLowerCase() : "truck";
-        const mode: TransportMode = rawMode.includes("rail") ? "rail" : rawMode.includes("ship") ? "ship" : "truck";
+        const keys = Object.keys(raw);
+        const distanceKey = keys.find((key) =>
+          /distance|transport.*(km|mile|mi|meter|metre)|\bkm\b/i.test(key)
+        );
+        const modeKey = keys.find((key) => /mode|transport.*type/i.test(key));
+        const thicknessKey = keys.find((key) => /thickness/i.test(key));
+        const costKey = keys.find((key) =>
+          /unit.*cost|cost.*unit|price/i.test(key)
+        );
+
+        const rawMode = modeKey
+          ? String(raw[modeKey] ?? "").trim().toLowerCase()
+          : "";
+        const recognizedTransportMode =
+          rawMode.includes("rail") ||
+          rawMode.includes("ship") ||
+          rawMode.includes("truck") ||
+          rawMode.includes("road");
+        const mode: TransportMode = rawMode.includes("rail")
+          ? "rail"
+          : rawMode.includes("ship")
+          ? "ship"
+          : "truck";
 
         return {
           id: `${Date.now()}-${index}-${slugId(materialName)}`,
@@ -1250,13 +2002,25 @@ function LcaEngineComponent() {
           epdId: materialName ? resolveEpdId(materialName) : undefined,
           quantity,
           unit,
-          distanceKm: distanceKey ? n(raw[distanceKey], 300) : 300,
+          // Never invent a default haul distance. No distance column => 0 km,
+          // leaving any EPD A4 value untouched.
+          distanceKm: distanceKey
+            ? parseDistanceKm(raw[distanceKey], distanceKey)
+            : 0,
           mode,
-          thicknessM: thicknessKey ? nOrNull(raw[thicknessKey]) : null,
+          transportModeWasDefaulted: !recognizedTransportMode,
+          thicknessM: thicknessKey
+            ? parseThicknessM(raw[thicknessKey], thicknessKey)
+            : null,
           costPerInputUnit: costKey ? n(raw[costKey], 0) : 0,
         } satisfies BomRow;
       })
-      .filter((row) => row.materialName && row.quantity !== 0);
+      .filter(
+        (row) =>
+          row.materialName &&
+          Number.isFinite(row.quantity) &&
+          row.quantity > 0
+      );
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: ModelType) => {
@@ -1274,7 +2038,12 @@ function LcaEngineComponent() {
           quantity: headers.find((h) => /qty|quantity|volume|area|mass|weight|count/i.test(h)) || headers[1] || "",
           unit: headers.find((h) => /unit|uom/i.test(h)) || headers[2] || "",
         });
-        setPendingUpload({ type, data: results.data, headers });
+        setPendingUpload({
+          type,
+          data: results.data,
+          headers,
+          sourceFileName: file.name,
+        });
         setIsProcessing(false);
       },
       error: (error) => {
@@ -1294,22 +2063,307 @@ function LcaEngineComponent() {
     );
 
     if (unknownAliases.length) {
-      setPendingReconciliation({ type: pendingUpload.type, rows, unknownAliases });
+      setPendingReconciliation({
+        type: pendingUpload.type,
+        rows,
+        unknownAliases,
+        sourceFileName: pendingUpload.sourceFileName,
+      });
     } else {
-      commitRows(pendingUpload.type, rows);
+      commitRows(pendingUpload.type, rows, pendingUpload.sourceFileName);
     }
     setPendingUpload(null);
   };
 
-  const commitRows = (type: ModelType, rows: BomRow[]) => {
+  const commitRows = (
+    type: ModelType,
+    rows: BomRow[],
+    sourceFileName = ""
+  ) => {
     if (type === "baseline") {
       setBaselineRows(rows);
+      if (sourceFileName) setBaselineSourceName(sourceFileName);
       setActiveView(proposedRows.length ? "comparison" : "baseline");
     } else {
       setProposedRows(rows);
+      if (sourceFileName) setProposedSourceName(sourceFileName);
       setActiveView(baselineRows.length ? "comparison" : "proposed");
     }
+    setProjectStatus("");
     setPage(0);
+  };
+
+  const rememberProjectRef = (ref: SavedProjectRef) => {
+    setSavedProjects((prev) => {
+      const next = [
+        ref,
+        ...prev.filter((item) => item.id !== ref.id),
+      ].slice(0, 100);
+      safeLocalStorageSet(PROJECT_INDEX_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const buildProjectPayload = () => {
+    const ec3SessionOnlyRows = [...baselineRows, ...proposedRows].filter(
+      (row) => {
+        const epd = row.epdId ? epdById.get(row.epdId) : undefined;
+        return epd?.source === "EC3" && !EC3_PERSISTENCE_ALLOWED;
+      }
+    ).length;
+
+    return {
+      name: projectName.trim() || "Untitled LCA Project",
+      studyPeriodYears: buildingLife,
+      floorAreaM2,
+      annualEnergyKwh,
+      gridIntensity,
+      baselineRows,
+      proposedRows,
+      metadata: {
+        baselineSourceName: baselineSourceName || null,
+        proposedSourceName: proposedSourceName || null,
+        baselineFingerprint: baselineRows.length
+          ? modelFingerprint(baselineRows)
+          : null,
+        proposedFingerprint: proposedRows.length
+          ? modelFingerprint(proposedRows)
+          : null,
+        ec3SessionOnlyRows,
+      },
+    };
+  };
+
+  const saveProject = async () => {
+    if (!baselineRows.length && !proposedRows.length) {
+      alert("Upload a baseline or proposed model before saving a project.");
+      return;
+    }
+
+    setIsProjectBusy(true);
+    setProjectStatus("Saving project...");
+
+    try {
+      const payload = buildProjectPayload();
+      const isExisting = Boolean(projectId && projectToken);
+      const url = isExisting
+        ? `/api/lca/projects/${encodeURIComponent(projectId!)}`
+        : "/api/lca/projects";
+
+      const response = await fetch(url, {
+        method: isExisting ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(isExisting
+            ? { "X-LCA-Project-Token": projectToken! }
+            : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await response.json().catch(() => null);
+
+      if (!response.ok || !json?.success) {
+        throw new Error(
+          json?.error || `Project save failed with HTTP ${response.status}.`
+        );
+      }
+
+      const nextId = String(json.project?.id || projectId || "");
+      const nextToken = String(json.editToken || projectToken || "");
+
+      if (!nextId || !nextToken) {
+        throw new Error("The project was saved but its local project key is missing.");
+      }
+
+      setProjectId(nextId);
+      setProjectToken(nextToken);
+
+      const ref: SavedProjectRef = {
+        id: nextId,
+        name: String(json.project?.name || payload.name),
+        editToken: nextToken,
+        updatedAt: String(
+          json.project?.updatedAt ||
+            json.project?.updated_at ||
+            new Date().toISOString()
+        ),
+      };
+
+      rememberProjectRef(ref);
+
+      const sessionOnlyCount = Number(payload.metadata.ec3SessionOnlyRows || 0);
+      setProjectStatus(
+        sessionOnlyCount > 0
+          ? `Saved. ${sessionOnlyCount} row(s) use EC3 data that is session-only under your current persistence setting; those EPDs may need reconciliation after a fresh browser session.`
+          : "Project saved to Neon."
+      );
+    } catch (error) {
+      console.error(error);
+      const message =
+        error instanceof Error ? error.message : "Project could not be saved.";
+      setProjectStatus(message);
+      alert(message);
+    } finally {
+      setIsProjectBusy(false);
+    }
+  };
+
+  const loadProject = async (ref: SavedProjectRef) => {
+    setIsProjectBusy(true);
+    setProjectStatus("Loading project...");
+
+    try {
+      const response = await fetch(
+        `/api/lca/projects/${encodeURIComponent(ref.id)}`,
+        {
+          headers: {
+            "X-LCA-Project-Token": ref.editToken,
+          },
+          cache: "no-store",
+        }
+      );
+
+      const json = await response.json().catch(() => null);
+
+      if (!response.ok || !json?.success || !json?.project) {
+        throw new Error(
+          json?.error || `Project load failed with HTTP ${response.status}.`
+        );
+      }
+
+      const project = json.project as SavedProjectPayload;
+      const baseline = Array.isArray(project.baselineRows)
+        ? project.baselineRows
+        : [];
+      const proposed = Array.isArray(project.proposedRows)
+        ? project.proposedRows
+        : [];
+
+      setProjectId(project.id);
+      setProjectToken(ref.editToken);
+      setProjectName(project.name || "Untitled LCA Project");
+      setBuildingLife(Math.max(0, n(project.studyPeriodYears, 60)));
+      setFloorAreaM2(Math.max(0, n(project.floorAreaM2, 0)));
+      setAnnualEnergyKwh(Math.max(0, n(project.annualEnergyKwh, 0)));
+      setGridIntensity(Math.max(0, n(project.gridIntensity, 0)));
+      setBaselineRows(baseline);
+      setProposedRows(proposed);
+      setBaselineSourceName(project.metadata?.baselineSourceName || "");
+      setProposedSourceName(project.metadata?.proposedSourceName || "");
+      setActiveView(
+        baseline.length && proposed.length
+          ? "comparison"
+          : proposed.length
+          ? "proposed"
+          : "baseline"
+      );
+      setTab("overview");
+      setPage(0);
+      setShowProjectManager(false);
+
+      rememberProjectRef({
+        ...ref,
+        name: project.name || ref.name,
+        updatedAt: project.updatedAt || ref.updatedAt,
+      });
+
+      const missingEpdRefs = [...baseline, ...proposed].filter(
+        (row) => row.epdId && !epdById.has(row.epdId)
+      ).length;
+
+      setProjectStatus(
+        missingEpdRefs > 0
+          ? `Project loaded. ${missingEpdRefs} saved row(s) reference EPDs not available in this session/database; review their mapping before formal reporting.`
+          : "Project loaded."
+      );
+    } catch (error) {
+      console.error(error);
+      const message =
+        error instanceof Error ? error.message : "Project could not be loaded.";
+      setProjectStatus(message);
+      alert(message);
+    } finally {
+      setIsProjectBusy(false);
+    }
+  };
+
+  const deleteProject = async (ref: SavedProjectRef) => {
+    if (
+      !window.confirm(
+        `Delete "${ref.name}" from the server and this browser's saved-project list?`
+      )
+    ) {
+      return;
+    }
+
+    setIsProjectBusy(true);
+
+    try {
+      const response = await fetch(
+        `/api/lca/projects/${encodeURIComponent(ref.id)}`,
+        {
+          method: "DELETE",
+          headers: {
+            "X-LCA-Project-Token": ref.editToken,
+          },
+        }
+      );
+
+      const json = await response.json().catch(() => null);
+
+      if (!response.ok || !json?.success) {
+        throw new Error(
+          json?.error || `Project delete failed with HTTP ${response.status}.`
+        );
+      }
+
+      setSavedProjects((prev) => {
+        const next = prev.filter((item) => item.id !== ref.id);
+        safeLocalStorageSet(PROJECT_INDEX_KEY, JSON.stringify(next));
+        return next;
+      });
+
+      if (projectId === ref.id) {
+        setProjectId(null);
+        setProjectToken(null);
+        setProjectStatus("Saved project deleted. Current model remains open.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error ? error.message : "Project could not be deleted."
+      );
+    } finally {
+      setIsProjectBusy(false);
+    }
+  };
+
+  const startNewProject = () => {
+    if (
+      (baselineRows.length || proposedRows.length) &&
+      !window.confirm(
+        "Start a new project? The current in-memory model will be cleared. Save it first if you want to keep it."
+      )
+    ) {
+      return;
+    }
+
+    setProjectId(null);
+    setProjectToken(null);
+    setProjectName("Untitled LCA Project");
+    setBaselineRows([]);
+    setProposedRows([]);
+    setBaselineSourceName("");
+    setProposedSourceName("");
+    setBuildingLife(60);
+    setFloorAreaM2(10000);
+    setAnnualEnergyKwh(0);
+    setGridIntensity(0.38);
+    setActiveView("proposed");
+    setTab("overview");
+    setPage(0);
+    setProjectStatus("New unsaved project.");
   };
 
   const searchEc3 = async (alias: string, query?: string) => {
@@ -1380,7 +2434,7 @@ function LcaEngineComponent() {
       const next = Array.from(map.values());
 
       if (epd.source !== "EC3" || EC3_PERSISTENCE_ALLOWED) {
-        localStorage.setItem("lca_v2_epd_cache", JSON.stringify(next));
+        safeLocalStorageSet("lca_v2_epd_cache", JSON.stringify(next));
       }
       return next;
     });
@@ -1391,7 +2445,7 @@ function LcaEngineComponent() {
       const next = Array.from(map.values());
 
       if (epd.source !== "EC3" || EC3_PERSISTENCE_ALLOWED) {
-        localStorage.setItem("lca_v2_alias_cache", JSON.stringify(next));
+        safeLocalStorageSet("lca_v2_alias_cache", JSON.stringify(next));
       }
       return next;
     });
@@ -1450,9 +2504,10 @@ function LcaEngineComponent() {
         searchSelection?.uuid
       );
 
-      // If the search result exposes an openEPD-style ID, enrich the record
-      // from the full digital EPD endpoint before it is normalized/stored.
-      if (selectedId && /^ec3/i.test(selectedId)) {
+      // Enrich every selected EC3 result when an ID is available. EC3/openEPD
+      // identifiers are not guaranteed to start with "ec3"; UUID-style IDs
+      // must not be skipped or the calculation can lose full module data.
+      if (selectedId) {
         try {
           const detailResponse = await fetch(
             `/api/ec3?id=${encodeURIComponent(selectedId)}`,
@@ -1508,7 +2563,11 @@ function LcaEngineComponent() {
       return epd ? { ...row, epdId: epd.id } : row;
     });
 
-    commitRows(pendingReconciliation.type, resolvedRows);
+    commitRows(
+      pendingReconciliation.type,
+      resolvedRows,
+      pendingReconciliation.sourceFileName
+    );
     setPendingReconciliation(null);
     setSelectedEc3({});
     setEc3SearchResults({});
@@ -1527,10 +2586,30 @@ function LcaEngineComponent() {
       if (Object.keys(total).length) modules[module] = total;
     });
 
-    const massKg = valid.reduce((sum, item) => {
-      const epd = epdById.get(item.epdId);
-      return sum + (epd?.massKgPerDeclaredUnit || 0) * item.qtyDeclared;
-    }, 0);
+    const componentMasses = valid.map((item) => {
+      const component = epdById.get(item.epdId);
+      return component?.massKgPerDeclaredUnit &&
+        component.massKgPerDeclaredUnit > 0
+        ? component.massKgPerDeclaredUnit * item.qtyDeclared
+        : null;
+    });
+    const massKg = componentMasses.every(
+      (value): value is number => typeof value === "number"
+    )
+      ? componentMasses.reduce((sum, value) => sum + value, 0)
+      : null;
+
+    const componentRsls = valid.map(
+      (item) => epdById.get(item.epdId)?.referenceServiceLifeYears ?? null
+    );
+    const referenceServiceLifeYears = componentRsls.every(
+      (value): value is number =>
+        typeof value === "number" && Number.isFinite(value) && value > 0
+    )
+      ? Math.min(...componentRsls)
+      : null;
+
+    const assemblyBasis = normalizeDeclaredBasis(assemblyUnit, 1);
 
     const epd: EpdRecord = {
       id: `assembly-${slugId(assemblyName)}-${Date.now()}`,
@@ -1538,14 +2617,17 @@ function LcaEngineComponent() {
       aliases: [assemblyName.trim()],
       category: assemblyCategory,
       source: "Custom",
-      declaredUnit: assemblyUnit,
-      declaredQuantity: 1,
-      massKgPerDeclaredUnit: massKg || null,
-      referenceServiceLifeYears: Math.min(
-        ...valid.map((item) => epdById.get(item.epdId)?.referenceServiceLifeYears || buildingLife)
-      ),
+      declaredUnit: assemblyBasis.declaredUnit,
+      declaredQuantity: assemblyBasis.declaredQuantity,
+      declaredUnitWasMissing: assemblyBasis.declaredUnitWasMissing,
+      massKgPerDeclaredUnit: massKg,
+      referenceServiceLifeYears,
       modules,
-      metadata: { components: valid },
+      metadata: {
+        components: valid,
+        massComplete: massKg !== null,
+        rslComplete: referenceServiceLifeYears !== null,
+      },
     };
 
     await persistEpdAndMapping(epd, assemblyName.trim());
@@ -1564,7 +2646,12 @@ function LcaEngineComponent() {
   );
 
   const isComparing = !!baselineReport && !!proposedReport;
-  const currentReport = activeView === "baseline" ? baselineReport : proposedReport || baselineReport;
+  const currentReport =
+    activeView === "baseline"
+      ? baselineReport
+      : activeView === "proposed"
+      ? proposedReport || baselineReport
+      : null;
 
   const comparisonMetrics = useMemo(() => {
     if (!baselineReport || !proposedReport) return [];
@@ -1580,36 +2667,111 @@ function LcaEngineComponent() {
   }, [baselineReport, proposedReport]);
 
   const leedIndicative = useMemo(() => {
-    if (!comparisonMetrics.length) return null;
-    const complete = comparisonMetrics.every((metric) => typeof metric.reduction === "number");
-    if (!complete) return { complete: false, passes: false, reason: "Missing impact-category data prevents a defensible LEED determination." };
-    const reductions = comparisonMetrics.map((metric) => metric.reduction as number);
+    if (!comparisonMetrics.length || !baselineReport || !proposedReport) {
+      return null;
+    }
+
+    const rowCoverageComplete =
+      baselineReport.epdMatchedRows === baselineReport.lines.length &&
+      proposedReport.epdMatchedRows === proposedReport.lines.length &&
+      baselineReport.calculableRows === baselineReport.lines.length &&
+      proposedReport.calculableRows === proposedReport.lines.length;
+
+    if (!rowCoverageComplete) {
+      return {
+        complete: false,
+        passes: false,
+        reason:
+          "Indicative LEED-style assessment unavailable: unmapped or unit-incompatible rows remain in one or both models.",
+      };
+    }
+
+    const gwpCoverageComplete =
+      baselineReport.rowsWithGwp === baselineReport.lines.length &&
+      proposedReport.rowsWithGwp === proposedReport.lines.length;
+
+    if (!gwpCoverageComplete) {
+      return {
+        complete: false,
+        passes: false,
+        reason: `Indicative LEED-style assessment unavailable: usable A-C GWP exists for only ${baselineReport.rowsWithGwp}/${baselineReport.lines.length} baseline rows and ${proposedReport.rowsWithGwp}/${proposedReport.lines.length} proposed rows. Complete material-level GWP coverage is required before reduction criteria are evaluated.`,
+      };
+    }
+
+    const coreBoundaryComplete =
+      baselineReport.rowsWithCompleteCoreGwp === baselineReport.lines.length &&
+      proposedReport.rowsWithCompleteCoreGwp === proposedReport.lines.length;
+
+    if (!coreBoundaryComplete) {
+      return {
+        complete: false,
+        passes: false,
+        reason: `Indicative LEED-style assessment unavailable: every material has at least one usable A-C GWP value, but the configured core GWP boundary (${CORE_GWP_BOUNDARY.join(", ")}) is complete for only ${baselineReport.rowsWithCompleteCoreGwp}/${baselineReport.lines.length} baseline rows and ${proposedReport.rowsWithCompleteCoreGwp}/${proposedReport.lines.length} proposed rows. The available-scope comparison remains usable for decision support, but formal reduction logic is held back until the configured core boundary is complete.`,
+      };
+    }
+
+    const completeMetrics = comparisonMetrics.every(
+      (metric) => typeof metric.reduction === "number"
+    );
+    if (!completeMetrics) {
+      return {
+        complete: false,
+        passes: false,
+        reason:
+          "Indicative LEED-style assessment unavailable: one or more required impact categories are missing from the comparison dataset.",
+      };
+    }
+
+    const reductions = comparisonMetrics.map(
+      (metric) => metric.reduction as number
+    );
     const gwpPassed = reductions[0] >= 10;
     const passed10 = reductions.filter((value) => value >= 10).length;
     const failed5 = reductions.some((value) => value < -5);
+
     return {
       complete: true,
       passes: gwpPassed && passed10 >= 3 && !failed5,
-      reason: `GWP ≥10%: ${gwpPassed ? "yes" : "no"}; categories ≥10%: ${passed10}; no category worse than 5%: ${!failed5 ? "yes" : "no"}.`,
+      reason: `Available-data logic check — GWP ≥10%: ${
+        gwpPassed ? "yes" : "no"
+      }; categories ≥10%: ${passed10}; no category worse than 5%: ${
+        !failed5 ? "yes" : "no"
+      }. Formal LEED documentation still requires project-specific scope and independent validation.`,
     };
-  }, [comparisonMetrics]);
+  }, [comparisonMetrics, baselineReport, proposedReport]);
 
   const phaseChartData = useMemo(() => {
+    const sumKnownStage = (
+      report: ProjectReport,
+      modules: LcaModule[]
+    ): number | null => {
+      const values = modules
+        .map((module) => report.moduleTotals[module]?.gwp)
+        .filter(
+          (value): value is number =>
+            typeof value === "number" && Number.isFinite(value)
+        );
+      return values.length ? values.reduce((sum, value) => sum + value, 0) : null;
+    };
+
     const toRow = (name: string, report: ProjectReport) => ({
       name,
-      "A1-A3": report.moduleTotals.A1A3?.gwp || 0,
-      A4: report.moduleTotals.A4?.gwp || 0,
-      A5: report.moduleTotals.A5?.gwp || 0,
-      "B1-B7": ["B1", "B2", "B3", "B4", "B5", "B6", "B7"].reduce(
-        (sum, module) => sum + (report.moduleTotals[module as LcaModule]?.gwp || 0),
-        0
-      ),
-      "C1-C4": ["C1", "C2", "C3", "C4"].reduce(
-        (sum, module) => sum + (report.moduleTotals[module as LcaModule]?.gwp || 0),
-        0
-      ),
+      "A1-A3": report.moduleTotals.A1A3?.gwp ?? null,
+      A4: report.moduleTotals.A4?.gwp ?? null,
+      A5: report.moduleTotals.A5?.gwp ?? null,
+      "B1-B7": sumKnownStage(report, [
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5",
+        "B6",
+        "B7",
+      ]),
+      "C1-C4": sumKnownStage(report, ["C1", "C2", "C3", "C4"]),
     });
-    const data = [] as any[];
+
+    const data: any[] = [];
     if (baselineReport) data.push(toRow("Baseline", baselineReport));
     if (proposedReport) data.push(toRow("Proposed", proposedReport));
     return data;
@@ -1617,14 +2779,38 @@ function LcaEngineComponent() {
 
   const crossoverData = useMemo(() => {
     if (!currentReport) return [];
-    const embodied =
-      (currentReport.moduleTotals.A1A3?.gwp || 0) +
-      (currentReport.moduleTotals.A4?.gwp || 0) +
-      (currentReport.moduleTotals.A5?.gwp || 0);
+
+    const initialStageValues = [
+      currentReport.moduleTotals.A1A3?.gwp,
+      currentReport.moduleTotals.A4?.gwp,
+      currentReport.moduleTotals.A5?.gwp,
+    ].filter(
+      (value): value is number =>
+        typeof value === "number" && Number.isFinite(value)
+    );
+
+    // Do not render "0 embodied carbon" when the underlying EPD impacts are
+    // simply unavailable.
+    if (!initialStageValues.length) return [];
+
+    const embodied = initialStageValues.reduce(
+      (sum, value) => sum + value,
+      0
+    );
+
     const data = [];
-    for (let year = 0; year <= buildingLife; year += Math.max(1, Math.round(buildingLife / 12))) {
+    for (
+      let year = 0;
+      year <= buildingLife;
+      year += Math.max(1, Math.round(buildingLife / 12))
+    ) {
       const operational = year * annualEnergyKwh * gridIntensity;
-      data.push({ year: `Year ${year}`, Embodied: embodied, Operational: operational, Total: embodied + operational });
+      data.push({
+        year: `Year ${year}`,
+        Embodied: embodied,
+        Operational: operational,
+        Total: embodied + operational,
+      });
     }
     return data;
   }, [currentReport, buildingLife, annualEnergyKwh, gridIntensity]);
@@ -1634,68 +2820,467 @@ function LcaEngineComponent() {
     setter((prev) => prev.map((row, i) => (i === index ? { ...row, ...patch } : row)));
   };
 
+  const exportComparisonCsv = () => {
+    if (!baselineReport || !proposedReport) return;
+
+    const rows: Array<Record<string, string | number>> = [];
+    const baselineIntensity =
+      floorAreaM2 > 0 && typeof baselineReport.aToC.gwp === "number"
+        ? baselineReport.aToC.gwp / floorAreaM2
+        : null;
+    const proposedIntensity =
+      floorAreaM2 > 0 && typeof proposedReport.aToC.gwp === "number"
+        ? proposedReport.aToC.gwp / floorAreaM2
+        : null;
+
+    const pushRow = (
+      section: string,
+      metric: string,
+      unit: string,
+      baseline: string | number,
+      proposed: string | number,
+      reduction: string | number,
+      notes = ""
+    ) => {
+      rows.push({
+        Section: section,
+        Metric: metric,
+        Unit: unit,
+        Baseline: baseline,
+        Proposed: proposed,
+        "Reduction (%)": reduction,
+        Notes: notes,
+      });
+    };
+
+    pushRow(
+      "Summary",
+      "A-C GWP (available modules)",
+      "kg CO2e",
+      baselineReport.aToC.gwp ?? "",
+      proposedReport.aToC.gwp ?? "",
+      reductionPct(baselineReport.aToC.gwp, proposedReport.aToC.gwp) ?? "",
+      "Module D excluded; missing lifecycle modules remain unavailable."
+    );
+    pushRow(
+      "Summary",
+      "A-C GWP intensity (available modules)",
+      "kg CO2e/m2",
+      baselineIntensity ?? "",
+      proposedIntensity ?? "",
+      reductionPct(baselineIntensity, proposedIntensity) ?? ""
+    );
+    pushRow(
+      "Summary",
+      "Project cost",
+      "USD",
+      baselineReport.totalCost,
+      proposedReport.totalCost,
+      reductionPct(baselineReport.totalCost, proposedReport.totalCost) ?? ""
+    );
+
+    comparisonMetrics.forEach((item) => {
+      pushRow(
+        "Impact category",
+        item.label,
+        item.unit,
+        item.baseline ?? "",
+        item.proposed ?? "",
+        item.reduction ?? ""
+      );
+    });
+
+    MODULE_ORDER.forEach((module) => {
+      const baselineValue = baselineReport.moduleTotals[module]?.gwp ?? null;
+      const proposedValue = proposedReport.moduleTotals[module]?.gwp ?? null;
+      pushRow(
+        "Lifecycle module GWP",
+        module,
+        "kg CO2e",
+        baselineValue ?? "",
+        proposedValue ?? "",
+        module === "D"
+          ? moduleDChangeLabel(baselineValue, proposedValue)
+          : reductionPct(baselineValue, proposedValue) ?? "",
+        module === "D"
+          ? "Module D reported separately from A-C; negative values are potential beyond-system-boundary credits/benefits."
+          : ""
+      );
+    });
+
+    pushRow(
+      "Data quality",
+      "EPD matched rows",
+      "rows",
+      `${baselineReport.epdMatchedRows}/${baselineReport.lines.length}`,
+      `${proposedReport.epdMatchedRows}/${proposedReport.lines.length}`,
+      ""
+    );
+    pushRow(
+      "Data quality",
+      "Unit-compatible rows",
+      "rows",
+      `${baselineReport.calculableRows}/${baselineReport.lines.length}`,
+      `${proposedReport.calculableRows}/${proposedReport.lines.length}`,
+      ""
+    );
+    pushRow(
+      "Data quality",
+      "Rows with at least one A-C GWP value",
+      "rows",
+      `${baselineReport.rowsWithGwp}/${baselineReport.lines.length}`,
+      `${proposedReport.rowsWithGwp}/${proposedReport.lines.length}`,
+      ""
+    );
+    pushRow(
+      "Data quality",
+      "Rows complete for configured core GWP boundary",
+      "rows",
+      `${baselineReport.rowsWithCompleteCoreGwp}/${baselineReport.lines.length}`,
+      `${proposedReport.rowsWithCompleteCoreGwp}/${proposedReport.lines.length}`,
+      ""
+    );
+    pushRow(
+      "Data quality",
+      "Warnings",
+      "count",
+      baselineReport.warnings.length,
+      proposedReport.warnings.length,
+      "",
+      leedIndicative?.reason || ""
+    );
+
+    const blob = new Blob(["\uFEFF", Papa.unparse(rows)], {
+      type: "text/csv;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `LCA_V2_Comparison_${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportComparisonPdf = () => {
+    if (!baselineReport || !proposedReport) return;
+    setIsDownloading(true);
+
+    try {
+      const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "landscape" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, pageWidth, 34, "F");
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      doc.text("LCA ENGINE V2 COMPARISON REPORT", 14, 16);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text(
+        "Baseline vs proposed - available lifecycle modules; Module D reported separately",
+        14,
+        25
+      );
+
+      const baselineIntensity =
+        floorAreaM2 > 0 && typeof baselineReport.aToC.gwp === "number"
+          ? baselineReport.aToC.gwp / floorAreaM2
+          : null;
+      const proposedIntensity =
+        floorAreaM2 > 0 && typeof proposedReport.aToC.gwp === "number"
+          ? proposedReport.aToC.gwp / floorAreaM2
+          : null;
+      const gwpReduction = reductionPct(
+        baselineReport.aToC.gwp,
+        proposedReport.aToC.gwp
+      );
+
+      doc.setTextColor(15, 23, 42);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.text("Comparison Summary", 14, 46);
+
+      autoTable(doc, {
+        startY: 52,
+        head: [["Metric", "Baseline", "Proposed", "Reduction"]],
+        body: [
+          [
+            "A-C GWP (available modules)",
+            `${fmt(baselineReport.aToC.gwp, 2)} kg CO2e`,
+            `${fmt(proposedReport.aToC.gwp, 2)} kg CO2e`,
+            fmtPercent(gwpReduction, 2),
+          ],
+          [
+            "A-C GWP intensity (available modules)",
+            `${fmt(baselineIntensity, 3)} kg CO2e/m2`,
+            `${fmt(proposedIntensity, 3)} kg CO2e/m2`,
+            fmtPercent(reductionPct(baselineIntensity, proposedIntensity), 2),
+          ],
+          [
+            "Project cost",
+            `$${fmt(baselineReport.totalCost, 2)}`,
+            `$${fmt(proposedReport.totalCost, 2)}`,
+            fmtPercent(
+              reductionPct(
+                baselineReport.totalCost,
+                proposedReport.totalCost
+              ),
+              2
+            ),
+          ],
+        ],
+        theme: "grid",
+        headStyles: { fillColor: [15, 23, 42] },
+      });
+
+      const firstTableEnd = (doc as any).lastAutoTable?.finalY ?? 86;
+
+      autoTable(doc, {
+        startY: firstTableEnd + 8,
+        head: [[
+          "Impact category (available modules)",
+          "Baseline",
+          "Proposed",
+          "Reduction",
+        ]],
+        body: comparisonMetrics.map((item) => [
+          item.label,
+          pdfSafeText(`${fmtMetricValue(item.metric, item.baseline)} ${item.unit}`),
+          pdfSafeText(`${fmtMetricValue(item.metric, item.proposed)} ${item.unit}`),
+          fmtPercent(item.reduction, 2),
+        ]),
+        theme: "grid",
+        headStyles: { fillColor: [30, 64, 175] },
+      });
+
+      doc.addPage("a4", "landscape");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      doc.text("Lifecycle Module GWP", 14, 18);
+      autoTable(doc, {
+        startY: 24,
+        head: [["Module", "Baseline kg CO2e", "Proposed kg CO2e", "Reduction"]],
+        body: MODULE_ORDER.map((module) => {
+          const baselineValue = baselineReport.moduleTotals[module]?.gwp ?? null;
+          const proposedValue = proposedReport.moduleTotals[module]?.gwp ?? null;
+          return [
+            module,
+            fmt(baselineValue, 3),
+            fmt(proposedValue, 3),
+            module === "D"
+              ? moduleDChangeLabel(baselineValue, proposedValue)
+              : fmtPercent(reductionPct(baselineValue, proposedValue), 2),
+          ];
+        }),
+        theme: "grid",
+        headStyles: { fillColor: [15, 23, 42] },
+      });
+
+      const moduleEnd = (doc as any).lastAutoTable?.finalY ?? 112;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(13);
+      doc.text("Data Quality", 14, moduleEnd + 10);
+      autoTable(doc, {
+        startY: moduleEnd + 15,
+        head: [["Check", "Baseline", "Proposed"]],
+        body: [
+          [
+            "EPD matched rows",
+            `${baselineReport.epdMatchedRows}/${baselineReport.lines.length}`,
+            `${proposedReport.epdMatchedRows}/${proposedReport.lines.length}`,
+          ],
+          [
+            "Unit-compatible rows",
+            `${baselineReport.calculableRows}/${baselineReport.lines.length}`,
+            `${proposedReport.calculableRows}/${proposedReport.lines.length}`,
+          ],
+          [
+            "Rows with at least one A-C GWP value",
+            `${baselineReport.rowsWithGwp}/${baselineReport.lines.length}`,
+            `${proposedReport.rowsWithGwp}/${proposedReport.lines.length}`,
+          ],
+          [
+            "Rows complete for configured core GWP boundary",
+            `${baselineReport.rowsWithCompleteCoreGwp}/${baselineReport.lines.length}`,
+            `${proposedReport.rowsWithCompleteCoreGwp}/${proposedReport.lines.length}`,
+          ],
+          [
+            "Any-GWP row coverage",
+            `${fmt(baselineReport.gwpRowShare, 1)}%`,
+            `${fmt(proposedReport.gwpRowShare, 1)}%`,
+          ],
+          [
+            "Core-boundary completeness",
+            `${fmt(baselineReport.coreGwpCompleteShare, 1)}%`,
+            `${fmt(proposedReport.coreGwpCompleteShare, 1)}%`,
+          ],
+          [
+            "Warnings",
+            String(baselineReport.warnings.length),
+            String(proposedReport.warnings.length),
+          ],
+        ],
+        theme: "grid",
+        headStyles: { fillColor: [15, 23, 42] },
+      });
+
+      const qualityEnd = (doc as any).lastAutoTable?.finalY ?? 170;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      const methodologyText =
+        "Methodology note: Comparison totals use the same available-module calculation engine as the individual models. Missing lifecycle modules remain unavailable rather than being treated as zero. Material warnings identify gaps in the configured core GWP boundary; other unavailable modules may still appear as N/A in the module table. Module D is reported separately and negative values represent potential beyond-system-boundary credits/benefits. This report is decision-support output, not a certification decision.";
+      const methodologyLines = doc.splitTextToSize(
+        pdfSafeText(methodologyText),
+        pageWidth - 28
+      );
+      doc.text(methodologyLines, 14, qualityEnd + 10);
+
+      if (leedIndicative?.reason) {
+        const leedLines = doc.splitTextToSize(
+          pdfSafeText(`Indicative LEED-style logic: ${leedIndicative.reason}`),
+          pageWidth - 28
+        );
+        doc.text(leedLines, 14, qualityEnd + 20);
+      }
+
+      const pageCount = doc.getNumberOfPages();
+      for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+        doc.setPage(pageNumber);
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text(
+          `Page ${pageNumber} of ${pageCount}`,
+          pageWidth - 14,
+          doc.internal.pageSize.getHeight() - 8,
+          { align: "right" }
+        );
+      }
+
+      doc.save(
+        `LCA_V2_Comparison_Report_${new Date()
+          .toISOString()
+          .slice(0, 10)}.pdf`
+      );
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleExportCsv = () => {
+    if (activeView === "comparison") {
+      exportComparisonCsv();
+      return;
+    }
+    exportCsv();
+  };
+
+  const handleExportPdf = () => {
+    if (activeView === "comparison") {
+      exportComparisonPdf();
+      return;
+    }
+    exportPdf();
+  };
+
   const exportCsv = () => {
     if (!currentReport) return;
-    const rows = currentReport.lines.map((line) => ({
-      "Input Material": line.row.materialName,
-      "Mapped EPD": line.epd?.name || "UNMAPPED",
-      Manufacturer: line.epd?.manufacturer || "",
-      Source: line.epd?.source || "",
-      "Input Quantity": line.row.quantity,
-      "Input Unit": line.row.unit,
-      "EPD Declared Quantity": line.declaredQuantity ?? "",
-      "EPD Declared Unit": line.epd?.declaredUnit || "",
-      "Replacement Count (B4)": line.replacementCount,
-      "A1-A3 GWP": line.modules.A1A3?.gwp ?? "",
-      "A4 GWP": line.modules.A4?.gwp ?? "",
-      "A5 GWP": line.modules.A5?.gwp ?? "",
-      "B4 GWP": line.modules.B4?.gwp ?? "",
-      "B6 GWP": "Project-level; see total rows",
-      "C1-C4 GWP": addImpact(line.modules.C1, line.modules.C2, line.modules.C3, line.modules.C4).gwp ?? "",
-      "A-C GWP": line.aToC.gwp ?? "",
-      "Module D GWP": line.moduleD.gwp ?? "",
-      "A-C + D GWP": line.aToCPlusD.gwp ?? "",
-      "Unit Cost": line.row.costPerInputUnit,
-      "Line Cost": line.cost,
-      "A-C kgCO2e/$": line.carbonPerDollar ?? "",
-      Warnings: line.warnings.join(" | "),
-    }));
+
+    const rows: Array<Record<string, string | number>> = currentReport.lines.map(
+      (line) => ({
+        "Input Material": line.row.materialName,
+        "Mapped EPD": line.epd?.name || "UNMAPPED",
+        Manufacturer: line.epd?.manufacturer || "",
+        Source: line.epd?.source || "",
+        "EPD Match Status": line.epd ? "Matched" : "Unmapped",
+        "Unit Conversion Status":
+          line.epd && line.declaredQuantity !== null
+            ? "Compatible"
+            : line.epd
+            ? "Failed"
+            : "Not attempted",
+        "GWP Data Status":
+          typeof line.aToC.gwp === "number" ? "Available" : "Unavailable",
+        "Input Quantity": line.row.quantity,
+        "Input Unit": line.row.unit,
+        "Converted EPD Quantity": line.declaredQuantity ?? "",
+        "EPD Declared Quantity": line.epd?.declaredQuantity ?? "",
+        "EPD Declared Unit": line.epd?.declaredUnit || "",
+        "Mass (kg)": line.massKg ?? "",
+        "Replacement Count (B4)": line.replacementCount,
+        "A1-A3 GWP": line.modules.A1A3?.gwp ?? "",
+        "A4 GWP": line.modules.A4?.gwp ?? "",
+        "A5 GWP": line.modules.A5?.gwp ?? "",
+        "B4 GWP": line.modules.B4?.gwp ?? "",
+        "B6 GWP": "Project-level; see total row",
+        "C1-C4 GWP":
+          addImpact(
+            line.modules.C1,
+            line.modules.C2,
+            line.modules.C3,
+            line.modules.C4
+          ).gwp ?? "",
+        "A-C GWP (available modules)": line.aToC.gwp ?? "",
+        "Module D GWP": line.moduleD.gwp ?? "",
+        "A-C + D GWP (available modules)": line.aToCPlusD.gwp ?? "",
+        "Unit Cost": line.row.costPerInputUnit,
+        "Line Cost": line.cost,
+        "A-C kgCO2e/$": line.carbonPerDollar ?? "",
+        Warnings: line.warnings.join(" | "),
+      })
+    );
 
     rows.push({
       "Input Material": "PROJECT TOTAL",
       "Mapped EPD": "",
       Manufacturer: "",
       Source: "",
-      "Input Quantity": "" as any,
+      "EPD Match Status": `${currentReport.epdMatchedRows}/${currentReport.lines.length} rows`,
+      "Unit Conversion Status": `${currentReport.calculableRows}/${currentReport.lines.length} rows calculable`,
+      "GWP Data Status": `${currentReport.rowsWithGwp}/${currentReport.lines.length} rows with GWP`,
+      "Input Quantity": "",
       "Input Unit": "",
+      "Converted EPD Quantity": "",
       "EPD Declared Quantity": "",
       "EPD Declared Unit": "",
-      "Replacement Count (B4)": "" as any,
+      "Mass (kg)": "",
+      "Replacement Count (B4)": "",
       "A1-A3 GWP": currentReport.moduleTotals.A1A3?.gwp ?? "",
       "A4 GWP": currentReport.moduleTotals.A4?.gwp ?? "",
       "A5 GWP": currentReport.moduleTotals.A5?.gwp ?? "",
       "B4 GWP": currentReport.moduleTotals.B4?.gwp ?? "",
-      "B6 GWP": String(currentReport.moduleTotals.B6?.gwp ?? ""),
-      "C1-C4 GWP": addImpact(
-        currentReport.moduleTotals.C1,
-        currentReport.moduleTotals.C2,
-        currentReport.moduleTotals.C3,
-        currentReport.moduleTotals.C4
-      ).gwp ?? "",
-      "A-C GWP": currentReport.aToC.gwp ?? "",
+      "B6 GWP": currentReport.moduleTotals.B6?.gwp ?? "",
+      "C1-C4 GWP":
+        addImpact(
+          currentReport.moduleTotals.C1,
+          currentReport.moduleTotals.C2,
+          currentReport.moduleTotals.C3,
+          currentReport.moduleTotals.C4
+        ).gwp ?? "",
+      "A-C GWP (available modules)": currentReport.aToC.gwp ?? "",
       "Module D GWP": currentReport.moduleD.gwp ?? "",
-      "A-C + D GWP": currentReport.aToCPlusD.gwp ?? "",
-      "Unit Cost": "" as any,
+      "A-C + D GWP (available modules)": currentReport.aToCPlusD.gwp ?? "",
+      "Unit Cost": "",
       "Line Cost": currentReport.totalCost,
-      "A-C kgCO2e/$": currentReport.totalCost > 0 && typeof currentReport.aToC.gwp === "number" ? currentReport.aToC.gwp / currentReport.totalCost : "",
+      "A-C kgCO2e/$":
+        currentReport.totalCost > 0 &&
+        typeof currentReport.aToC.gwp === "number"
+          ? currentReport.aToC.gwp / currentReport.totalCost
+          : "",
       Warnings: currentReport.warnings.join(" | "),
     });
 
-    const blob = new Blob([Papa.unparse(rows)], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([Papa.unparse(rows)], {
+      type: "text/csv;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `LCA_V2_${activeView}_${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `LCA_V2_${activeView}_${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -1703,6 +3288,7 @@ function LcaEngineComponent() {
   const exportPdf = () => {
     if (!currentReport) return;
     setIsDownloading(true);
+
     try {
       const doc = new jsPDF({ unit: "mm", format: "a4" });
       doc.setFillColor(15, 23, 42);
@@ -1713,7 +3299,11 @@ function LcaEngineComponent() {
       doc.text("LCA ENGINE V2 REPORT", 14, 18);
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.text("Auditable calculation output - Module D reported separately", 14, 27);
+      doc.text(
+        "Auditable calculation output - Module D reported separately",
+        14,
+        27
+      );
 
       doc.setTextColor(15, 23, 42);
       doc.setFontSize(15);
@@ -1721,17 +3311,82 @@ function LcaEngineComponent() {
       doc.text("Project Summary", 14, 52);
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
+
+      const totalRows = currentReport.lines.length;
+      const intensity =
+        floorAreaM2 > 0 && typeof currentReport.aToC.gwp === "number"
+          ? currentReport.aToC.gwp / floorAreaM2
+          : null;
+
       doc.text(`Study period: ${buildingLife} years`, 14, 61);
-      doc.text(`Gross floor area: ${fmt(floorAreaM2, 1)} m²`, 14, 68);
-      doc.text(`Mapped rows: ${currentReport.mappedRows}/${currentReport.lines.length}`, 14, 75);
-      doc.text(`Mapped quantity share: ${fmt(currentReport.mappedQuantityShare, 1)}%`, 14, 82);
-      doc.text(`A-C GWP: ${fmt(currentReport.aToC.gwp, 1)} kg CO2e`, 14, 89);
-      doc.text(`A-C GWP intensity: ${floorAreaM2 > 0 && typeof currentReport.aToC.gwp === "number" ? fmt(currentReport.aToC.gwp / floorAreaM2, 2) : "N/A"} kg CO2e/m2`, 14, 96);
-      doc.text(`Module D: ${fmt(currentReport.moduleD.gwp, 1)} kg CO2e`, 14, 103);
-      doc.text(`Total cost: $${fmt(currentReport.totalCost, 2)}`, 14, 110);
+      doc.text(`Gross floor area: ${fmt(floorAreaM2, 1)} m2`, 14, 68);
+      doc.text(
+        `EPD matched rows: ${currentReport.epdMatchedRows}/${totalRows} (${fmt(
+          currentReport.epdMatchShare,
+          1
+        )}%)`,
+        14,
+        75
+      );
+      doc.text(
+        `Unit-compatible rows: ${currentReport.calculableRows}/${totalRows} (${fmt(
+          currentReport.calculableShare,
+          1
+        )}%)`,
+        14,
+        82
+      );
+      doc.text(
+        `Rows with at least one A-C GWP value: ${currentReport.rowsWithGwp}/${totalRows} (${fmt(
+          currentReport.gwpRowShare,
+          1
+        )}%)`,
+        14,
+        89
+      );
+      doc.text(
+        `Rows complete for configured core GWP boundary: ${currentReport.rowsWithCompleteCoreGwp}/${totalRows} (${fmt(
+          currentReport.coreGwpCompleteShare,
+          1
+        )}%)`,
+        14,
+        96
+      );
+      doc.text(
+        `A-C GWP (available modules): ${fmt(
+          currentReport.aToC.gwp,
+          1
+        )} kg CO2e`,
+        14,
+        103
+      );
+      doc.text(
+        `A-C GWP intensity (available modules): ${fmt(
+          intensity,
+          2
+        )} kg CO2e/m2`,
+        14,
+        110
+      );
+      doc.text(
+        `Module D: ${fmt(currentReport.moduleD.gwp, 1)} kg CO2e`,
+        14,
+        117
+      );
+      doc.text(`Total cost: $${fmt(currentReport.totalCost, 2)}`, 14, 124);
+
+      doc.setFontSize(8);
+      doc.setTextColor(71, 85, 105);
+      doc.text(
+        "A-C values are sums of available reported/modelled modules only. Missing modules remain N/A. Material warnings identify gaps in the configured core GWP boundary; other N/A modules are visible in the module table.",
+        14,
+        131,
+        { maxWidth: 182 }
+      );
+      doc.setTextColor(15, 23, 42);
 
       autoTable(doc, {
-        startY: 122,
+        startY: 143,
         head: [["Module", "GWP (kg CO2e)", "Acidification", "Smog", "Energy"]],
         body: MODULE_ORDER.map((module) => [
           module,
@@ -1748,35 +3403,80 @@ function LcaEngineComponent() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
       doc.text("Material Inventory", 14, 18);
+
       autoTable(doc, {
         startY: 26,
-        head: [["Input material", "Mapped dataset", "Qty", "A-C GWP", "Warnings"]],
+        head: [
+          [
+            "Input material",
+            "Mapped dataset",
+            "Qty",
+            "Unit status",
+            "A-C GWP*",
+            "Warnings",
+          ],
+        ],
         body: currentReport.lines.map((line) => [
-          line.row.materialName,
-          line.epd?.name || "UNMAPPED",
-          `${fmt(line.row.quantity, 3)} ${line.row.unit}`,
+          pdfSafeText(line.row.materialName),
+          pdfSafeText(line.epd?.name || "UNMAPPED"),
+          pdfSafeText(`${fmt(line.row.quantity, 3)} ${line.row.unit}`),
+          line.epd
+            ? line.declaredQuantity !== null
+              ? "Compatible"
+              : "Failed"
+            : "Unmapped",
           fmt(line.aToC.gwp, 1),
-          line.warnings.join("; "),
+          pdfSafeText(line.warnings.join("; ")),
         ]),
-        styles: { fontSize: 7 },
+        styles: { fontSize: 6.7, cellPadding: 1.8 },
         headStyles: { fillColor: [15, 23, 42] },
+        columnStyles: {
+          0: { cellWidth: 30 },
+          1: { cellWidth: 42 },
+          2: { cellWidth: 21 },
+          3: { cellWidth: 20 },
+          4: { cellWidth: 20 },
+          5: { cellWidth: 49 },
+        },
       });
+
+      const inventoryFinalY = (doc as any).lastAutoTable?.finalY ?? 270;
+      if (inventoryFinalY < 276) {
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(71, 85, 105);
+        doc.text(
+          "* A-C GWP is an available-module sum; review warnings for missing lifecycle stages.",
+          14,
+          Math.min(inventoryFinalY + 6, 285)
+        );
+      }
 
       if (currentReport.warnings.length) {
         doc.addPage();
+        doc.setTextColor(15, 23, 42);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(16);
         doc.text("Data Quality / Calculation Warnings", 14, 18);
+
         autoTable(doc, {
           startY: 26,
           head: [["#", "Warning"]],
-          body: currentReport.warnings.map((warning, index) => [index + 1, warning]),
+          body: currentReport.warnings.map((warning, index) => [
+            index + 1,
+            pdfSafeText(warning),
+          ]),
           styles: { fontSize: 8 },
           headStyles: { fillColor: [180, 83, 9] },
+          columnStyles: { 0: { cellWidth: 10 }, 1: { cellWidth: 172 } },
         });
       }
 
-      doc.save(`LCA_V2_Report_${new Date().toISOString().slice(0, 10)}.pdf`);
+      doc.save(
+        `LCA_V2_Report_${activeView}_${new Date()
+          .toISOString()
+          .slice(0, 10)}.pdf`
+      );
     } finally {
       setIsDownloading(false);
     }
@@ -1800,6 +3500,63 @@ function LcaEngineComponent() {
     <div className="bg-white border border-slate-200 shadow-2xl rounded-xl overflow-hidden">
       <input ref={baselineInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => handleFileUpload(e, "baseline")} />
       <input ref={proposedInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => handleFileUpload(e, "proposed")} />
+
+      {showProjectManager && (
+        <Modal
+          title="Saved LCA projects"
+          onClose={() => setShowProjectManager(false)}
+          maxWidth="max-w-4xl"
+        >
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+            Project contents are stored in Neon, but access is protected by a project key kept in this browser. There is no public global project list. Clearing browser storage can remove your local access key until account-based authentication is added.
+          </div>
+
+          {savedProjects.length ? (
+            <div className="mt-5 space-y-3">
+              {savedProjects.map((ref) => (
+                <div
+                  key={ref.id}
+                  className="rounded-xl border border-slate-200 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
+                >
+                  <div className="min-w-0">
+                    <div className="font-black text-slate-900 truncate">
+                      {ref.name}
+                    </div>
+                    <div className="mt-1 text-xs text-slate-500 font-mono break-all">
+                      {ref.id}
+                    </div>
+                    {ref.updatedAt && (
+                      <div className="mt-1 text-xs text-slate-500">
+                        Last saved: {new Date(ref.updatedAt).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => loadProject(ref)}
+                      disabled={isProjectBusy}
+                      className="px-4 py-2 rounded-lg bg-blue-600 text-white font-bold disabled:opacity-50"
+                    >
+                      Load
+                    </button>
+                    <button
+                      onClick={() => deleteProject(ref)}
+                      disabled={isProjectBusy}
+                      className="px-4 py-2 rounded-lg bg-red-50 text-red-700 border border-red-200 font-bold disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-6 rounded-xl border-2 border-dashed border-slate-300 p-8 text-center text-slate-500">
+              No projects have been saved from this browser yet.
+            </div>
+          )}
+        </Modal>
+      )}
 
       {pendingUpload && (
         <Modal title={`Map ${pendingUpload.type} CSV columns`} onClose={() => setPendingUpload(null)}>
@@ -1949,7 +3706,7 @@ function LcaEngineComponent() {
                       }}
                       className="mt-4 w-full p-3 border-2 border-blue-300 rounded-lg bg-white text-sm"
                     >
-                      <option value="">Select verified EPD...</option>
+                      <option value="">Select EPD/product dataset...</option>
                       {results.map((result, index) => {
                         const value = firstString(result?.id, result?.epd_id, result?.uuid, result?.name) || String(index);
                         return (
@@ -2036,8 +3793,9 @@ function LcaEngineComponent() {
                 </select>
                 <input
                   type="number"
+                  min={0}
                   value={item.qtyDeclared}
-                  onChange={(e) => setAssemblyItems((prev) => prev.map((x, i) => i === index ? { ...x, qtyDeclared: n(e.target.value, 0) } : x))}
+                  onChange={(e) => setAssemblyItems((prev) => prev.map((x, i) => i === index ? { ...x, qtyDeclared: Math.max(0, n(e.target.value, 0)) } : x))}
                   className="p-3 border-2 border-slate-300 rounded-lg"
                 />
                 <button onClick={() => setAssemblyItems((prev) => prev.filter((_, i) => i !== index))} className="text-red-600 font-black">×</button>
@@ -2051,17 +3809,79 @@ function LcaEngineComponent() {
         </Modal>
       )}
 
-      <header className="bg-slate-950 text-white p-4 sm:p-5 flex flex-col xl:flex-row gap-4 xl:items-center justify-between">
-        <div>
-          <h2 className="font-black text-lg">Enterprise LCA Engine V2</h2>
-          <p className="text-xs text-slate-400">{epds.length.toLocaleString()} datasets · {materialMappings.length.toLocaleString()} saved alias mappings</p>
+      <header className="bg-slate-950 text-white p-4 sm:p-5 flex flex-col gap-4">
+        <div className="flex flex-col xl:flex-row gap-4 xl:items-start justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="font-black text-lg">Enterprise LCA Engine V2</h2>
+              <span className="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px] uppercase tracking-wider font-black text-emerald-300">
+                {LCA_APP_VERSION} · Core {LCA_CALC_ENGINE_VERSION}
+              </span>
+            </div>
+
+            <div className="mt-3 flex flex-col sm:flex-row gap-2 sm:items-center max-w-3xl">
+              <input
+                value={projectName}
+                onChange={(e) => {
+                  setProjectName(e.target.value.slice(0, 160));
+                  setProjectStatus("");
+                }}
+                aria-label="Project name"
+                className="w-full sm:max-w-md px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white font-bold outline-none focus:border-blue-400"
+                placeholder="Project name"
+              />
+              <div className="text-[11px] text-slate-400">
+                {projectId ? `Saved project · ${projectId.slice(0, 8)}…` : "Unsaved project"}
+              </div>
+            </div>
+
+            <p className="mt-2 text-xs text-slate-400">
+              {epds.length.toLocaleString()} datasets · {materialMappings.length.toLocaleString()} saved alias mappings
+              {baselineSourceName ? ` · Baseline: ${baselineSourceName}` : ""}
+              {proposedSourceName ? ` · Proposed: ${proposedSourceName}` : ""}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={saveProject}
+              disabled={isProjectBusy || (!baselineRows.length && !proposedRows.length)}
+              className="px-3 py-2 bg-emerald-600 rounded-lg text-sm font-bold disabled:opacity-40"
+            >
+              {isProjectBusy ? "Working..." : projectId ? "Save Project" : "Save New Project"}
+            </button>
+            <button
+              onClick={() => setShowProjectManager(true)}
+              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-bold"
+            >
+              Projects ({savedProjects.length})
+            </button>
+            <button
+              onClick={startNewProject}
+              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-bold"
+            >
+              New
+            </button>
+            <button onClick={() => setShowAssemblyBuilder(true)} className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-bold">+ Assembly</button>
+            <button onClick={() => setShowRevitModal(true)} className="px-3 py-2 bg-indigo-600 rounded-lg text-sm font-bold">BIM Sync</button>
+            <button onClick={() => baselineInputRef.current?.click()} className="px-3 py-2 bg-slate-700 rounded-lg text-sm font-bold">{baselineRows.length ? "Replace Baseline" : "Upload Baseline"}</button>
+            <button onClick={() => proposedInputRef.current?.click()} className="px-3 py-2 bg-blue-600 rounded-lg text-sm font-bold">{proposedRows.length ? "Replace Proposed" : "Upload Proposed"}</button>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => setShowAssemblyBuilder(true)} className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-bold">+ Assembly</button>
-          <button onClick={() => setShowRevitModal(true)} className="px-3 py-2 bg-indigo-600 rounded-lg text-sm font-bold">BIM Sync</button>
-          <button onClick={() => baselineInputRef.current?.click()} className="px-3 py-2 bg-slate-700 rounded-lg text-sm font-bold">{baselineRows.length ? "Replace Baseline" : "Upload Baseline"}</button>
-          <button onClick={() => proposedInputRef.current?.click()} className="px-3 py-2 bg-blue-600 rounded-lg text-sm font-bold">{proposedRows.length ? "Replace Proposed" : "Upload Proposed"}</button>
-        </div>
+
+        {projectStatus && (
+          <div className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-300">
+            {projectStatus}
+          </div>
+        )}
+
+        {baselineRows.length > 0 &&
+          proposedRows.length > 0 &&
+          modelFingerprint(baselineRows) === modelFingerprint(proposedRows) && (
+            <div className="rounded-lg border border-amber-400/50 bg-amber-400/10 px-3 py-2 text-xs font-bold text-amber-200">
+              Baseline and Proposed currently have identical normalized model fingerprints. Check that two different models were loaded before interpreting comparison reductions.
+            </div>
+          )}
       </header>
 
       {isProcessing && (
@@ -2072,7 +3892,7 @@ function LcaEngineComponent() {
         <div className="min-h-[560px] flex items-center justify-center p-6">
           <div className="max-w-4xl w-full text-center">
             <h3 className="text-3xl font-black text-slate-900">Start an auditable LCA</h3>
-            <p className="mt-3 text-slate-500">Upload a model, map quantities to declared units, then resolve unmapped products with verified datasets.</p>
+            <p className="mt-3 text-slate-500">Upload a model, map quantities to declared units, then resolve unmapped products with selected EPD/product datasets.</p>
             <div className="grid md:grid-cols-3 gap-5 mt-10">
               <WorkflowCard title="Single model" text="Upload a proposed design and calculate A-D modules, cost and data-quality warnings." onClick={() => proposedInputRef.current?.click()} />
               <WorkflowCard title="Baseline comparison" text="Upload baseline and proposed models for impact-category reductions." onClick={() => baselineInputRef.current?.click()} />
@@ -2088,8 +3908,33 @@ function LcaEngineComponent() {
             <NumberField label="Annual energy (kWh)" value={annualEnergyKwh} onChange={setAnnualEnergyKwh} />
             <NumberField label="Grid intensity (kg/kWh)" value={gridIntensity} onChange={setGridIntensity} step={0.01} />
             <div className="flex gap-2 items-end">
-              <button onClick={exportCsv} className="flex-1 p-2.5 border border-blue-300 text-blue-700 bg-white rounded-lg font-bold text-sm">CSV</button>
-              <button onClick={exportPdf} disabled={isDownloading} className="flex-1 p-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm">PDF</button>
+              <button
+                onClick={handleExportCsv}
+                disabled={activeView === "comparison" ? !isComparing : !currentReport}
+                title={
+                  activeView === "comparison"
+                    ? "Export baseline-versus-proposed comparison CSV."
+                    : "Export current model CSV."
+                }
+                className="flex-1 p-2.5 border border-blue-300 text-blue-700 bg-white rounded-lg font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {activeView === "comparison" ? "Compare CSV" : "CSV"}
+              </button>
+              <button
+                onClick={handleExportPdf}
+                disabled={
+                  isDownloading ||
+                  (activeView === "comparison" ? !isComparing : !currentReport)
+                }
+                title={
+                  activeView === "comparison"
+                    ? "Download baseline-versus-proposed comparison PDF."
+                    : "Export current model PDF."
+                }
+                className="flex-1 p-2.5 bg-blue-600 text-white rounded-lg font-bold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {activeView === "comparison" ? "Compare PDF" : "PDF"}
+              </button>
             </div>
           </div>
 
@@ -2139,20 +3984,26 @@ function LcaEngineComponent() {
                   <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
                     <h3 className="font-black text-lg text-slate-900">Embodied vs operational carbon</h3>
                     <p className="text-sm text-slate-500 mt-1">B6 uses the project-level annual energy and grid intensity entered above.</p>
-                    <div className="h-[420px] mt-5">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={crossoverData}>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                          <XAxis dataKey="year" />
-                          <YAxis tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
-                          <RechartsTooltip formatter={(v: any) => `${fmt(Number(v), 0)} kg CO₂e`} />
-                          <Legend />
-                          <Line type="monotone" dataKey="Embodied" stroke="#2563eb" strokeWidth={3} />
-                          <Line type="monotone" dataKey="Operational" stroke="#10b981" strokeWidth={3} />
-                          <Line type="monotone" dataKey="Total" stroke="#ef4444" strokeWidth={3} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
+                    {crossoverData.length ? (
+                      <div className="h-[420px] mt-5">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <LineChart data={crossoverData}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="year" />
+                            <YAxis tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
+                            <RechartsTooltip formatter={(v: any) => `${fmt(Number(v), 0)} kg CO₂e`} />
+                            <Legend />
+                            <Line type="monotone" dataKey="Embodied" stroke="#2563eb" strokeWidth={3} />
+                            <Line type="monotone" dataKey="Operational" stroke="#10b981" strokeWidth={3} />
+                            <Line type="monotone" dataKey="Total" stroke="#ef4444" strokeWidth={3} />
+                          </LineChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+                        Embodied-stage GWP is unavailable for the selected model, so this chart is intentionally not drawn as zero. Resolve the unit/data-quality warnings first.
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -2195,27 +4046,64 @@ function LcaEngineComponent() {
                                 </td>
                                 <td className="p-3 text-right">
                                   <div className="flex justify-end items-center gap-2">
-                                    <input type="number" value={line.row.quantity} onChange={(e) => updateRow(realIndex, { quantity: n(e.target.value, 0) })} className="w-24 p-1.5 border rounded text-right font-mono" />
+                                    <input type="number" min={0} value={line.row.quantity} onChange={(e) => updateRow(realIndex, { quantity: Math.max(0, n(e.target.value, 0)) })} className="w-24 p-1.5 border rounded text-right font-mono" />
                                     <span className="text-xs text-slate-500">{line.row.unit}</span>
                                   </div>
                                 </td>
                                 <td className="p-3 text-right">
-                                  <input type="number" value={line.row.distanceKm} onChange={(e) => updateRow(realIndex, { distanceKm: n(e.target.value, 0) })} className="w-20 p-1.5 border rounded text-right font-mono" />
+                                  <input type="number" min={0} value={line.row.distanceKm} onChange={(e) => updateRow(realIndex, { distanceKm: Math.max(0, n(e.target.value, 0)) })} className="w-20 p-1.5 border rounded text-right font-mono" />
                                   <span className="ml-1 text-xs">km</span>
                                 </td>
                                 <td className="p-3 text-right font-mono font-bold">{fmt(line.aToC.gwp, 1)}</td>
                                 <td className="p-3 text-right font-mono text-emerald-700">{fmt(line.moduleD.gwp, 1)}</td>
                                 {tab === "procurement" && (
                                   <td className="p-3 text-right">
-                                    <input type="number" value={line.row.costPerInputUnit || ""} onChange={(e) => updateRow(realIndex, { costPerInputUnit: n(e.target.value, 0) })} className="w-24 p-1.5 border border-indigo-300 rounded text-right font-mono" placeholder="$/unit" />
+                                    <input type="number" min={0} value={line.row.costPerInputUnit || ""} onChange={(e) => updateRow(realIndex, { costPerInputUnit: Math.max(0, n(e.target.value, 0)) })} className="w-24 p-1.5 border border-indigo-300 rounded text-right font-mono" placeholder="$/unit" />
                                   </td>
                                 )}
                                 {tab === "procurement" && <td className="p-3 text-right font-mono font-black text-indigo-700">{fmt(line.carbonPerDollar, 3)}</td>}
                                 <td className="p-3">
-                                  {line.warnings.length ? (
-                                    <span title={line.warnings.join("\n")} className="inline-flex px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs font-black">Warning</span>
-                                  ) : (
-                                    <span className="inline-flex px-2 py-1 rounded bg-emerald-100 text-emerald-800 text-xs font-black">OK</span>
+                                  <div className="flex flex-wrap gap-1">
+                                    <span
+                                      className={`inline-flex px-2 py-1 rounded text-[10px] font-black ${
+                                        line.epd
+                                          ? "bg-emerald-100 text-emerald-800"
+                                          : "bg-red-100 text-red-800"
+                                      }`}
+                                    >
+                                      {line.epd ? "EPD ✓" : "EPD ✕"}
+                                    </span>
+                                    <span
+                                      className={`inline-flex px-2 py-1 rounded text-[10px] font-black ${
+                                        line.epd && line.declaredQuantity !== null
+                                          ? "bg-emerald-100 text-emerald-800"
+                                          : "bg-amber-100 text-amber-800"
+                                      }`}
+                                    >
+                                      {line.epd && line.declaredQuantity !== null
+                                        ? "UNIT ✓"
+                                        : "UNIT !"}
+                                    </span>
+                                    <span
+                                      className={`inline-flex px-2 py-1 rounded text-[10px] font-black ${
+                                        typeof line.aToC.gwp === "number"
+                                          ? "bg-emerald-100 text-emerald-800"
+                                          : "bg-amber-100 text-amber-800"
+                                      }`}
+                                    >
+                                      {typeof line.aToC.gwp === "number"
+                                        ? "GWP ✓"
+                                        : "GWP !"}
+                                    </span>
+                                  </div>
+                                  {line.warnings.length > 0 && (
+                                    <div
+                                      title={line.warnings.join("\n")}
+                                      className="mt-1 text-[10px] font-bold text-amber-700"
+                                    >
+                                      {line.warnings.length} warning
+                                      {line.warnings.length === 1 ? "" : "s"}
+                                    </div>
                                   )}
                                 </td>
                               </tr>
@@ -2243,18 +4131,21 @@ function OverviewPanel({ report, floorAreaM2, phaseChartData, activeView }: { re
   const intensity = floorAreaM2 > 0 && typeof report.aToC.gwp === "number" ? report.aToC.gwp / floorAreaM2 : null;
   return (
     <div className="space-y-6">
-      <div className="grid sm:grid-cols-2 xl:grid-cols-5 gap-4">
-        <Kpi label="A-C GWP" value={`${fmt(report.aToC.gwp, 0)} kg CO₂e`} />
-        <Kpi label="GWP intensity" value={`${fmt(intensity, 2)} kg CO₂e/m²`} />
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-8 gap-4">
+        <Kpi label="A-C GWP (available)" value={`${fmt(report.aToC.gwp, 0)} kg CO₂e`} />
+        <Kpi label="GWP intensity (available)" value={`${fmt(intensity, 2)} kg CO₂e/m²`} />
         <Kpi label="Module D" value={`${fmt(report.moduleD.gwp, 0)} kg CO₂e`} />
-        <Kpi label="Mapped quantity" value={`${fmt(report.mappedQuantityShare, 1)}%`} />
+        <Kpi label="EPD matched" value={`${report.epdMatchedRows}/${report.lines.length}`} />
+        <Kpi label="Unit compatible" value={`${report.calculableRows}/${report.lines.length}`} />
+        <Kpi label="Rows with any A-C GWP" value={`${report.rowsWithGwp}/${report.lines.length}`} />
+        <Kpi label="Core GWP complete" value={`${report.rowsWithCompleteCoreGwp}/${report.lines.length}`} />
         <Kpi label="Project cost" value={`$${fmt(report.totalCost, 2)}`} />
       </div>
 
       <div className="grid xl:grid-cols-[2fr_1fr] gap-6">
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <h3 className="font-black text-slate-900">Lifecycle GWP by stage</h3>
-          <p className="text-xs text-slate-500 mt-1">Module D is intentionally excluded from the stacked A-C chart.</p>
+          <p className="text-xs text-slate-500 mt-1">Module D is intentionally excluded. Missing stages remain unavailable and are not zero-filled.</p>
           <div className="h-[380px] mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={phaseChartData.filter((row) => row.name.toLowerCase() === activeView || activeView === "comparison")}>
@@ -2295,13 +4186,36 @@ function ComparisonPanel({ baseline, proposed, metrics, leedIndicative, floorAre
   return (
     <div className="space-y-6">
       <div className="grid md:grid-cols-3 gap-4">
-        <Kpi label="Baseline A-C GWP intensity" value={`${fmt(baselineIntensity, 2)} kg CO₂e/m²`} />
-        <Kpi label="Proposed A-C GWP intensity" value={`${fmt(proposedIntensity, 2)} kg CO₂e/m²`} />
-        <Kpi label="GWP reduction" value={`${fmt(reductionPct(baseline.aToC.gwp, proposed.aToC.gwp), 2)}%`} />
+        <Kpi label="Baseline A-C intensity (available)" value={`${fmt(baselineIntensity, 2)} kg CO₂e/m²`} />
+        <Kpi label="Proposed A-C intensity (available)" value={`${fmt(proposedIntensity, 2)} kg CO₂e/m²`} />
+        <Kpi label="GWP reduction (available scope)" value={fmtPercent(reductionPct(baseline.aToC.gwp, proposed.aToC.gwp), 2)} />
       </div>
 
+      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+        Comparison totals use the same available-module calculation engine as the individual models. Missing lifecycle modules remain N/A rather than being converted to zero.
+      </div>
+
+      {(baseline.rowsWithGwp < baseline.lines.length || proposed.rowsWithGwp < proposed.lines.length) && (
+        <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-5 text-amber-950">
+          <h3 className="font-black">Incomplete material-level GWP coverage</h3>
+          <p className="mt-1 text-sm leading-6">
+            Baseline has usable A-C GWP for {baseline.rowsWithGwp}/{baseline.lines.length} rows ({fmt(baseline.gwpRowShare, 1)}%); Proposed has {proposed.rowsWithGwp}/{proposed.lines.length} rows ({fmt(proposed.gwpRowShare, 1)}%). The displayed reduction applies only to the available scope and must not be interpreted as a complete whole-building result.
+          </p>
+        </div>
+      )}
+
+      {(baseline.rowsWithCompleteCoreGwp < baseline.lines.length ||
+        proposed.rowsWithCompleteCoreGwp < proposed.lines.length) && (
+        <div className="rounded-xl border-2 border-amber-300 bg-amber-50 p-5 text-amber-950">
+          <h3 className="font-black">Incomplete configured core lifecycle boundary</h3>
+          <p className="mt-1 text-sm leading-6">
+            Every row may contain some usable GWP while still missing one or more configured core modules. Baseline is complete for {baseline.rowsWithCompleteCoreGwp}/{baseline.lines.length} rows ({fmt(baseline.coreGwpCompleteShare, 1)}%); Proposed is complete for {proposed.rowsWithCompleteCoreGwp}/{proposed.lines.length} rows ({fmt(proposed.coreGwpCompleteShare, 1)}%). The comparison remains an available-scope decision-support result, but the indicative formal reduction gate remains unavailable.
+          </p>
+        </div>
+      )}
+
       <div className={`border-2 rounded-xl p-5 ${leedIndicative?.complete && leedIndicative?.passes ? "bg-emerald-50 border-emerald-300" : "bg-amber-50 border-amber-300"}`}>
-        <h3 className="font-black text-slate-900">Indicative LEED v4 logic check</h3>
+        <h3 className="font-black text-slate-900">{leedIndicative?.complete ? "Indicative LEED v4 logic check" : "Indicative LEED-style assessment unavailable"}</h3>
         <p className="text-sm text-slate-700 mt-1">{leedIndicative?.reason || "Comparison unavailable."}</p>
         <p className="text-xs text-slate-500 mt-2">This is intentionally labeled indicative until the calculation core, datasets, functional equivalence and reporting workflow are independently validated.</p>
       </div>
@@ -2310,15 +4224,15 @@ function ComparisonPanel({ baseline, proposed, metrics, leedIndicative, floorAre
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-sm">
             <thead className="bg-slate-100 text-xs uppercase text-slate-600">
-              <tr><th className="p-3 text-left">Impact category</th><th className="p-3 text-right">Baseline</th><th className="p-3 text-right">Proposed</th><th className="p-3 text-right">Reduction</th></tr>
+              <tr><th className="p-3 text-left">Impact category (available modules)</th><th className="p-3 text-right">Baseline</th><th className="p-3 text-right">Proposed</th><th className="p-3 text-right">Reduction</th></tr>
             </thead>
             <tbody>
               {metrics.map((metric: any) => (
                 <tr key={metric.metric} className="border-t border-slate-100">
                   <td className="p-3 font-black">{metric.label}</td>
-                  <td className="p-3 text-right font-mono">{fmt(metric.baseline, 3)} {metric.unit}</td>
-                  <td className="p-3 text-right font-mono">{fmt(metric.proposed, 3)} {metric.unit}</td>
-                  <td className="p-3 text-right font-mono font-black">{fmt(metric.reduction, 2)}%</td>
+                  <td className="p-3 text-right font-mono">{fmtMetricValue(metric.metric, metric.baseline)} {metric.unit}</td>
+                  <td className="p-3 text-right font-mono">{fmtMetricValue(metric.metric, metric.proposed)} {metric.unit}</td>
+                  <td className="p-3 text-right font-mono font-black">{fmtPercent(metric.reduction, 2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -2346,27 +4260,125 @@ function ComparisonPanel({ baseline, proposed, metrics, leedIndicative, floorAre
   );
 }
 
-function QualityPanel({ report, epds, mappings }: { report: ProjectReport; epds: EpdRecord[]; mappings: MaterialMapping[] }) {
+function QualityPanel({
+  report,
+  epds,
+  mappings,
+}: {
+  report: ProjectReport;
+  epds: EpdRecord[];
+  mappings: MaterialMapping[];
+}) {
   const ec3Count = epds.filter((epd) => epd.source === "EC3").length;
-  const completeGwp = report.lines.filter((line) => typeof line.aToC.gwp === "number").length;
+
   return (
     <div className="space-y-6">
-      <div className="grid md:grid-cols-4 gap-4">
-        <Kpi label="Mapped rows" value={`${report.mappedRows}/${report.lines.length}`} />
-        <Kpi label="Rows with A-C GWP" value={`${completeGwp}/${report.lines.length}`} />
-        <Kpi label="EC3 datasets cached" value={ec3Count.toLocaleString()} />
+      <div className="grid sm:grid-cols-2 xl:grid-cols-6 gap-4">
+        <Kpi
+          label="EPD matched rows"
+          value={`${report.epdMatchedRows}/${report.lines.length}`}
+        />
+        <Kpi
+          label="Unit-compatible rows"
+          value={`${report.calculableRows}/${report.lines.length}`}
+        />
+        <Kpi
+          label="Rows with A-C GWP"
+          value={`${report.rowsWithGwp}/${report.lines.length}`}
+        />
+        <Kpi
+          label="GWP row coverage"
+          value={`${fmt(report.gwpRowShare, 1)}%`}
+        />
+        <Kpi
+          label="EC3 datasets cached"
+          value={ec3Count.toLocaleString()}
+        />
         <Kpi label="Alias mappings" value={mappings.length.toLocaleString()} />
       </div>
+
+      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <h3 className="font-black text-slate-900">Row calculation status</h3>
+        <p className="mt-1 text-xs text-slate-500">
+          EPD matching, unit compatibility and impact-data availability are
+          separate checks. A matched row is not automatically calculable.
+        </p>
+
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[760px] text-sm">
+            <thead className="bg-slate-100 text-xs uppercase text-slate-600">
+              <tr>
+                <th className="p-3 text-left">Material</th>
+                <th className="p-3 text-left">EPD match</th>
+                <th className="p-3 text-left">Unit conversion</th>
+                <th className="p-3 text-left">A-C GWP data</th>
+              </tr>
+            </thead>
+            <tbody>
+              {report.lines.map((line) => (
+                <tr key={line.row.id} className="border-t border-slate-100">
+                  <td className="p-3 font-bold text-slate-900">
+                    {line.row.materialName}
+                  </td>
+                  <td className="p-3">
+                    {line.epd ? (
+                      <span className="inline-flex rounded bg-emerald-100 px-2 py-1 text-xs font-black text-emerald-800">
+                        Matched
+                      </span>
+                    ) : (
+                      <span className="inline-flex rounded bg-red-100 px-2 py-1 text-xs font-black text-red-800">
+                        Unmapped
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {line.epd && line.declaredQuantity !== null ? (
+                      <span className="inline-flex rounded bg-emerald-100 px-2 py-1 text-xs font-black text-emerald-800">
+                        Compatible
+                      </span>
+                    ) : line.epd ? (
+                      <span className="inline-flex rounded bg-amber-100 px-2 py-1 text-xs font-black text-amber-800">
+                        Needs review
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-400">Not attempted</span>
+                    )}
+                  </td>
+                  <td className="p-3">
+                    {typeof line.aToC.gwp === "number" ? (
+                      <span className="inline-flex rounded bg-emerald-100 px-2 py-1 text-xs font-black text-emerald-800">
+                        Available
+                      </span>
+                    ) : (
+                      <span className="inline-flex rounded bg-amber-100 px-2 py-1 text-xs font-black text-amber-800">
+                        Unavailable
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
         <h3 className="font-black text-slate-900">Warnings</h3>
         {report.warnings.length ? (
           <div className="mt-4 space-y-2 max-h-[450px] overflow-y-auto">
             {report.warnings.map((warning, index) => (
-              <div key={`${warning}-${index}`} className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">{warning}</div>
+              <div
+                key={`${warning}-${index}`}
+                className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900"
+              >
+                {warning}
+              </div>
             ))}
           </div>
         ) : (
-          <p className="mt-3 text-emerald-700 font-bold">No row-level calculation warnings.</p>
+          <p className="mt-3 text-emerald-700 font-bold">
+            No row-level calculation warnings.
+          </p>
         )}
       </div>
     </div>
@@ -2397,11 +4409,30 @@ function WorkflowCard({ title, text, onClick }: { title: string; text: string; o
   );
 }
 
-function NumberField({ label, value, onChange, step = 1 }: { label: string; value: number; onChange: (value: number) => void; step?: number }) {
+function NumberField({
+  label,
+  value,
+  onChange,
+  step = 1,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  step?: number;
+}) {
   return (
     <label>
-      <span className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">{label}</span>
-      <input type="number" step={step} value={value} onChange={(e) => onChange(n(e.target.value, 0))} className="w-full p-2.5 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-900" />
+      <span className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+        {label}
+      </span>
+      <input
+        type="number"
+        min={0}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(Math.max(0, n(e.target.value, 0)))}
+        className="w-full p-2.5 bg-white border-2 border-slate-300 rounded-lg font-mono font-bold text-slate-900"
+      />
     </label>
   );
 }
