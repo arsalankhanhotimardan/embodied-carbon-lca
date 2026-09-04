@@ -3985,7 +3985,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-      "bytes": 107784,
+      "bytes": 107891,
       "imports": [
         {
           "path": "path",
@@ -5855,7 +5855,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/[root-of-the-server]__0q80n6-._.js": {
-      "bytes": 13752,
+      "bytes": 13843,
       "imports": [
         {
           "path": "crypto",
@@ -6125,6 +6125,11 @@
       ],
       "format": "cjs"
     },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js": {
+      "bytes": 16140,
+      "imports": [],
+      "format": "cjs"
+    },
     ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_actual-data_page_actions_1qzdti_.js": {
       "bytes": 139,
       "imports": [],
@@ -6136,17 +6141,12 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_actual-data_page_tsx_1ec20dm._.js": {
-      "bytes": 18046,
+      "bytes": 21712,
       "imports": [],
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_layout_tsx_0_yloxs._.js": {
       "bytes": 1165,
-      "imports": [],
-      "format": "cjs"
-    },
-    ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_00z2epx._.js": {
-      "bytes": 6483,
       "imports": [],
       "format": "cjs"
     },
@@ -6172,11 +6172,6 @@
       ],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/chunks/ssr/_1vgovfg._.js": {
-      "bytes": 19120,
-      "imports": [],
-      "format": "cjs"
-    },
     ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_bulk_page_actions_197kngd.js": {
       "bytes": 132,
       "imports": [],
@@ -6184,6 +6179,11 @@
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_layout_tsx_1nrcx8y._.js": {
       "bytes": 503,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_page_tsx_1lf9osu._.js": {
+      "bytes": 13693,
       "imports": [],
       "format": "cjs"
     },
@@ -6198,11 +6198,6 @@
       ],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/chunks/ssr/_1q22zj5._.js": {
-      "bytes": 17593,
-      "imports": [],
-      "format": "cjs"
-    },
     ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_electricity_page_actions_1krcda9.js": {
       "bytes": 139,
       "imports": [],
@@ -6210,6 +6205,11 @@
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_layout_tsx_02cp6eb._.js": {
       "bytes": 543,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_page_tsx_1j163w4._.js": {
+      "bytes": 12395,
       "imports": [],
       "format": "cjs"
     },
@@ -6240,18 +6240,18 @@
       ],
       "format": "cjs"
     },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_0fnie-o._.js": {
+      "bytes": 10487,
+      "imports": [],
+      "format": "cjs"
+    },
     ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_page_actions_0f9ruch.js": {
       "bytes": 127,
       "imports": [],
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_page_tsx_20u_jxs._.js": {
-      "bytes": 70256,
-      "imports": [],
-      "format": "cjs"
-    },
-    ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_11l_ji6._.js": {
-      "bytes": 830,
+      "bytes": 72654,
       "imports": [],
       "format": "cjs"
     },
@@ -6471,18 +6471,18 @@
       ],
       "format": "cjs"
     },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_026lpia._.js": {
+      "bytes": 10487,
+      "imports": [],
+      "format": "cjs"
+    },
     ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_page_actions_0hhsz1j.js": {
       "bytes": 111,
       "imports": [],
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/app_page_tsx_0pxmutw._.js": {
-      "bytes": 96182,
-      "imports": [],
-      "format": "cjs"
-    },
-    ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_1w4i6ht._.js": {
-      "bytes": 830,
+      "bytes": 98955,
       "imports": [],
       "format": "cjs"
     },
@@ -6704,7 +6704,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js": {
-      "bytes": 61485,
+      "bytes": 61559,
       "imports": [
         {
           "path": "worker_threads",
@@ -7092,6 +7092,11 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_actual-data_page_actions_1qzdti_.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_actual-data_page_actions_1qzdti_.js"
@@ -7112,11 +7117,6 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_layout_tsx_0_yloxs._.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_00z2epx._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/node_modules_00z2epx._.js"
-        },
-        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1-tlzjg._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1-tlzjg._.js"
@@ -7125,11 +7125,6 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__14m33z9._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__14m33z9._.js"
-        },
-        {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1vgovfg._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1vgovfg._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_bulk_page_actions_197kngd.js",
@@ -7142,14 +7137,14 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_layout_tsx_1nrcx8y._.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_page_tsx_1lf9osu._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_page_tsx_1lf9osu._.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0jbruv4._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0jbruv4._.js"
-        },
-        {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1q22zj5._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1q22zj5._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_electricity_page_actions_1krcda9.js",
@@ -7160,6 +7155,11 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_layout_tsx_02cp6eb._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_layout_tsx_02cp6eb._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_page_tsx_1j163w4._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_page_tsx_1j163w4._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/00jf_dompurify_dist_purify_es_0izvny_.js",
@@ -7177,6 +7177,11 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1-c4-3a._.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_0fnie-o._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_0fnie-o._.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_page_actions_0f9ruch.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_page_actions_0f9ruch.js"
@@ -7185,11 +7190,6 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_page_tsx_20u_jxs._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_page_tsx_20u_jxs._.js"
-        },
-        {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_11l_ji6._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/node_modules_11l_ji6._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_1xkztv5._.js",
@@ -7302,6 +7302,11 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0pum7ci._.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_026lpia._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_026lpia._.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_page_actions_0hhsz1j.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_page_actions_0hhsz1j.js"
@@ -7310,11 +7315,6 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_page_tsx_0pxmutw._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_page_tsx_0pxmutw._.js"
-        },
-        {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_1w4i6ht._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/node_modules_1w4i6ht._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1fm5zcx._.js",
@@ -7390,7 +7390,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/[turbopack]_runtime.js": {
-      "bytes": 61475,
+      "bytes": 61549,
       "imports": [
         {
           "path": "worker_threads",
@@ -7778,6 +7778,11 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_actual-data_page_actions_1qzdti_.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_actual-data_page_actions_1qzdti_.js"
@@ -7798,11 +7803,6 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_layout_tsx_0_yloxs._.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_00z2epx._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/node_modules_00z2epx._.js"
-        },
-        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1-tlzjg._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1-tlzjg._.js"
@@ -7811,11 +7811,6 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__14m33z9._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__14m33z9._.js"
-        },
-        {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1vgovfg._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1vgovfg._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_bulk_page_actions_197kngd.js",
@@ -7828,14 +7823,14 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_layout_tsx_1nrcx8y._.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_page_tsx_1lf9osu._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_page_tsx_1lf9osu._.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0jbruv4._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0jbruv4._.js"
-        },
-        {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1q22zj5._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1q22zj5._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_electricity_page_actions_1krcda9.js",
@@ -7846,6 +7841,11 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_layout_tsx_02cp6eb._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_layout_tsx_02cp6eb._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_page_tsx_1j163w4._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_page_tsx_1j163w4._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/00jf_dompurify_dist_purify_es_0izvny_.js",
@@ -7863,6 +7863,11 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1-c4-3a._.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_0fnie-o._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_0fnie-o._.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_page_actions_0f9ruch.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_page_actions_0f9ruch.js"
@@ -7871,11 +7876,6 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_page_tsx_20u_jxs._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_page_tsx_20u_jxs._.js"
-        },
-        {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_11l_ji6._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/node_modules_11l_ji6._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_1xkztv5._.js",
@@ -7988,6 +7988,11 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0pum7ci._.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_026lpia._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_026lpia._.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_page_actions_0hhsz1j.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_page_actions_0hhsz1j.js"
@@ -7996,11 +8001,6 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_page_tsx_0pxmutw._.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_page_tsx_0pxmutw._.js"
-        },
-        {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_1w4i6ht._.js",
-          "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/node_modules_1w4i6ht._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1fm5zcx._.js",
@@ -11690,7 +11690,7 @@
           "bytesInOutput": 459
         },
         ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-          "bytesInOutput": 81486
+          "bytesInOutput": 81593
         },
         ".open-next/cloudflare-templates/shims/throw.js": {
           "bytesInOutput": 215
@@ -11939,7 +11939,7 @@
           "bytesInOutput": 276
         },
         ".open-next/server-functions/default/.next/server/chunks/[root-of-the-server]__0q80n6-._.js": {
-          "bytesInOutput": 13886
+          "bytesInOutput": 13977
         },
         ".open-next/server-functions/default/.next/server/chunks/_next-internal_server_app_api_lca_projects_route_actions_16mp7s6.js": {
           "bytesInOutput": 281
@@ -11974,6 +11974,9 @@
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js": {
           "bytesInOutput": 4560
         },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js": {
+          "bytesInOutput": 16731
+        },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_actual-data_page_actions_1qzdti_.js": {
           "bytesInOutput": 304
         },
@@ -11981,13 +11984,10 @@
           "bytesInOutput": 681
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_actual-data_page_tsx_1ec20dm._.js": {
-          "bytesInOutput": 18629
+          "bytesInOutput": 22387
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_layout_tsx_0_yloxs._.js": {
           "bytesInOutput": 1298
-        },
-        ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_00z2epx._.js": {
-          "bytesInOutput": 6924
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1-tlzjg._.js": {
           "bytesInOutput": 21837
@@ -11995,26 +11995,26 @@
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__14m33z9._.js": {
           "bytesInOutput": 4511
         },
-        ".open-next/server-functions/default/.next/server/chunks/ssr/_1vgovfg._.js": {
-          "bytesInOutput": 19818
-        },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_bulk_page_actions_197kngd.js": {
           "bytesInOutput": 291
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_layout_tsx_1nrcx8y._.js": {
           "bytesInOutput": 641
         },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_bulk_page_tsx_1lf9osu._.js": {
+          "bytesInOutput": 14116
+        },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0jbruv4._.js": {
           "bytesInOutput": 4560
-        },
-        ".open-next/server-functions/default/.next/server/chunks/ssr/_1q22zj5._.js": {
-          "bytesInOutput": 18237
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_electricity_page_actions_1krcda9.js": {
           "bytesInOutput": 305
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_layout_tsx_02cp6eb._.js": {
           "bytesInOutput": 688
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_electricity_page_tsx_1j163w4._.js": {
+          "bytesInOutput": 12780
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/00jf_dompurify_dist_purify_es_0izvny_.js": {
           "bytesInOutput": 22887
@@ -12025,14 +12025,14 @@
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1-c4-3a._.js": {
           "bytesInOutput": 881008
         },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_0fnie-o._.js": {
+          "bytesInOutput": 10765
+        },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_page_actions_0f9ruch.js": {
           "bytesInOutput": 281
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/app_cbam-calculator_page_tsx_20u_jxs._.js": {
-          "bytesInOutput": 71431
-        },
-        ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_11l_ji6._.js": {
-          "bytesInOutput": 958
+          "bytesInOutput": 73885
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_1xkztv5._.js": {
           "bytesInOutput": 169346
@@ -12100,14 +12100,14 @@
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0pum7ci._.js": {
           "bytesInOutput": 881008
         },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_026lpia._.js": {
+          "bytesInOutput": 10763
+        },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_page_actions_0hhsz1j.js": {
           "bytesInOutput": 249
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/app_page_tsx_0pxmutw._.js": {
-          "bytesInOutput": 99459
-        },
-        ".open-next/server-functions/default/.next/server/chunks/ssr/node_modules_1w4i6ht._.js": {
-          "bytesInOutput": 958
+          "bytesInOutput": 102341
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1fm5zcx._.js": {
           "bytesInOutput": 6921
@@ -12149,10 +12149,10 @@
           "bytesInOutput": 275
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js": {
-          "bytesInOutput": 30370
+          "bytesInOutput": 30440
         },
         ".open-next/server-functions/default/.next/server/chunks/[turbopack]_runtime.js": {
-          "bytesInOutput": 30357
+          "bytesInOutput": 30427
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/reference/activate/route.js": {
           "bytesInOutput": 579
@@ -12440,7 +12440,7 @@
           "bytesInOutput": 74725
         }
       },
-      "bytes": 6780850
+      "bytes": 6808542
     }
   }
 }

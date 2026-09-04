@@ -1,13 +1,14 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
+
+export const dynamic = "force-static";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
-      userAgent: '*',
-      allow: '/',
-      // Prevent Google from trying to index your raw JSON backend routes
-      disallow: ['/api/', '/api/epd', '/api/ec3', '/api/webhook/revit'], 
+      userAgent: "*",
+      allow: "/",
+      disallow: ["/api/"],
     },
-    sitemap: 'https://greenengineeringtools.com/sitemap.xml',
+    sitemap: "https://greenengineeringtools.com/sitemap.xml",
   };
 }
