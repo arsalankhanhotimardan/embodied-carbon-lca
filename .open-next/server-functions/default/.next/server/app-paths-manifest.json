@@ -18,6 +18,8 @@
   "/api/ec3/route": "app/api/ec3/route.js",
   "/api/epd/route": "app/api/epd/route.js",
   "/api/health/lca/route": "app/api/health/lca/route.js",
+  "/api/lca/projects/[id]/route": "app/api/lca/projects/[id]/route.js",
+  "/api/lca/projects/route": "app/api/lca/projects/route.js",
   "/api/material-mappings/route": "app/api/material-mappings/route.js",
   "/api/webhook/revit/route": "app/api/webhook/revit/route.js",
   "/bim-embodied-carbon/page": "app/bim-embodied-carbon/page.js",

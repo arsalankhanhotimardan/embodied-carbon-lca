@@ -21,7 +21,16 @@
     "afterFiles": [],
     "fallback": []
   },
-  "dynamicRoutes": [],
+  "dynamicRoutes": [
+    {
+      "page": "/api/lca/projects/[id]",
+      "regex": "^/api/lca/projects/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/lca/projects/(?<nxtPid>[^/]+?)(?:/)?$"
+    }
+  ],
   "staticRoutes": [
     {
       "page": "/",
@@ -142,6 +151,12 @@
       "regex": "^/api/health/lca(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/health/lca(?:/)?$"
+    },
+    {
+      "page": "/api/lca/projects",
+      "regex": "^/api/lca/projects(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/lca/projects(?:/)?$"
     },
     {
       "page": "/api/material-mappings",

@@ -18,6 +18,8 @@
   "/api/ec3/route": "/api/ec3",
   "/api/epd/route": "/api/epd",
   "/api/health/lca/route": "/api/health/lca",
+  "/api/lca/projects/[id]/route": "/api/lca/projects/[id]",
+  "/api/lca/projects/route": "/api/lca/projects",
   "/api/material-mappings/route": "/api/material-mappings",
   "/api/webhook/revit/route": "/api/webhook/revit",
   "/bim-embodied-carbon/page": "/bim-embodied-carbon",

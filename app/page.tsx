@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import AnonymousWorkspacePanel from "@/components/AnonymousWorkspacePanel";
 import {
   Bar,
   BarChart,
@@ -257,7 +258,7 @@ const TRANSPORT_GWP_KG_PER_TKM: Record<TransportMode, number> = {
 const EC3_PERSISTENCE_ALLOWED =
   process.env.NEXT_PUBLIC_EC3_PERSISTENCE_ALLOWED === "true";
 
-const LCA_APP_VERSION = "LCA-V2.6";
+const LCA_APP_VERSION = "LCA-V2.7";
 const LCA_CALC_ENGINE_VERSION = "LCA-V2.5";
 const PROJECT_INDEX_KEY = "lca_v2_6_saved_projects";
 
@@ -1585,9 +1586,9 @@ export default function GreenEngineeringSaaS() {
       <section className="bg-slate-950 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
           <div className="inline-flex px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-black tracking-widest uppercase">
-            Free embodied carbon & whole-building LCA calculator
+            Free embodied carbon & whole-building LCA calculator · No signup required
           </div>
-          <h1 className="text-4xl sm:text-6xl font-black mt-6 tracking-tight">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black mt-6 tracking-tight break-words">
             Embodied Carbon Calculator for <span className="text-emerald-400">Construction Materials</span>
           </h1>
           <p className="max-w-4xl mx-auto mt-5 text-slate-300 text-base sm:text-xl leading-relaxed">
@@ -1606,7 +1607,7 @@ export default function GreenEngineeringSaaS() {
         </div>
       </section>
 
-      <section className="max-w-[1500px] mx-auto px-2 sm:px-6 py-8 sm:py-12">
+      <section className="max-w-[1500px] mx-auto px-0 sm:px-6 py-6 sm:py-12 min-w-0">
         <LcaEngineComponent />
       </section>
 
@@ -2364,6 +2365,125 @@ function LcaEngineComponent() {
     setTab("overview");
     setPage(0);
     setProjectStatus("New unsaved project.");
+  };
+
+  const anonymousWorkspaceSnapshot = useMemo(
+    () => ({
+      workspaceVersion: "Workspace-V2.7",
+      appVersion: LCA_APP_VERSION,
+      calculationEngineVersion: LCA_CALC_ENGINE_VERSION,
+      projectName,
+      projectId,
+      projectToken,
+      buildingLife,
+      floorAreaM2,
+      annualEnergyKwh,
+      gridIntensity,
+      baselineRows,
+      proposedRows,
+      baselineSourceName,
+      proposedSourceName,
+      activeView,
+      tab,
+      savedAt: new Date().toISOString(),
+    }),
+    [
+      projectName,
+      projectId,
+      projectToken,
+      buildingLife,
+      floorAreaM2,
+      annualEnergyKwh,
+      gridIntensity,
+      baselineRows,
+      proposedRows,
+      baselineSourceName,
+      proposedSourceName,
+      activeView,
+      tab,
+    ]
+  );
+
+  const restoreAnonymousWorkspace = (raw: any) => {
+    if (!raw || typeof raw !== "object") {
+      setProjectStatus("Anonymous workspace backup is invalid.");
+      return;
+    }
+
+    const baseline = Array.isArray(raw.baselineRows) ? raw.baselineRows : [];
+    const proposed = Array.isArray(raw.proposedRows) ? raw.proposedRows : [];
+
+    setProjectName(
+      typeof raw.projectName === "string" && raw.projectName.trim()
+        ? raw.projectName.slice(0, 160)
+        : "Untitled LCA Project"
+    );
+    setBuildingLife(Math.max(0, n(raw.buildingLife, 60)));
+    setFloorAreaM2(Math.max(0, n(raw.floorAreaM2, 10000)));
+    setAnnualEnergyKwh(Math.max(0, n(raw.annualEnergyKwh, 0)));
+    setGridIntensity(Math.max(0, n(raw.gridIntensity, 0.38)));
+    setBaselineRows(baseline);
+    setProposedRows(proposed);
+    setBaselineSourceName(
+      typeof raw.baselineSourceName === "string" ? raw.baselineSourceName : ""
+    );
+    setProposedSourceName(
+      typeof raw.proposedSourceName === "string" ? raw.proposedSourceName : ""
+    );
+
+    const restoredView: ActiveView = ["baseline", "proposed", "comparison"].includes(
+      raw.activeView
+    )
+      ? raw.activeView
+      : baseline.length && proposed.length
+      ? "comparison"
+      : proposed.length
+      ? "proposed"
+      : "baseline";
+    const restoredTab: DashboardTab = [
+      "overview",
+      "materials",
+      "use",
+      "procurement",
+      "quality",
+    ].includes(raw.tab)
+      ? raw.tab
+      : "overview";
+
+    setActiveView(restoredView);
+    setTab(restoredTab);
+    setPage(0);
+
+    const restoredId = typeof raw.projectId === "string" ? raw.projectId : "";
+    const restoredToken =
+      typeof raw.projectToken === "string" ? raw.projectToken : "";
+
+    if (restoredId && restoredToken) {
+      setProjectId(restoredId);
+      setProjectToken(restoredToken);
+      rememberProjectRef({
+        id: restoredId,
+        name:
+          typeof raw.projectName === "string" && raw.projectName.trim()
+            ? raw.projectName
+            : "Imported LCA project",
+        editToken: restoredToken,
+        updatedAt: new Date().toISOString(),
+      });
+    } else {
+      setProjectId(null);
+      setProjectToken(null);
+    }
+
+    const missingEpdRefs = [...baseline, ...proposed].filter(
+      (row: BomRow) => row?.epdId && !epdById.has(row.epdId)
+    ).length;
+
+    setProjectStatus(
+      missingEpdRefs > 0
+        ? `Anonymous workspace restored. ${missingEpdRefs} row(s) reference EPDs not currently available; review mapping before formal reporting.`
+        : "Anonymous workspace restored."
+    );
   };
 
   const searchEc3 = async (alias: string, query?: string) => {
@@ -3497,7 +3617,7 @@ function LcaEngineComponent() {
   }
 
   return (
-    <div className="bg-white border border-slate-200 shadow-2xl rounded-xl overflow-hidden">
+    <div className="min-w-0 overflow-hidden border-y border-slate-200 bg-white shadow-2xl sm:rounded-xl sm:border">
       <input ref={baselineInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => handleFileUpload(e, "baseline")} />
       <input ref={proposedInputRef} type="file" accept=".csv" className="hidden" onChange={(e) => handleFileUpload(e, "proposed")} />
 
@@ -3508,7 +3628,7 @@ function LcaEngineComponent() {
           maxWidth="max-w-4xl"
         >
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
-            Project contents are stored in Neon, but access is protected by a project key kept in this browser. There is no public global project list. Clearing browser storage can remove your local access key until account-based authentication is added.
+            Project contents can be stored in Neon without an account. Access is protected by a private project key kept in this browser. There is no public global project list. Download an Anonymous Workspace JSON backup if you want recovery on another device or after clearing browser storage.
           </div>
 
           {savedProjects.length ? (
@@ -3531,7 +3651,7 @@ function LcaEngineComponent() {
                       </div>
                     )}
                   </div>
-                  <div className="flex gap-2 shrink-0">
+                  <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0">
                     <button
                       onClick={() => loadProject(ref)}
                       disabled={isProjectBusy}
@@ -3782,7 +3902,7 @@ function LcaEngineComponent() {
           </div>
           <div className="mt-5 space-y-3">
             {assemblyItems.map((item, index) => (
-              <div key={index} className="grid grid-cols-[1fr_130px_40px] gap-3 items-center">
+              <div key={index} className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_130px_40px] sm:items-center">
                 <select
                   value={item.epdId}
                   onChange={(e) => setAssemblyItems((prev) => prev.map((x, i) => i === index ? { ...x, epdId: e.target.value } : x))}
@@ -3842,30 +3962,30 @@ function LcaEngineComponent() {
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap xl:justify-end">
             <button
               onClick={saveProject}
               disabled={isProjectBusy || (!baselineRows.length && !proposedRows.length)}
-              className="px-3 py-2 bg-emerald-600 rounded-lg text-sm font-bold disabled:opacity-40"
+              className="w-full px-3 py-2.5 bg-emerald-600 rounded-lg text-xs sm:w-auto sm:text-sm font-bold disabled:opacity-40"
             >
               {isProjectBusy ? "Working..." : projectId ? "Save Project" : "Save New Project"}
             </button>
             <button
               onClick={() => setShowProjectManager(true)}
-              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-bold"
+              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-xs sm:w-auto sm:text-sm font-bold"
             >
               Projects ({savedProjects.length})
             </button>
             <button
               onClick={startNewProject}
-              className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-bold"
+              className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-xs sm:w-auto sm:text-sm font-bold"
             >
               New
             </button>
-            <button onClick={() => setShowAssemblyBuilder(true)} className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm font-bold">+ Assembly</button>
-            <button onClick={() => setShowRevitModal(true)} className="px-3 py-2 bg-indigo-600 rounded-lg text-sm font-bold">BIM Sync</button>
-            <button onClick={() => baselineInputRef.current?.click()} className="px-3 py-2 bg-slate-700 rounded-lg text-sm font-bold">{baselineRows.length ? "Replace Baseline" : "Upload Baseline"}</button>
-            <button onClick={() => proposedInputRef.current?.click()} className="px-3 py-2 bg-blue-600 rounded-lg text-sm font-bold">{proposedRows.length ? "Replace Proposed" : "Upload Proposed"}</button>
+            <button onClick={() => setShowAssemblyBuilder(true)} className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-xs sm:w-auto sm:text-sm font-bold">+ Assembly</button>
+            <button onClick={() => setShowRevitModal(true)} className="w-full px-3 py-2.5 bg-indigo-600 rounded-lg text-xs sm:w-auto sm:text-sm font-bold">BIM Sync</button>
+            <button onClick={() => baselineInputRef.current?.click()} className="w-full px-3 py-2.5 bg-slate-700 rounded-lg text-xs sm:w-auto sm:text-sm font-bold">{baselineRows.length ? "Replace Baseline" : "Upload Baseline"}</button>
+            <button onClick={() => proposedInputRef.current?.click()} className="w-full px-3 py-2.5 bg-blue-600 rounded-lg text-xs sm:w-auto sm:text-sm font-bold">{proposedRows.length ? "Replace Proposed" : "Upload Proposed"}</button>
           </div>
         </div>
 
@@ -3884,16 +4004,29 @@ function LcaEngineComponent() {
           )}
       </header>
 
+      <div className="border-b border-slate-200 bg-white p-3 sm:p-4">
+        <AnonymousWorkspacePanel
+          toolId="lca"
+          toolLabel="LCA"
+          toolVersion={`${LCA_APP_VERSION} · Core ${LCA_CALC_ENGINE_VERSION} · Workspace-V2.7`}
+          snapshot={anonymousWorkspaceSnapshot}
+          onRestore={restoreAnonymousWorkspace}
+          defaultSaveName={projectName}
+          privateBackup
+          skipAutoRestoreWhenQuery={false}
+        />
+      </div>
+
       {isProcessing && (
         <div className="bg-blue-50 border-b border-blue-200 px-4 py-3 text-sm font-bold text-blue-800">Processing model...</div>
       )}
 
       {!baselineRows.length && !proposedRows.length ? (
-        <div className="min-h-[560px] flex items-center justify-center p-6">
+        <div className="min-h-[480px] flex items-center justify-center p-4 sm:min-h-[560px] sm:p-6">
           <div className="max-w-4xl w-full text-center">
-            <h3 className="text-3xl font-black text-slate-900">Start an auditable LCA</h3>
+            <h3 className="text-2xl font-black text-slate-900 sm:text-3xl">Start an auditable LCA</h3>
             <p className="mt-3 text-slate-500">Upload a model, map quantities to declared units, then resolve unmapped products with selected EPD/product datasets.</p>
-            <div className="grid md:grid-cols-3 gap-5 mt-10">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-5 mt-8 sm:mt-10">
               <WorkflowCard title="Single model" text="Upload a proposed design and calculate A-D modules, cost and data-quality warnings." onClick={() => proposedInputRef.current?.click()} />
               <WorkflowCard title="Baseline comparison" text="Upload baseline and proposed models for impact-category reductions." onClick={() => baselineInputRef.current?.click()} />
               <WorkflowCard title="BIM sync" text="Use a server-side Revit/IFC adapter with stable element IDs and central alias mapping." onClick={() => setShowRevitModal(true)} />
@@ -3985,7 +4118,7 @@ function LcaEngineComponent() {
                     <h3 className="font-black text-lg text-slate-900">Embodied vs operational carbon</h3>
                     <p className="text-sm text-slate-500 mt-1">B6 uses the project-level annual energy and grid intensity entered above.</p>
                     {crossoverData.length ? (
-                      <div className="h-[420px] mt-5">
+                      <div className="h-[300px] sm:h-[420px] mt-5">
                         <ResponsiveContainer width="100%" height="100%">
                           <LineChart data={crossoverData}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -4146,7 +4279,7 @@ function OverviewPanel({ report, floorAreaM2, phaseChartData, activeView }: { re
         <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
           <h3 className="font-black text-slate-900">Lifecycle GWP by stage</h3>
           <p className="text-xs text-slate-500 mt-1">Module D is intentionally excluded. Missing stages remain unavailable and are not zero-filled.</p>
-          <div className="h-[380px] mt-4">
+          <div className="h-[300px] sm:h-[380px] mt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={phaseChartData.filter((row) => row.name.toLowerCase() === activeView || activeView === "comparison")}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -4240,7 +4373,7 @@ function ComparisonPanel({ baseline, proposed, metrics, leedIndicative, floorAre
         </div>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm h-[420px]">
+      <div className="h-[320px] rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:h-[420px] sm:p-5">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={phaseChartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -4273,7 +4406,7 @@ function QualityPanel({
 
   return (
     <div className="space-y-6">
-      <div className="grid sm:grid-cols-2 xl:grid-cols-6 gap-4">
+      <div className="grid sm:grid-cols-2 xl:grid-cols-7 gap-4">
         <Kpi
           label="EPD matched rows"
           value={`${report.epdMatchedRows}/${report.lines.length}`}
@@ -4283,12 +4416,16 @@ function QualityPanel({
           value={`${report.calculableRows}/${report.lines.length}`}
         />
         <Kpi
-          label="Rows with A-C GWP"
+          label="Rows with any A-C GWP"
           value={`${report.rowsWithGwp}/${report.lines.length}`}
         />
         <Kpi
-          label="GWP row coverage"
+          label="Any-GWP row coverage"
           value={`${fmt(report.gwpRowShare, 1)}%`}
+        />
+        <Kpi
+          label="Core GWP complete"
+          value={`${report.rowsWithCompleteCoreGwp}/${report.lines.length}`}
         />
         <Kpi
           label="EC3 datasets cached"
@@ -4387,13 +4524,13 @@ function QualityPanel({
 
 function Modal({ title, onClose, children, maxWidth = "max-w-3xl" }: { title: string; onClose: () => void; children: React.ReactNode; maxWidth?: string }) {
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/85 p-2 backdrop-blur-sm sm:p-4">
       <div className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[92vh] overflow-hidden flex flex-col`}>
-        <div className="p-5 border-b border-slate-200 flex justify-between items-center">
+        <div className="flex items-center justify-between border-b border-slate-200 p-4 sm:p-5">
           <h2 className="text-xl font-black text-slate-900">{title}</h2>
           <button onClick={onClose} className="text-2xl font-black text-slate-400 hover:text-red-500">×</button>
         </div>
-        <div className="p-5 overflow-y-auto">{children}</div>
+        <div className="overflow-y-auto p-4 sm:p-5">{children}</div>
       </div>
     </div>
   );

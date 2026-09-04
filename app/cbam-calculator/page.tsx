@@ -14,6 +14,7 @@ import {
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Papa from "papaparse";
+import AnonymousWorkspacePanel from "@/components/AnonymousWorkspacePanel";
 
 /**
  * Green Engineering Tools — CBAM Estimator V3
@@ -218,6 +219,9 @@ interface PortfolioItem {
   freeAllocationAdjustment: number | null;
   eligibleForMassThreshold: boolean;
 }
+
+const CBAM_APP_VERSION = "CBAM-V3";
+const CBAM_WORKSPACE_VERSION = "Workspace-V2.7";
 
 const OFFICIAL_2026_PRICES: Record<Quarter, number | null> = {
   Q1: 75.36,
@@ -595,6 +599,108 @@ export default function CbamEstimatorV3() {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [erpErrors, setErpErrors] = useState<string[]>([]);
   const erpFileInputRef = useRef<HTMLInputElement>(null);
+
+  const anonymousWorkspaceSnapshot = useMemo(
+    () => ({
+      workspaceVersion: CBAM_WORKSPACE_VERSION,
+      appVersion: CBAM_APP_VERSION,
+      activeAppTab,
+      selectedYear,
+      productionYear,
+      selectedWeeklyPeriodKey,
+      planningEtsPrice,
+      selectedCountry,
+      goodsSearch,
+      selectedOfficialGood,
+      actualProductionRoute,
+      volume,
+      priorYtdEligibleMass,
+      supplierName,
+      importQuarter,
+      emissionsMode,
+      actualEf,
+      actualVerified,
+      foreignCarbonPrice,
+      portfolio,
+    }),
+    [
+      activeAppTab,
+      selectedYear,
+      productionYear,
+      selectedWeeklyPeriodKey,
+      planningEtsPrice,
+      selectedCountry,
+      goodsSearch,
+      selectedOfficialGood,
+      actualProductionRoute,
+      volume,
+      priorYtdEligibleMass,
+      supplierName,
+      importQuarter,
+      emissionsMode,
+      actualEf,
+      actualVerified,
+      foreignCarbonPrice,
+      portfolio,
+    ]
+  );
+
+  const restoreAnonymousWorkspace = (raw: any) => {
+    if (!raw || typeof raw !== "object") return;
+
+    const restoredYear = Number(raw.selectedYear);
+    if (Number.isInteger(restoredYear) && restoredYear >= 2026 && restoredYear <= 2100) {
+      setSelectedYear(restoredYear);
+    }
+
+    const restoredProductionYear = Number(raw.productionYear);
+    if (
+      Number.isInteger(restoredProductionYear) &&
+      restoredProductionYear >= 2026 &&
+      restoredProductionYear <= (Number.isInteger(restoredYear) ? restoredYear : 2100)
+    ) {
+      setProductionYear(restoredProductionYear);
+    }
+
+    if (["calculator", "portfolio", "erp"].includes(raw.activeAppTab)) {
+      setActiveAppTab(raw.activeAppTab);
+    }
+    if (typeof raw.selectedWeeklyPeriodKey === "string") {
+      setSelectedWeeklyPeriodKey(raw.selectedWeeklyPeriodKey);
+    }
+    if (Number.isFinite(Number(raw.planningEtsPrice))) {
+      setPlanningEtsPrice(Math.max(0, Number(raw.planningEtsPrice)));
+    }
+    setSelectedCountry(typeof raw.selectedCountry === "string" ? raw.selectedCountry : "");
+    setGoodsSearch(typeof raw.goodsSearch === "string" ? raw.goodsSearch : "");
+    setSelectedOfficialGood(
+      raw.selectedOfficialGood && typeof raw.selectedOfficialGood === "object"
+        ? raw.selectedOfficialGood
+        : null
+    );
+    setActualProductionRoute(
+      typeof raw.actualProductionRoute === "string" ? raw.actualProductionRoute : ""
+    );
+    if (Number.isFinite(Number(raw.volume))) setVolume(Math.max(0, Number(raw.volume)));
+    if (Number.isFinite(Number(raw.priorYtdEligibleMass))) {
+      setPriorYtdEligibleMass(Math.max(0, Number(raw.priorYtdEligibleMass)));
+    }
+    setSupplierName(typeof raw.supplierName === "string" ? raw.supplierName : "");
+    if (["Q1", "Q2", "Q3", "Q4"].includes(raw.importQuarter)) {
+      setImportQuarter(raw.importQuarter);
+    }
+    if (["default", "actual"].includes(raw.emissionsMode)) {
+      setEmissionsMode(raw.emissionsMode);
+    }
+    if (Number.isFinite(Number(raw.actualEf))) setActualEf(Math.max(0, Number(raw.actualEf)));
+    setActualVerified(Boolean(raw.actualVerified));
+    if (Number.isFinite(Number(raw.foreignCarbonPrice))) {
+      setForeignCarbonPrice(Math.max(0, Number(raw.foreignCarbonPrice)));
+    }
+    setPortfolio(Array.isArray(raw.portfolio) ? raw.portfolio.slice(0, 5000) : []);
+    setOfficialReference(null);
+    setOfficialDataError("");
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1994,7 +2100,9 @@ export default function CbamEstimatorV3() {
               : "Unavailable",
           ],
           [
-            "CBAM benchmark",
+            emissionsMode === "actual"
+              ? "Process CBAM benchmark (actual-data route)"
+              : "CBAM benchmark",
             calculation.benchmark !== null
               ? `${num(calculation.benchmark, 4)} tCO2e/t`
               : "Unavailable",
@@ -2033,11 +2141,15 @@ export default function CbamEstimatorV3() {
           ],
           [
             "50 t annual de-minimis status",
-            calculation.deMinimisExempt
+            !calculation.thresholdEligible
+              ? "Threshold not applicable to this sector"
+              : calculation.deMinimisExempt
               ? `Provisionally exempt — ${num(
                   calculation.annualEligibleMass
                 )} t annual eligible mass`
-              : "Not exempt / threshold not applicable",
+              : `Not exempt — ${num(
+                  calculation.annualEligibleMass
+                )} t annual eligible mass exceeds 50 t`,
           ],
           [
             `Estimated ${selectedYear} exposure`,
@@ -2239,18 +2351,18 @@ export default function CbamEstimatorV3() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen min-w-0 overflow-x-hidden bg-slate-50">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
 
-      <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      <main className="w-full min-w-0 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
         <header className="text-center max-w-4xl mx-auto mb-8">
           <div className="inline-flex rounded-full bg-indigo-50 border border-indigo-200 px-3 py-1 text-xs font-black uppercase tracking-widest text-indigo-700">
-            Definitive-period planning tool
+            Definitive-period planning tool · No signup required
           </div>
-          <h1 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-black text-slate-950 tracking-tight">
+          <h1 className="mt-4 break-words text-2xl font-black tracking-tight text-slate-950 sm:text-4xl md:text-5xl">
             EU CBAM Calculator — {selectedYear}
           </h1>
           <p className="mt-4 text-base md:text-lg text-slate-600 leading-7">
@@ -2267,6 +2379,16 @@ export default function CbamEstimatorV3() {
             <strong>Backend check:</strong> {apiWarning}
           </div>
         )}
+
+        <AnonymousWorkspacePanel
+          toolId="cbam-main"
+          toolLabel="CBAM calculator"
+          toolVersion={`${CBAM_APP_VERSION} · ${CBAM_WORKSPACE_VERSION}`}
+          snapshot={anonymousWorkspaceSnapshot}
+          onRestore={restoreAnonymousWorkspace}
+          defaultSaveName={supplierName.trim() ? `${supplierName} CBAM project` : "CBAM project"}
+          className="mb-5"
+        />
 
         <div className="mb-5 grid gap-3 sm:grid-cols-3">
           <Link
@@ -3145,12 +3267,12 @@ export default function CbamEstimatorV3() {
                   {eur(portfolioTotal)}
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2 sm:justify-end">
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
                   <button
                     type="button"
                     onClick={generatePortfolioPDF}
                     disabled={!portfolio.length || isPortfolioDownloading}
-                    className="rounded-lg bg-slate-950 px-4 py-2 text-xs font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="w-full rounded-lg bg-slate-950 px-4 py-2.5 text-xs font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
                   >
                     {isPortfolioDownloading
                       ? "Generating PDF…"
@@ -3161,7 +3283,7 @@ export default function CbamEstimatorV3() {
                     type="button"
                     onClick={exportPortfolioCSV}
                     disabled={!portfolio.length}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-black text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-xs font-black text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
                   >
                     Export Portfolio CSV
                   </button>
@@ -3300,7 +3422,7 @@ export default function CbamEstimatorV3() {
         )}
 
         {activeAppTab === "erp" && (
-          <section className="rounded-xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
+          <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-10 shadow-sm">
             <div className="max-w-3xl mx-auto">
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-6">
                 <div className="text-xs font-black uppercase tracking-widest text-emerald-700">
@@ -3317,7 +3439,7 @@ export default function CbamEstimatorV3() {
                 </div>
                 <a
                   href="/cbam-calculator/bulk"
-                  className="mt-6 inline-flex rounded-xl bg-emerald-700 px-6 py-3 font-black text-white hover:bg-emerald-600"
+                  className="mt-6 inline-flex w-full justify-center rounded-xl bg-emerald-700 px-6 py-3 font-black text-white hover:bg-emerald-600 sm:w-auto"
                 >
                   Open Official Bulk Tool →
                 </a>

@@ -22,7 +22,7 @@ export async function GET() {
       success: true,
       mode: "project-key",
       message:
-        "For privacy, projects are not globally enumerable. The browser keeps the project IDs and project keys it created.",
+        "No login is required. For privacy, projects are not globally enumerable; the browser keeps the project IDs and private project keys it created. Export a workspace backup if you need cross-device recovery.",
     },
     { headers: { "Cache-Control": "no-store" } }
   );

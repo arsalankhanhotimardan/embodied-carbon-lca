@@ -1,6 +1,6 @@
 import { createHash, timingSafeEqual } from "crypto";
 
-export const LCA_APP_VERSION = "LCA-V2.6";
+export const LCA_APP_VERSION = "LCA-V2.7";
 export const LCA_CALC_ENGINE_VERSION = "LCA-V2.5";
 export const LCA_PROJECT_SCHEMA_VERSION = 1;
 

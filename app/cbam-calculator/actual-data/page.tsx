@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import AnonymousWorkspacePanel from "@/components/AnonymousWorkspacePanel";
 
 type Precursor = {
   id: string;
@@ -32,6 +33,9 @@ type PriceRecord = {
   price: number;
   official: boolean;
 };
+
+const ACTUAL_CBAM_VERSION = "CBAM-Actual-V1";
+const CBAM_WORKSPACE_VERSION = "Workspace-V2.7";
 
 const routeOptions = [
   ["", "Auto / not specified"],
@@ -103,6 +107,120 @@ export default function ActualDataCbamPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
+
+  const anonymousWorkspaceSnapshot = useMemo(
+    () => ({
+      workspaceVersion: CBAM_WORKSPACE_VERSION,
+      appVersion: ACTUAL_CBAM_VERSION,
+      reportingYear,
+      productionYear,
+      country,
+      cnCode,
+      route,
+      activity,
+      direct,
+      indirect,
+      verified,
+      importedMass,
+      priorYtd,
+      selectedPriceKey,
+      planningPrice,
+      precursors,
+      claimCarbonPrice,
+      carbonPriceEur,
+      paymentEvidence,
+      independentCertification,
+    }),
+    [
+      reportingYear,
+      productionYear,
+      country,
+      cnCode,
+      route,
+      activity,
+      direct,
+      indirect,
+      verified,
+      importedMass,
+      priorYtd,
+      selectedPriceKey,
+      planningPrice,
+      precursors,
+      claimCarbonPrice,
+      carbonPriceEur,
+      paymentEvidence,
+      independentCertification,
+    ]
+  );
+
+  const restoreAnonymousWorkspace = (raw: any) => {
+    if (!raw || typeof raw !== "object") return;
+    const reportYear = Number(raw.reportingYear);
+    const prodYear = Number(raw.productionYear);
+    if (Number.isInteger(reportYear) && reportYear >= 2026 && reportYear <= 2100) {
+      setReportingYear(reportYear);
+    }
+    if (Number.isInteger(prodYear) && prodYear >= 2026 && prodYear <= 2100) {
+      setProductionYear(prodYear);
+    }
+    setCountry(typeof raw.country === "string" ? raw.country : "");
+    setCnCode(typeof raw.cnCode === "string" ? raw.cnCode : "");
+    setRoute(
+      typeof raw.route === "string" && routeOptions.some(([value]) => value === raw.route)
+        ? raw.route
+        : ""
+    );
+    setActivity(typeof raw.activity === "string" ? raw.activity : String(raw.activity ?? ""));
+    setDirect(typeof raw.direct === "string" ? raw.direct : String(raw.direct ?? ""));
+    setIndirect(typeof raw.indirect === "string" ? raw.indirect : String(raw.indirect ?? "0"));
+    setVerified(Boolean(raw.verified));
+    setImportedMass(
+      typeof raw.importedMass === "string" ? raw.importedMass : String(raw.importedMass ?? "")
+    );
+    setPriorYtd(typeof raw.priorYtd === "string" ? raw.priorYtd : String(raw.priorYtd ?? "0"));
+    setSelectedPriceKey(
+      typeof raw.selectedPriceKey === "string" ? raw.selectedPriceKey : "planning"
+    );
+    setPlanningPrice(
+      typeof raw.planningPrice === "string" ? raw.planningPrice : String(raw.planningPrice ?? "")
+    );
+    setPrecursors(
+      Array.isArray(raw.precursors)
+        ? raw.precursors
+            .filter((row: any) => row && typeof row === "object")
+            .slice(0, 100)
+            .map((row: any) => ({
+              id: typeof row.id === "string" ? row.id : crypto.randomUUID(),
+              name: typeof row.name === "string" ? row.name : "",
+              cnCode: typeof row.cnCode === "string" ? row.cnCode : "",
+              country: typeof row.country === "string" ? row.country : "",
+              massTonnes:
+                typeof row.massTonnes === "string"
+                  ? row.massTonnes
+                  : String(row.massTonnes ?? ""),
+              source: row.source === "exempt" ? "exempt" : "default",
+              productionYear:
+                Number.isInteger(Number(row.productionYear)) && Number(row.productionYear) >= 2026
+                  ? Number(row.productionYear)
+                  : prodYear || reportYear || 2026,
+              route:
+                typeof row.route === "string" && routeOptions.some(([value]) => value === row.route)
+                  ? row.route
+                  : "",
+            }))
+        : []
+    );
+    setClaimCarbonPrice(Boolean(raw.claimCarbonPrice));
+    setCarbonPriceEur(
+      typeof raw.carbonPriceEur === "string"
+        ? raw.carbonPriceEur
+        : String(raw.carbonPriceEur ?? "0")
+    );
+    setPaymentEvidence(Boolean(raw.paymentEvidence));
+    setIndependentCertification(Boolean(raw.independentCertification));
+    setResult(null);
+    setError("");
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -322,18 +440,28 @@ export default function ActualDataCbamPage() {
   };
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <main className="mx-auto min-w-0 max-w-6xl overflow-x-hidden px-3 py-6 sm:px-6 sm:py-10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="text-xs font-black uppercase tracking-widest text-indigo-700">Advanced CBAM methodology</div>
-          <h1 className="mt-2 text-3xl font-black text-slate-950 sm:text-4xl">Actual & complex-goods calculator</h1>
+          <h1 className="mt-2 break-words text-2xl font-black text-slate-950 sm:text-4xl">Actual & complex-goods calculator</h1>
           <p className="mt-3 max-w-3xl text-slate-600">Enter your own installation and supplier data. This page no longer loads demonstration country, CN code, route, emissions, mass or price values.</p>
         </div>
-        <Link href="/cbam-calculator" className="rounded-xl border border-slate-300 bg-white px-4 py-2 font-bold text-slate-700">← Main calculator</Link>
+        <Link href="/cbam-calculator" className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-center font-bold text-slate-700 sm:w-auto">← Main calculator</Link>
       </div>
 
+      <AnonymousWorkspacePanel
+        toolId="cbam-actual"
+        toolLabel="CBAM actual / complex goods"
+        toolVersion={`${ACTUAL_CBAM_VERSION} · ${CBAM_WORKSPACE_VERSION}`}
+        snapshot={anonymousWorkspaceSnapshot}
+        onRestore={restoreAnonymousWorkspace}
+        defaultSaveName={cnCode ? `CBAM actual ${cnCode}` : "CBAM actual project"}
+        className="mt-6"
+      />
+
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="space-y-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="min-w-0 space-y-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <h2 className="text-xl font-black">Good & process data</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Country of origin">
@@ -381,20 +509,43 @@ export default function ActualDataCbamPage() {
           </label>
 
           <div className="border-t border-slate-200 pt-5">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div><h3 className="font-black">Precursors</h3><p className="text-xs text-slate-500">Add only precursors that belong to this actual-data calculation.</p></div>
-              <button type="button" onClick={addPrecursor} className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-black text-white">+ Add</button>
+              <button type="button" onClick={addPrecursor} className="w-full rounded-lg bg-slate-900 px-3 py-2.5 text-sm font-black text-white sm:w-auto">+ Add</button>
             </div>
             <div className="mt-4 space-y-4">
               {precursors.map((row) => (
                 <div key={row.id} className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
-                  <input placeholder="Precursor name" value={row.name} onChange={(e) => updatePrecursor(row.id, { name: e.target.value })} className="input" />
-                  <input placeholder="CN code" value={row.cnCode} onChange={(e) => updatePrecursor(row.id, { cnCode: e.target.value })} className="input font-mono" />
-                  <select value={row.country} onChange={(e) => updatePrecursor(row.id, { country: e.target.value })} className="input"><option value="">Select precursor country</option>{countries.map((item) => <option key={item.normalized} value={item.name}>{item.name}</option>)}</select>
-                  <input type="number" min="0" placeholder="Mass t" value={row.massTonnes} onChange={(e) => updatePrecursor(row.id, { massTonnes: e.target.value })} className="input" />
-                  <select value={row.source} onChange={(e) => updatePrecursor(row.id, { source: e.target.value as Precursor["source"] })} className="input"><option value="default">Official default precursor</option><option value="exempt">Exempt / no CBAM precursor contribution</option></select>
-                  <select value={row.route} onChange={(e) => updatePrecursor(row.id, { route: e.target.value })} className="input">{routeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
-                  <button type="button" onClick={() => setPrecursors((rows) => rows.filter((x) => x.id !== row.id))} className="text-left text-sm font-bold text-red-700">Remove precursor</button>
+                  <Field label="Precursor name">
+                    <input placeholder="e.g. Grey cement clinker" value={row.name} onChange={(e) => updatePrecursor(row.id, { name: e.target.value })} className="input" />
+                  </Field>
+                  <Field label="Precursor CN / TARIC code">
+                    <input placeholder="e.g. 25231000" value={row.cnCode} onChange={(e) => updatePrecursor(row.id, { cnCode: e.target.value })} className="input font-mono" />
+                  </Field>
+                  <Field label="Precursor country">
+                    <select value={row.country} onChange={(e) => updatePrecursor(row.id, { country: e.target.value })} className="input"><option value="">Select precursor country</option>{countries.map((item) => <option key={item.normalized} value={item.name}>{item.name}</option>)}</select>
+                  </Field>
+                  <Field label="Total precursor mass used (t)">
+                    <input type="number" min="0" placeholder="e.g. 80" value={row.massTonnes} onChange={(e) => updatePrecursor(row.id, { massTonnes: e.target.value })} className="input" />
+                  </Field>
+                  <Field label="Precursor source">
+                    <select value={row.source} onChange={(e) => updatePrecursor(row.id, { source: e.target.value as Precursor["source"] })} className="input"><option value="default">Official default precursor</option><option value="exempt">Exempt / no CBAM precursor contribution</option></select>
+                  </Field>
+                  <Field label="Precursor production year">
+                    <select value={row.productionYear} onChange={(e) => updatePrecursor(row.id, { productionYear: Number(e.target.value) })} className="input">{productionYearChoices.map((year) => <option key={year} value={year}>{year}</option>)}</select>
+                  </Field>
+                  <Field label="Precursor production route">
+                    <select value={row.route} onChange={(e) => updatePrecursor(row.id, { route: e.target.value })} className="input">{routeOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
+                  </Field>
+                  <div className="rounded-lg border border-indigo-100 bg-indigo-50 p-3 text-xs text-indigo-900">
+                    <div className="font-black">Specific precursor mass</div>
+                    <div className="mt-1 font-mono text-sm">
+                      {toNumber(activity) && toNumber(activity)! > 0 && toNumber(row.massTonnes) !== null
+                        ? `${(Number(toNumber(row.massTonnes)) / Number(toNumber(activity))).toFixed(4)} t precursor / t final good`
+                        : "Enter activity level and precursor mass"}
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => setPrecursors((rows) => rows.filter((x) => x.id !== row.id))} className="w-full rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-left text-sm font-bold text-red-700 sm:w-auto">Remove precursor</button>
                 </div>
               ))}
             </div>
@@ -405,16 +556,16 @@ export default function ActualDataCbamPage() {
             {claimCarbonPrice && <div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Net carbon price effectively paid (€ / tCO₂e)"><input type="number" min="0" value={carbonPriceEur} onChange={(e) => setCarbonPriceEur(e.target.value)} className="input" /></Field><div className="space-y-2"><label className="flex gap-2 text-sm"><input type="checkbox" checked={paymentEvidence} onChange={(e) => setPaymentEvidence(e.target.checked)} /> Payment evidence available</label><label className="flex gap-2 text-sm"><input type="checkbox" checked={independentCertification} onChange={(e) => setIndependentCertification(e.target.checked)} /> Independent certification available</label></div></div>}
           </div>
 
-          <button type="button" onClick={calculate} disabled={loading} className="w-full rounded-xl bg-indigo-700 px-5 py-3 font-black text-white disabled:opacity-50">{loading ? "Calculating…" : "Calculate actual / complex goods"}</button>
+          <button type="button" onClick={calculate} disabled={loading} className="w-full rounded-xl bg-indigo-700 px-5 py-3.5 font-black text-white disabled:opacity-50">{loading ? "Calculating…" : "Calculate actual / complex goods"}</button>
           {error && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</div>}
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
           <h2 className="text-xl font-black">Result</h2>
-          {!result ? <p className="mt-4 text-sm text-slate-500">Enter your data and run a calculation. No country, CN code, route, mass, emissions or price is preloaded as a demonstration value.</p> : <div className="mt-5 space-y-3"><Metric label="Specific embedded emissions" value={`${Number(result.actual?.specificEmbeddedEmissions ?? 0).toFixed(4)} tCO₂e/t`} /><Metric label="SEFA" value={result.actual?.sefa == null ? "Pending / incomplete" : `${Number(result.actual.sefa).toFixed(4)} tCO₂e/t`} /><Metric label="Embedded emissions" value={`${Number(result.embeddedEmissionsTco2e ?? 0).toFixed(3)} tCO₂e`} /><Metric label="Certificates before Article 9" value={result.certificatesAfterThresholdBeforeCarbonPrice == null ? "Pending" : Number(result.certificatesAfterThresholdBeforeCarbonPrice).toFixed(3)} /><Metric label="Estimated exposure" value={result.finalEstimatedExposureEur == null ? "Pending" : `€${Number(result.finalEstimatedExposureEur).toLocaleString(undefined, { maximumFractionDigits: 2 })}`} /><details className="rounded-xl border border-slate-200 p-4"><summary className="cursor-pointer font-black">Calculation detail</summary><pre className="mt-3 overflow-auto text-xs">{JSON.stringify(result, null, 2)}</pre></details></div>}
+          {!result ? <p className="mt-4 text-sm text-slate-500">Enter your data and run a calculation. No country, CN code, route, mass, emissions or price is preloaded as a demonstration value.</p> : <div className="mt-5 space-y-3"><Metric label="Specific embedded emissions" value={`${Number(result.actual?.specificEmbeddedEmissions ?? 0).toFixed(4)} tCO₂e/t`} /><Metric label="SEFA" value={result.actual?.sefa == null ? "Pending / incomplete" : `${Number(result.actual.sefa).toFixed(4)} tCO₂e/t`} /><Metric label="Embedded emissions" value={`${Number(result.embeddedEmissionsTco2e ?? 0).toFixed(3)} tCO₂e`} /><Metric label="Certificates before Article 9" value={result.certificatesAfterThresholdBeforeCarbonPrice == null ? "Pending" : Number(result.certificatesAfterThresholdBeforeCarbonPrice).toFixed(3)} /><Metric label="Estimated exposure" value={result.finalEstimatedExposureEur == null ? "Pending" : `€${Number(result.finalEstimatedExposureEur).toLocaleString(undefined, { maximumFractionDigits: 2 })}`} /><details className="rounded-xl border border-slate-200 p-4"><summary className="cursor-pointer font-black">Calculation detail</summary><pre className="mt-3 max-w-full overflow-auto whitespace-pre text-xs">{JSON.stringify(result, null, 2)}</pre></details></div>}
         </section>
       </div>
-      <style jsx global>{`.input{width:100%;border:1px solid rgb(203 213 225);border-radius:.65rem;padding:.7rem .8rem;background:white}`}</style>
+      <style jsx global>{`.input{width:100%;min-width:0;border:1px solid rgb(203 213 225);border-radius:.65rem;padding:.75rem .8rem;background:white;font-size:16px}`}</style>
     </main>
   );
 }
