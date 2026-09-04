@@ -3985,7 +3985,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-      "bytes": 107891,
+      "bytes": 148034,
       "imports": [
         {
           "path": "path",
@@ -4644,11 +4644,11 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0w66zr0._.js": {
-      "bytes": 11703,
+      "bytes": 11147,
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__12z6yle._.js": {
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1yvv6ks._.js": {
       "bytes": 3056,
       "imports": [
         {
@@ -4700,7 +4700,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/_0979ajz._.js": {
-      "bytes": 57760,
+      "bytes": 58408,
       "imports": [],
       "format": "cjs"
     },
@@ -6125,7 +6125,7 @@
       ],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js": {
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_1xr5wgb._.js": {
       "bytes": 16140,
       "imports": [],
       "format": "cjs"
@@ -6294,6 +6294,197 @@
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_ec3-epd-guide_page_actions_12vkcc2.js": {
       "bytes": 125,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_3-phase-voltage-drop-calculator_page_actions_0t2u1wh.js": {
+      "bytes": 144,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1_nn_iy._.js": {
+      "bytes": 11862,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_1a2i1au._.js": {
+      "bytes": 15322,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_ElectricalDesigner_tsx_0-wbihh._.js": {
+      "bytes": 24686,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_battery-cable-size-calculator_page_actions_128xcsm.js": {
+      "bytes": 142,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1q8lkmo._.js": {
+      "bytes": 11601,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_cable-power-loss-calculator_page_actions_0ah09vo.js": {
+      "bytes": 140,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1mdo85_._.js": {
+      "bytes": 11753,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_dc-wire-size-calculator_page_actions_0idm7m9.js": {
+      "bytes": 136,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1fuypgj._.js": {
+      "bytes": 11986,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1jfdywj._.js": {
+      "bytes": 7387,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_kva-to-amps-calculator_page_actions_16c-8pa.js": {
+      "bytes": 145,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_PowerConverter_tsx_0kr4lol._.js": {
+      "bytes": 4980,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0v1hqur._.js": {
+      "bytes": 11919,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_methodology_page_actions_0p47937.js": {
+      "bytes": 134,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0pohvx3._.js": {
+      "bytes": 10598,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_page_actions_00rai78.js": {
+      "bytes": 122,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_voltage-drop-calculator_page_actions_0g8ijmz.js": {
+      "bytes": 136,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0s238v8._.js": {
+      "bytes": 12001,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_watts-to-amps-calculator_page_actions_1yzk-hf.js": {
+      "bytes": 137,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1kq_alv._.js": {
+      "bytes": 7258,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1b248o2._.js": {
+      "bytes": 11428,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-length-calculator_page_actions_18-a52n.js": {
+      "bytes": 145,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__160mmq7._.js": {
+      "bytes": 11804,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-size-calculator_page_actions_1yrxukk.js": {
+      "bytes": 143,
       "imports": [],
       "format": "cjs"
     },
@@ -6503,7 +6694,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/[root-of-the-server]__18m-44u._.js": {
-      "bytes": 12608,
+      "bytes": 12614,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/compiled/@opentelemetry/api/index.js",
@@ -6559,7 +6750,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/[root-of-the-server]__1-6bjl1._.js": {
-      "bytes": 13875,
+      "bytes": 13346,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/compiled/@opentelemetry/api/index.js",
@@ -6703,8 +6894,8 @@
       "imports": [],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js": {
-      "bytes": 61559,
+    ".open-next/server-functions/default/.next/server/chunks/[turbopack]_runtime.js": {
+      "bytes": 67643,
       "imports": [
         {
           "path": "worker_threads",
@@ -6752,9 +6943,9 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0w66zr0._.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__12z6yle._.js",
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1yvv6ks._.js",
           "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__12z6yle._.js"
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1yvv6ks._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
@@ -7092,9 +7283,9 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js",
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1xr5wgb._.js",
           "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js"
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1xr5wgb._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_actual-data_page_actions_1qzdti_.js",
@@ -7220,6 +7411,131 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_ec3-epd-guide_page_actions_12vkcc2.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_ec3-epd-guide_page_actions_12vkcc2.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_3-phase-voltage-drop-calculator_page_actions_0t2u1wh.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_3-phase-voltage-drop-calculator_page_actions_0t2u1wh.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1_nn_iy._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1_nn_iy._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1a2i1au._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1a2i1au._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_ElectricalDesigner_tsx_0-wbihh._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_ElectricalDesigner_tsx_0-wbihh._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_battery-cable-size-calculator_page_actions_128xcsm.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_battery-cable-size-calculator_page_actions_128xcsm.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1q8lkmo._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1q8lkmo._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_cable-power-loss-calculator_page_actions_0ah09vo.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_cable-power-loss-calculator_page_actions_0ah09vo.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1mdo85_._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1mdo85_._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_dc-wire-size-calculator_page_actions_0idm7m9.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_dc-wire-size-calculator_page_actions_0idm7m9.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1fuypgj._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1fuypgj._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1jfdywj._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1jfdywj._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_kva-to-amps-calculator_page_actions_16c-8pa.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_kva-to-amps-calculator_page_actions_16c-8pa.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_PowerConverter_tsx_0kr4lol._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_PowerConverter_tsx_0kr4lol._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0v1hqur._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0v1hqur._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_methodology_page_actions_0p47937.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_methodology_page_actions_0p47937.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0pohvx3._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0pohvx3._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_page_actions_00rai78.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_page_actions_00rai78.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_voltage-drop-calculator_page_actions_0g8ijmz.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_voltage-drop-calculator_page_actions_0g8ijmz.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0s238v8._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0s238v8._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_watts-to-amps-calculator_page_actions_1yzk-hf.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_watts-to-amps-calculator_page_actions_1yzk-hf.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1kq_alv._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1kq_alv._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1b248o2._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1b248o2._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-length-calculator_page_actions_18-a52n.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-length-calculator_page_actions_18-a52n.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__160mmq7._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__160mmq7._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-size-calculator_page_actions_1yrxukk.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-size-calculator_page_actions_1yrxukk.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__044i40o._.js",
@@ -7389,8 +7705,8 @@
       ],
       "format": "cjs"
     },
-    ".open-next/server-functions/default/.next/server/chunks/[turbopack]_runtime.js": {
-      "bytes": 61549,
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js": {
+      "bytes": 67653,
       "imports": [
         {
           "path": "worker_threads",
@@ -7438,9 +7754,9 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0w66zr0._.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__12z6yle._.js",
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1yvv6ks._.js",
           "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__12z6yle._.js"
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1yvv6ks._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
@@ -7778,9 +8094,9 @@
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js"
         },
         {
-          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js",
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1xr5wgb._.js",
           "kind": "require-call",
-          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js"
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1xr5wgb._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_actual-data_page_actions_1qzdti_.js",
@@ -7906,6 +8222,131 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_ec3-epd-guide_page_actions_12vkcc2.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_ec3-epd-guide_page_actions_12vkcc2.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_3-phase-voltage-drop-calculator_page_actions_0t2u1wh.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_3-phase-voltage-drop-calculator_page_actions_0t2u1wh.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1_nn_iy._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1_nn_iy._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_1a2i1au._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_1a2i1au._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_ElectricalDesigner_tsx_0-wbihh._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_ElectricalDesigner_tsx_0-wbihh._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_battery-cable-size-calculator_page_actions_128xcsm.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_battery-cable-size-calculator_page_actions_128xcsm.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1q8lkmo._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1q8lkmo._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_cable-power-loss-calculator_page_actions_0ah09vo.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_cable-power-loss-calculator_page_actions_0ah09vo.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1mdo85_._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1mdo85_._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_dc-wire-size-calculator_page_actions_0idm7m9.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_dc-wire-size-calculator_page_actions_0idm7m9.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1fuypgj._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1fuypgj._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1jfdywj._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1jfdywj._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_kva-to-amps-calculator_page_actions_16c-8pa.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_kva-to-amps-calculator_page_actions_16c-8pa.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_PowerConverter_tsx_0kr4lol._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_PowerConverter_tsx_0kr4lol._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0v1hqur._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0v1hqur._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_methodology_page_actions_0p47937.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_methodology_page_actions_0p47937.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0pohvx3._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0pohvx3._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_page_actions_00rai78.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_page_actions_00rai78.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_voltage-drop-calculator_page_actions_0g8ijmz.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_voltage-drop-calculator_page_actions_0g8ijmz.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0s238v8._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0s238v8._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_watts-to-amps-calculator_page_actions_1yzk-hf.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_watts-to-amps-calculator_page_actions_1yzk-hf.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1kq_alv._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1kq_alv._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1b248o2._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1b248o2._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-length-calculator_page_actions_18-a52n.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-length-calculator_page_actions_18-a52n.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__160mmq7._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__160mmq7._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-size-calculator_page_actions_1yrxukk.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-size-calculator_page_actions_1yrxukk.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__044i40o._.js",
@@ -8071,6 +8512,105 @@
           "path": "<runtime>",
           "kind": "import-statement",
           "external": true
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/3-phase-voltage-drop-calculator/page.js": {
+      "bytes": 949,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/battery-cable-size-calculator/page.js": {
+      "bytes": 945,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/cable-power-loss-calculator/page.js": {
+      "bytes": 941,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/watts-to-amps-calculator/page.js": {
+      "bytes": 935,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/dc-wire-size-calculator/page.js": {
+      "bytes": 933,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/voltage-drop-calculator/page.js": {
+      "bytes": 933,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/kva-to-amps-calculator/page.js": {
+      "bytes": 941,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/wire-length-calculator/page.js": {
+      "bytes": 941,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/wire-size-calculator/page.js": {
+      "bytes": 935,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
         }
       ],
       "format": "cjs"
@@ -8181,6 +8721,17 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/[turbopack]_runtime.js",
           "kind": "require-call",
           "original": "../../../chunks/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/electrical/methodology/page.js": {
+      "bytes": 917,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
         }
       ],
       "format": "cjs"
@@ -8460,6 +9011,17 @@
       ],
       "format": "cjs"
     },
+    ".open-next/server-functions/default/.next/server/app/electrical/page.js": {
+      "bytes": 892,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
     ".open-next/server-functions/default/.next/server/app/api/cbam/route.js": {
       "bytes": 434,
       "imports": [
@@ -8549,7 +9111,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/node_modules/next/dist/server/require.js": {
-      "bytes": 13917,
+      "bytes": 16754,
       "imports": [
         {
           "path": "path",
@@ -8595,6 +9157,51 @@
           "path": "fs",
           "kind": "require-call",
           "external": true
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/3-phase-voltage-drop-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\3-phase-voltage-drop-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/battery-cable-size-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\battery-cable-size-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/cable-power-loss-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\cable-power-loss-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/watts-to-amps-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\watts-to-amps-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/dc-wire-size-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\dc-wire-size-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/voltage-drop-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\voltage-drop-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/kva-to-amps-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\kva-to-amps-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/wire-length-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\wire-length-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/wire-size-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\wire-size-calculator\\page.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/api/cbam/reference/activate/route.js",
@@ -8645,6 +9252,11 @@
           "path": ".open-next/server-functions/default/.next/server/app/api/material-mappings/route.js",
           "kind": "require-call",
           "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\material-mappings\\route.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/methodology/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\methodology\\page.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/a1-a3-embodied-carbon/page.js",
@@ -8770,6 +9382,11 @@
           "path": ".open-next/server-functions/default/.next/server/app/_not-found/page.js",
           "kind": "require-call",
           "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\_not-found\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/electrical/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\page.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/api/cbam/route.js",
@@ -10045,7 +10662,7 @@
       "format": "esm"
     },
     ".open-next/server-functions/default/index.mjs": {
-      "bytes": 103389,
+      "bytes": 112718,
       "imports": [
         {
           "path": "node:module",
@@ -11690,7 +12307,7 @@
           "bytesInOutput": 459
         },
         ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-          "bytesInOutput": 81593
+          "bytesInOutput": 113262
         },
         ".open-next/cloudflare-templates/shims/throw.js": {
           "bytesInOutput": 215
@@ -11771,13 +12388,13 @@
           "bytesInOutput": 2426
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0w66zr0._.js": {
-          "bytesInOutput": 11880
+          "bytesInOutput": 11330
         },
-        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__12z6yle._.js": {
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1yvv6ks._.js": {
           "bytesInOutput": 3007
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_0979ajz._.js": {
-          "bytesInOutput": 58913
+          "bytesInOutput": 59566
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app__not-found_page_actions_0pt47yr.js": {
           "bytesInOutput": 270
@@ -11974,7 +12591,7 @@
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js": {
           "bytesInOutput": 4560
         },
-        ".open-next/server-functions/default/.next/server/chunks/ssr/_1f28f12._.js": {
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_1xr5wgb._.js": {
           "bytesInOutput": 16731
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_cbam-calculator_actual-data_page_actions_1qzdti_.js": {
@@ -12052,6 +12669,81 @@
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_ec3-epd-guide_page_actions_12vkcc2.js": {
           "bytesInOutput": 277
         },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_3-phase-voltage-drop-calculator_page_actions_0t2u1wh.js": {
+          "bytesInOutput": 315
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1_nn_iy._.js": {
+          "bytesInOutput": 11979
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_1a2i1au._.js": {
+          "bytesInOutput": 16066
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_ElectricalDesigner_tsx_0-wbihh._.js": {
+          "bytesInOutput": 25091
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_battery-cable-size-calculator_page_actions_128xcsm.js": {
+          "bytesInOutput": 311
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1q8lkmo._.js": {
+          "bytesInOutput": 11706
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_cable-power-loss-calculator_page_actions_0ah09vo.js": {
+          "bytesInOutput": 307
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1mdo85_._.js": {
+          "bytesInOutput": 11866
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_dc-wire-size-calculator_page_actions_0idm7m9.js": {
+          "bytesInOutput": 299
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1fuypgj._.js": {
+          "bytesInOutput": 12102
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1jfdywj._.js": {
+          "bytesInOutput": 7483
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_kva-to-amps-calculator_page_actions_16c-8pa.js": {
+          "bytesInOutput": 317
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/src_components_electrical_PowerConverter_tsx_0kr4lol._.js": {
+          "bytesInOutput": 5144
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0v1hqur._.js": {
+          "bytesInOutput": 12152
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_methodology_page_actions_0p47937.js": {
+          "bytesInOutput": 295
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0pohvx3._.js": {
+          "bytesInOutput": 10709
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_page_actions_00rai78.js": {
+          "bytesInOutput": 271
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_voltage-drop-calculator_page_actions_0g8ijmz.js": {
+          "bytesInOutput": 299
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0s238v8._.js": {
+          "bytesInOutput": 12118
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_electrical_watts-to-amps-calculator_page_actions_1yzk-hf.js": {
+          "bytesInOutput": 301
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1kq_alv._.js": {
+          "bytesInOutput": 7356
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1b248o2._.js": {
+          "bytesInOutput": 11526
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-length-calculator_page_actions_18-a52n.js": {
+          "bytesInOutput": 317
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__160mmq7._.js": {
+          "bytesInOutput": 11914
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_electrical_wire-size-calculator_page_actions_1yrxukk.js": {
+          "bytesInOutput": 313
+        },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__044i40o._.js": {
           "bytesInOutput": 18178
         },
@@ -12116,13 +12808,13 @@
           "bytesInOutput": 279
         },
         ".open-next/server-functions/default/.next/server/chunks/[root-of-the-server]__18m-44u._.js": {
-          "bytesInOutput": 12747
+          "bytesInOutput": 12753
         },
         ".open-next/server-functions/default/.next/server/chunks/_next-internal_server_app_robots_txt_route_actions_15vc_89.js": {
           "bytesInOutput": 269
         },
         ".open-next/server-functions/default/.next/server/chunks/[root-of-the-server]__1-6bjl1._.js": {
-          "bytesInOutput": 14033
+          "bytesInOutput": 13487
         },
         ".open-next/server-functions/default/.next/server/chunks/_next-internal_server_app_sitemap_xml_route_actions_05l5km9.js": {
           "bytesInOutput": 271
@@ -12148,143 +12840,176 @@
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app__global-error_page_actions_0zi5s8-.js": {
           "bytesInOutput": 275
         },
-        ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js": {
-          "bytesInOutput": 30440
-        },
         ".open-next/server-functions/default/.next/server/chunks/[turbopack]_runtime.js": {
-          "bytesInOutput": 30427
+          "bytesInOutput": 34045
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js": {
+          "bytesInOutput": 34060
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/3-phase-voltage-drop-calculator/page.js": {
+          "bytesInOutput": 1091
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/battery-cable-size-calculator/page.js": {
+          "bytesInOutput": 1086
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/cable-power-loss-calculator/page.js": {
+          "bytesInOutput": 1080
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/watts-to-amps-calculator/page.js": {
+          "bytesInOutput": 1071
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/dc-wire-size-calculator/page.js": {
+          "bytesInOutput": 1068
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/voltage-drop-calculator/page.js": {
+          "bytesInOutput": 1068
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/kva-to-amps-calculator/page.js": {
+          "bytesInOutput": 1075
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/wire-length-calculator/page.js": {
+          "bytesInOutput": 1075
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/wire-size-calculator/page.js": {
+          "bytesInOutput": 1067
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/reference/activate/route.js": {
-          "bytesInOutput": 579
+          "bytesInOutput": 578
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/reference/options/route.js": {
-          "bytesInOutput": 612
+          "bytesInOutput": 611
         },
         ".open-next/server-functions/default/.next/server/app/cbam-calculator/actual-data/page.js": {
-          "bytesInOutput": 1205
+          "bytesInOutput": 1208
         },
         ".open-next/server-functions/default/.next/server/app/cbam-calculator/electricity/page.js": {
-          "bytesInOutput": 1206
+          "bytesInOutput": 1208
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/reference/status/route.js": {
-          "bytesInOutput": 574
+          "bytesInOutput": 573
         },
         ".open-next/server-functions/default/.next/server/app/embodied-carbon-calculator/page.js": {
-          "bytesInOutput": 1053
+          "bytesInOutput": 1055
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/sync-reference/route.js": {
-          "bytesInOutput": 633
+          "bytesInOutput": 632
         },
         ".open-next/server-functions/default/.next/server/app/leed-whole-building-lca/page.js": {
-          "bytesInOutput": 1040
+          "bytesInOutput": 1042
         },
         ".open-next/server-functions/default/.next/server/app/api/lca/projects/[id]/route.js": {
-          "bytesInOutput": 597
+          "bytesInOutput": 596
         },
         ".open-next/server-functions/default/.next/server/app/api/material-mappings/route.js": {
-          "bytesInOutput": 562
+          "bytesInOutput": 561
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/methodology/page.js": {
+          "bytesInOutput": 1041
         },
         ".open-next/server-functions/default/.next/server/app/a1-a3-embodied-carbon/page.js": {
-          "bytesInOutput": 1038
+          "bytesInOutput": 1040
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/sync-prices/route.js": {
-          "bytesInOutput": 559
+          "bytesInOutput": 558
         },
         ".open-next/server-functions/default/.next/server/app/epd-carbon-calculator/page.js": {
-          "bytesInOutput": 1038
+          "bytesInOutput": 1040
         },
         ".open-next/server-functions/default/.next/server/app/api/cron/update-ets/route.js": {
-          "bytesInOutput": 556
+          "bytesInOutput": 555
         },
         ".open-next/server-functions/default/.next/server/app/cbam-calculator/bulk/page.js": {
-          "bytesInOutput": 1178
+          "bytesInOutput": 1180
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/calculate/route.js": {
-          "bytesInOutput": 588
+          "bytesInOutput": 587
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/reference/route.js": {
-          "bytesInOutput": 554
+          "bytesInOutput": 553
         },
         ".open-next/server-functions/default/.next/server/app/bim-embodied-carbon/page.js": {
-          "bytesInOutput": 1032
+          "bytesInOutput": 1034
         },
         ".open-next/server-functions/default/.next/server/app/api/webhook/revit/route.js": {
-          "bytesInOutput": 551
-        },
-        ".open-next/server-functions/default/.next/server/app/whole-building-lca/page.js": {
-          "bytesInOutput": 1029
-        },
-        ".open-next/server-functions/default/.next/server/app/api/lca/projects/route.js": {
-          "bytesInOutput": 548
-        },
-        ".open-next/server-functions/default/.next/server/app/api/cbam/health/route.js": {
-          "bytesInOutput": 545
-        },
-        ".open-next/server-functions/default/.next/server/app/terms-of-service/page.js": {
-          "bytesInOutput": 1024
-        },
-        ".open-next/server-functions/default/.next/server/app/api/cbam/years/route.js": {
-          "bytesInOutput": 642
-        },
-        ".open-next/server-functions/default/.next/server/app/api/health/lca/route.js": {
-          "bytesInOutput": 540
-        },
-        ".open-next/server-functions/default/.next/server/app/cbam-calculator/page.js": {
-          "bytesInOutput": 1090
-        },
-        ".open-next/server-functions/default/.next/server/app/api/cbam/bulk/route.js": {
-          "bytesInOutput": 539
-        },
-        ".open-next/server-functions/default/.next/server/app/privacy-policy/page.js": {
-          "bytesInOutput": 1018
-        },
-        ".open-next/server-functions/default/.next/server/app/_global-error/page.js": {
-          "bytesInOutput": 683
-        },
-        ".open-next/server-functions/default/.next/server/app/ec3-epd-guide/page.js": {
-          "bytesInOutput": 1015
-        },
-        ".open-next/server-functions/default/.next/server/app/module-d-lca/page.js": {
-          "bytesInOutput": 1010
-        },
-        ".open-next/server-functions/default/.next/server/app/sitemap.xml/route.js": {
-          "bytesInOutput": 449
-        },
-        ".open-next/server-functions/default/.next/server/app/methodology/page.js": {
-          "bytesInOutput": 1009
-        },
-        ".open-next/server-functions/default/.next/server/app/robots.txt/route.js": {
-          "bytesInOutput": 448
-        },
-        ".open-next/server-functions/default/.next/server/app/_not-found/page.js": {
-          "bytesInOutput": 908
-        },
-        ".open-next/server-functions/default/.next/server/app/api/cbam/route.js": {
           "bytesInOutput": 550
         },
+        ".open-next/server-functions/default/.next/server/app/whole-building-lca/page.js": {
+          "bytesInOutput": 1031
+        },
+        ".open-next/server-functions/default/.next/server/app/api/lca/projects/route.js": {
+          "bytesInOutput": 547
+        },
+        ".open-next/server-functions/default/.next/server/app/api/cbam/health/route.js": {
+          "bytesInOutput": 544
+        },
+        ".open-next/server-functions/default/.next/server/app/terms-of-service/page.js": {
+          "bytesInOutput": 1025
+        },
+        ".open-next/server-functions/default/.next/server/app/api/cbam/years/route.js": {
+          "bytesInOutput": 641
+        },
+        ".open-next/server-functions/default/.next/server/app/api/health/lca/route.js": {
+          "bytesInOutput": 539
+        },
+        ".open-next/server-functions/default/.next/server/app/cbam-calculator/page.js": {
+          "bytesInOutput": 1091
+        },
+        ".open-next/server-functions/default/.next/server/app/api/cbam/bulk/route.js": {
+          "bytesInOutput": 538
+        },
+        ".open-next/server-functions/default/.next/server/app/privacy-policy/page.js": {
+          "bytesInOutput": 1019
+        },
+        ".open-next/server-functions/default/.next/server/app/_global-error/page.js": {
+          "bytesInOutput": 684
+        },
+        ".open-next/server-functions/default/.next/server/app/ec3-epd-guide/page.js": {
+          "bytesInOutput": 1016
+        },
+        ".open-next/server-functions/default/.next/server/app/module-d-lca/page.js": {
+          "bytesInOutput": 1011
+        },
+        ".open-next/server-functions/default/.next/server/app/sitemap.xml/route.js": {
+          "bytesInOutput": 448
+        },
+        ".open-next/server-functions/default/.next/server/app/methodology/page.js": {
+          "bytesInOutput": 1010
+        },
+        ".open-next/server-functions/default/.next/server/app/robots.txt/route.js": {
+          "bytesInOutput": 447
+        },
+        ".open-next/server-functions/default/.next/server/app/_not-found/page.js": {
+          "bytesInOutput": 909
+        },
+        ".open-next/server-functions/default/.next/server/app/electrical/page.js": {
+          "bytesInOutput": 1007
+        },
+        ".open-next/server-functions/default/.next/server/app/api/cbam/route.js": {
+          "bytesInOutput": 549
+        },
         ".open-next/server-functions/default/.next/server/app/icon.svg/route.js": {
-          "bytesInOutput": 442
+          "bytesInOutput": 441
         },
         ".open-next/server-functions/default/.next/server/app/api/ec3/route.js": {
-          "bytesInOutput": 465
+          "bytesInOutput": 464
         },
         ".open-next/server-functions/default/.next/server/app/api/epd/route.js": {
-          "bytesInOutput": 556
+          "bytesInOutput": 555
         },
         ".open-next/server-functions/default/.next/server/app/contact/page.js": {
-          "bytesInOutput": 997
+          "bytesInOutput": 998
         },
         ".open-next/server-functions/default/.next/server/app/guides/page.js": {
-          "bytesInOutput": 994
+          "bytesInOutput": 995
         },
         ".open-next/server-functions/default/.next/server/app/about/page.js": {
-          "bytesInOutput": 989
+          "bytesInOutput": 990
         },
         ".open-next/server-functions/default/.next/server/app/page.js": {
-          "bytesInOutput": 973
+          "bytesInOutput": 974
         },
         ".open-next/server-functions/default/node_modules/next/dist/server/require.js": {
-          "bytesInOutput": 7016
+          "bytesInOutput": 8270
         },
         ".open-next/server-functions/default/node_modules/next/dist/lib/wait.js": {
           "bytesInOutput": 341
@@ -12437,10 +13162,10 @@
           "bytesInOutput": 5074
         },
         ".open-next/server-functions/default/index.mjs": {
-          "bytesInOutput": 74725
+          "bytesInOutput": 83064
         }
       },
-      "bytes": 6808542
+      "bytes": 7038900
     }
   }
 }

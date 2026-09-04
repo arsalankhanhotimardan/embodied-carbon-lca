@@ -213,6 +213,72 @@
       "namedRegex": "^/ec3\\-epd\\-guide(?:/)?$"
     },
     {
+      "page": "/electrical",
+      "regex": "^/electrical(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical(?:/)?$"
+    },
+    {
+      "page": "/electrical/3-phase-voltage-drop-calculator",
+      "regex": "^/electrical/3\\-phase\\-voltage\\-drop\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/3\\-phase\\-voltage\\-drop\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/electrical/battery-cable-size-calculator",
+      "regex": "^/electrical/battery\\-cable\\-size\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/battery\\-cable\\-size\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/electrical/cable-power-loss-calculator",
+      "regex": "^/electrical/cable\\-power\\-loss\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/cable\\-power\\-loss\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/electrical/dc-wire-size-calculator",
+      "regex": "^/electrical/dc\\-wire\\-size\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/dc\\-wire\\-size\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/electrical/kva-to-amps-calculator",
+      "regex": "^/electrical/kva\\-to\\-amps\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/kva\\-to\\-amps\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/electrical/methodology",
+      "regex": "^/electrical/methodology(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/methodology(?:/)?$"
+    },
+    {
+      "page": "/electrical/voltage-drop-calculator",
+      "regex": "^/electrical/voltage\\-drop\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/voltage\\-drop\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/electrical/watts-to-amps-calculator",
+      "regex": "^/electrical/watts\\-to\\-amps\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/watts\\-to\\-amps\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/electrical/wire-length-calculator",
+      "regex": "^/electrical/wire\\-length\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/wire\\-length\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/electrical/wire-size-calculator",
+      "regex": "^/electrical/wire\\-size\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/electrical/wire\\-size\\-calculator(?:/)?$"
+    },
+    {
       "page": "/embodied-carbon-calculator",
       "regex": "^/embodied\\-carbon\\-calculator(?:/)?$",
       "routeKeys": {},

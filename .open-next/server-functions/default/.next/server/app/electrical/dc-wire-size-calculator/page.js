@@ -1,0 +1,13 @@
+var R=require("../../../chunks/ssr/[turbopack]_runtime.js")("server/app/electrical/dc-wire-size-calculator/page.js")
+R.c("server/chunks/ssr/[root-of-the-server]__1fuypgj._.js")
+R.c("server/chunks/ssr/node_modules_next_dist_1n3w9lb._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__1yvv6ks._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0j26pto._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0w66zr0._.js")
+R.c("server/chunks/ssr/node_modules_next_dist_client_components_0wpq8j3._.js")
+R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_forbidden_0symwr9.js")
+R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_unauthorized_0l_sp0x.js")
+R.c("server/chunks/ssr/node_modules_next_dist_client_components_builtin_global-error_0q-w892.js")
+R.c("server/chunks/ssr/1oeh_server_app_electrical_dc-wire-size-calculator_page_actions_0idm7m9.js")
+R.m(85612)
+module.exports=R.m(85612).exports
