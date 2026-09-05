@@ -35,6 +35,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/electrical/watts-to-amps-calculator",
     "/electrical/kva-to-amps-calculator",
     "/electrical/methodology",
+    "/building-envelope",
+    "/building-envelope/insulation-calculator",
+    "/building-envelope/attic-insulation-calculator",
+    "/building-envelope/blown-in-insulation-calculator",
+    "/building-envelope/wall-insulation-calculator",
+    "/building-envelope/r-value-calculator",
+    "/building-envelope/u-value-calculator",
+    "/building-envelope/heat-loss-calculator",
+    "/building-envelope/carbon-payback-calculator",
+    "/building-envelope/methodology",
   ];
   return paths.map((path) => ({ url: `${base}${path}` }));
 }

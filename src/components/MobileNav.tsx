@@ -7,10 +7,13 @@ import { useEffect, useState } from "react";
 const primaryLinks = [
   { href: "/", label: "LCA Engine" },
   { href: "/cbam-calculator", label: "CBAM Calculator" },
+  { href: "/building-envelope", label: "Building Envelope Tools" },
+  { href: "/building-envelope/insulation-calculator", label: "Insulation Calculator" },
+  { href: "/building-envelope/u-value-calculator", label: "U-Value Calculator" },
+  { href: "/building-envelope/heat-loss-calculator", label: "Heat Loss Calculator" },
   { href: "/electrical", label: "Electrical Tools" },
   { href: "/electrical/voltage-drop-calculator", label: "Voltage Drop Calculator" },
   { href: "/electrical/wire-size-calculator", label: "Wire Size Calculator" },
-  { href: "/electrical/dc-wire-size-calculator", label: "DC Wire Size Calculator" },
   { href: "/cbam-calculator/actual-data", label: "CBAM Actual / Complex Goods" },
   { href: "/cbam-calculator/electricity", label: "CBAM Electricity" },
   { href: "/cbam-calculator/bulk", label: "CBAM Bulk CSV" },
@@ -21,6 +24,7 @@ const primaryLinks = [
 ];
 
 const learningLinks = [
+  { href: "/building-envelope/methodology", label: "Building Envelope Methodology" },
   { href: "/embodied-carbon-calculator", label: "Embodied Carbon Calculator" },
   { href: "/a1-a3-embodied-carbon", label: "A1-A3 Embodied Carbon" },
   { href: "/epd-carbon-calculator", label: "EPD Carbon Calculator" },
@@ -81,12 +85,13 @@ export default function MobileNav() {
           <div id="mobile-navigation-panel" className="fixed inset-x-0 top-16 z-[60] max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain border-b border-slate-200 bg-white shadow-2xl sm:top-20 sm:max-h-[calc(100vh-5rem)]">
             <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6">
               <section className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
-                <p className="px-1 pb-3 text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Calculators</p>
+                <p className="px-1 pb-3 text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Core calculators</p>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <Link href="/#calculator-workspace" onClick={closeMenu} className="rounded-xl bg-slate-900 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-slate-800">LCA Workspace</Link>
                   <Link href="/cbam-calculator" onClick={closeMenu} className="rounded-xl bg-emerald-600 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-emerald-500">CBAM Calculator</Link>
+                  <Link href="/building-envelope" onClick={closeMenu} className="rounded-xl bg-orange-600 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-orange-500">Building Envelope</Link>
                   <Link href="/electrical" onClick={closeMenu} className="rounded-xl bg-blue-700 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-blue-600">Electrical Tools</Link>
-                  <a href="https://solarcalculator.greenengineeringtools.com" onClick={closeMenu} className="rounded-xl bg-sky-600 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-sky-500">Solar Calculator ↗</a>
+                  <a href="https://solarcalculator.greenengineeringtools.com" onClick={closeMenu} className="rounded-xl bg-sky-600 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-sky-500 sm:col-span-2">Solar Calculator ↗</a>
                 </div>
               </section>
 

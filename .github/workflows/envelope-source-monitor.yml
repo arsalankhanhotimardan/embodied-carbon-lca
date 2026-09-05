@@ -1,0 +1,19 @@
+name: Building Envelope Source Monitor
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --experimental-strip-types scripts/test-building-envelope-engine-v1.mjs
+      - run: node --experimental-strip-types scripts/test-building-envelope-data.mjs
+      - run: node scripts/test-building-envelope-static.mjs
+      - run: node scripts/check-building-envelope-sources.mjs
