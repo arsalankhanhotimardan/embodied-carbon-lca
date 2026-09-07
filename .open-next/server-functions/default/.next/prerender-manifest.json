@@ -5,7 +5,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 48900,
+      "htmlSize": 50584,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -62,7 +62,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 25793,
+      "htmlSize": 27477,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -90,7 +90,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 60505,
+      "htmlSize": 62086,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -118,7 +118,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 26471,
+      "htmlSize": 28155,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -146,7 +146,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 61824,
+      "htmlSize": 63405,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -170,11 +170,291 @@
         "x-next-revalidate-tag-token"
       ]
     },
+    "/building-envelope": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 46418,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope",
+      "dataRoute": "/building-envelope.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/building-envelope/attic-insulation-calculator": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 60668,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope/attic-insulation-calculator",
+      "dataRoute": "/building-envelope/attic-insulation-calculator.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/building-envelope/blown-in-insulation-calculator": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 60696,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope/blown-in-insulation-calculator",
+      "dataRoute": "/building-envelope/blown-in-insulation-calculator.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/building-envelope/carbon-payback-calculator": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 60876,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope/carbon-payback-calculator",
+      "dataRoute": "/building-envelope/carbon-payback-calculator.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/building-envelope/heat-loss-calculator": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 66096,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope/heat-loss-calculator",
+      "dataRoute": "/building-envelope/heat-loss-calculator.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/building-envelope/insulation-calculator": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 59422,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope/insulation-calculator",
+      "dataRoute": "/building-envelope/insulation-calculator.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/building-envelope/methodology": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 54280,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope/methodology",
+      "dataRoute": "/building-envelope/methodology.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/building-envelope/r-value-calculator": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 63480,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope/r-value-calculator",
+      "dataRoute": "/building-envelope/r-value-calculator.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/building-envelope/u-value-calculator": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 64128,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope/u-value-calculator",
+      "dataRoute": "/building-envelope/u-value-calculator.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/building-envelope/wall-insulation-calculator": {
+      "routeType": "page",
+      "response": "complete",
+      "compute": "static",
+      "htmlSize": 58874,
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/building-envelope/wall-insulation-calculator",
+      "dataRoute": "/building-envelope/wall-insulation-calculator.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
     "/cbam-calculator": {
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 25866,
+      "htmlSize": 27398,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -202,7 +482,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 35411,
+      "htmlSize": 36930,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -230,7 +510,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 31405,
+      "htmlSize": 32924,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -258,7 +538,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 31812,
+      "htmlSize": 33331,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -286,7 +566,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 29714,
+      "htmlSize": 31398,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -314,7 +594,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 60452,
+      "htmlSize": 62020,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -342,7 +622,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 43952,
+      "htmlSize": 45520,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -370,7 +650,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 63776,
+      "htmlSize": 65369,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -398,7 +678,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 61449,
+      "htmlSize": 63042,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -426,7 +706,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 63872,
+      "htmlSize": 65465,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -454,7 +734,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 62826,
+      "htmlSize": 64419,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -482,7 +762,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 33349,
+      "htmlSize": 34942,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -510,7 +790,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 40001,
+      "htmlSize": 41594,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -538,7 +818,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 64752,
+      "htmlSize": 66345,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -566,7 +846,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 33084,
+      "htmlSize": 34677,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -594,7 +874,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 62960,
+      "htmlSize": 64553,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -622,7 +902,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 62673,
+      "htmlSize": 64266,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -650,7 +930,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 62518,
+      "htmlSize": 64116,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -678,7 +958,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 62251,
+      "htmlSize": 63832,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -706,7 +986,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 36993,
+      "htmlSize": 38599,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -766,7 +1046,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 59728,
+      "htmlSize": 61309,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -794,7 +1074,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 76556,
+      "htmlSize": 78124,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -822,7 +1102,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 53594,
+      "htmlSize": 55162,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -850,7 +1130,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 30146,
+      "htmlSize": 31830,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -942,7 +1222,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 28935,
+      "htmlSize": 30619,
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -970,7 +1250,7 @@
       "routeType": "page",
       "response": "complete",
       "compute": "static",
-      "htmlSize": 57462,
+      "htmlSize": 59043,
       "experimentalBypassFor": [
         {
           "type": "header",

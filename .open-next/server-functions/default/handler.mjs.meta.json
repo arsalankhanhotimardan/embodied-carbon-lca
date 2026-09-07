@@ -3985,7 +3985,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-      "bytes": 148046,
+      "bytes": 183095,
       "imports": [
         {
           "path": "path",
@@ -4644,7 +4644,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0w66zr0._.js": {
-      "bytes": 11147,
+      "bytes": 11902,
       "imports": [],
       "format": "cjs"
     },
@@ -4700,7 +4700,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/_0979ajz._.js": {
-      "bytes": 58408,
+      "bytes": 58919,
       "imports": [],
       "format": "cjs"
     },
@@ -6114,6 +6114,176 @@
       "imports": [],
       "format": "cjs"
     },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_attic-insulation-calculator_page_actions_0mbkl91.js": {
+      "bytes": 147,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__19j5ura._.js": {
+      "bytes": 13837,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/src_02ewp98._.js": {
+      "bytes": 63078,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1jng_app_building-envelope_blown-in-insulation-calculator_page_actions_0gasyey.js": {
+      "bytes": 142,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1murdpu._.js": {
+      "bytes": 13833,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_carbon-payback-calculator_page_actions_0q-okty.js": {
+      "bytes": 145,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1u6ji_-._.js": {
+      "bytes": 13918,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_heat-loss-calculator_page_actions_19h_5yr.js": {
+      "bytes": 140,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__02pvjx7._.js": {
+      "bytes": 13720,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_insulation-calculator_page_actions_1oipezn.js": {
+      "bytes": 141,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1234ok_._.js": {
+      "bytes": 14042,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1t0fc56._.js": {
+      "bytes": 3738,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_methodology_page_actions_16jct89.js": {
+      "bytes": 140,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/app_building-envelope_methodology_page_tsx_1m7d22v._.js": {
+      "bytes": 12067,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0c5h8ij._.js": {
+      "bytes": 10793,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_page_actions_10awzre.js": {
+      "bytes": 129,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_r-value-calculator_page_actions_0pgap2p.js": {
+      "bytes": 138,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__17q60y0._.js": {
+      "bytes": 13339,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_u-value-calculator_page_actions_18ibhbi.js": {
+      "bytes": 138,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1esuotz._.js": {
+      "bytes": 13615,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_wall-insulation-calculator_page_actions_19ikmqb.js": {
+      "bytes": 146,
+      "imports": [],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1imjrnf._.js": {
+      "bytes": 13752,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/node_modules/next/dist/shared/lib/no-fallback-error.external.js",
+          "kind": "require-call",
+          "original": "next/dist/shared/lib/no-fallback-error.external.js"
+        }
+      ],
+      "format": "cjs"
+    },
     ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js": {
       "bytes": 4486,
       "imports": [
@@ -6750,7 +6920,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/[root-of-the-server]__1-6bjl1._.js": {
-      "bytes": 13346,
+      "bytes": 13761,
       "imports": [
         {
           "path": ".open-next/server-functions/default/node_modules/next/dist/compiled/@opentelemetry/api/index.js",
@@ -6895,7 +7065,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/[turbopack]_runtime.js": {
-      "bytes": 67667,
+      "bytes": 73057,
       "imports": [
         {
           "path": "worker_threads",
@@ -7276,6 +7446,116 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_bim-embodied-carbon_page_actions_0_ezbwy.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_bim-embodied-carbon_page_actions_0_ezbwy.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_attic-insulation-calculator_page_actions_0mbkl91.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_attic-insulation-calculator_page_actions_0mbkl91.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__19j5ura._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__19j5ura._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/src_02ewp98._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/src_02ewp98._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1jng_app_building-envelope_blown-in-insulation-calculator_page_actions_0gasyey.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1jng_app_building-envelope_blown-in-insulation-calculator_page_actions_0gasyey.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1murdpu._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1murdpu._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_carbon-payback-calculator_page_actions_0q-okty.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_carbon-payback-calculator_page_actions_0q-okty.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1u6ji_-._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1u6ji_-._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_heat-loss-calculator_page_actions_19h_5yr.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_heat-loss-calculator_page_actions_19h_5yr.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__02pvjx7._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__02pvjx7._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_insulation-calculator_page_actions_1oipezn.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_insulation-calculator_page_actions_1oipezn.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1234ok_._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1234ok_._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1t0fc56._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1t0fc56._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_methodology_page_actions_16jct89.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_methodology_page_actions_16jct89.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_building-envelope_methodology_page_tsx_1m7d22v._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_building-envelope_methodology_page_tsx_1m7d22v._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0c5h8ij._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0c5h8ij._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_page_actions_10awzre.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_page_actions_10awzre.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_r-value-calculator_page_actions_0pgap2p.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_r-value-calculator_page_actions_0pgap2p.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__17q60y0._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__17q60y0._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_u-value-calculator_page_actions_18ibhbi.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_u-value-calculator_page_actions_18ibhbi.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1esuotz._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1esuotz._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_wall-insulation-calculator_page_actions_19ikmqb.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_wall-insulation-calculator_page_actions_19ikmqb.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1imjrnf._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1imjrnf._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js",
@@ -7706,7 +7986,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js": {
-      "bytes": 67677,
+      "bytes": 73067,
       "imports": [
         {
           "path": "worker_threads",
@@ -8087,6 +8367,116 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_bim-embodied-carbon_page_actions_0_ezbwy.js",
           "kind": "require-call",
           "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_bim-embodied-carbon_page_actions_0_ezbwy.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_attic-insulation-calculator_page_actions_0mbkl91.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_attic-insulation-calculator_page_actions_0mbkl91.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__19j5ura._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__19j5ura._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/src_02ewp98._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/src_02ewp98._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1jng_app_building-envelope_blown-in-insulation-calculator_page_actions_0gasyey.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1jng_app_building-envelope_blown-in-insulation-calculator_page_actions_0gasyey.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1murdpu._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1murdpu._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_carbon-payback-calculator_page_actions_0q-okty.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_carbon-payback-calculator_page_actions_0q-okty.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1u6ji_-._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1u6ji_-._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_heat-loss-calculator_page_actions_19h_5yr.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_heat-loss-calculator_page_actions_19h_5yr.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__02pvjx7._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__02pvjx7._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_insulation-calculator_page_actions_1oipezn.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_insulation-calculator_page_actions_1oipezn.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1234ok_._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1234ok_._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1t0fc56._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1t0fc56._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_methodology_page_actions_16jct89.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_methodology_page_actions_16jct89.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/app_building-envelope_methodology_page_tsx_1m7d22v._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/app_building-envelope_methodology_page_tsx_1m7d22v._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0c5h8ij._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0c5h8ij._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_page_actions_10awzre.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_page_actions_10awzre.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_r-value-calculator_page_actions_0pgap2p.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_r-value-calculator_page_actions_0pgap2p.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__17q60y0._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__17q60y0._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_u-value-calculator_page_actions_18ibhbi.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_u-value-calculator_page_actions_18ibhbi.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1esuotz._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1esuotz._.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_wall-insulation-calculator_page_actions_19ikmqb.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_wall-insulation-calculator_page_actions_19ikmqb.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1imjrnf._.js",
+          "kind": "require-call",
+          "original": "D:/embodied-carbon-lca/.open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1imjrnf._.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js",
@@ -8516,6 +8906,50 @@
       ],
       "format": "cjs"
     },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/blown-in-insulation-calculator/page.js": {
+      "bytes": 954,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/attic-insulation-calculator/page.js": {
+      "bytes": 955,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/wall-insulation-calculator/page.js": {
+      "bytes": 953,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/carbon-payback-calculator/page.js": {
+      "bytes": 951,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
     ".open-next/server-functions/default/.next/server/app/electrical/3-phase-voltage-drop-calculator/page.js": {
       "bytes": 949,
       "imports": [
@@ -8538,8 +8972,52 @@
       ],
       "format": "cjs"
     },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/insulation-calculator/page.js": {
+      "bytes": 943,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/heat-loss-calculator/page.js": {
+      "bytes": 941,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
     ".open-next/server-functions/default/.next/server/app/electrical/cable-power-loss-calculator/page.js": {
       "bytes": 941,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/r-value-calculator/page.js": {
+      "bytes": 937,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/u-value-calculator/page.js": {
+      "bytes": 937,
       "imports": [
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
@@ -8606,6 +9084,17 @@
     },
     ".open-next/server-functions/default/.next/server/app/electrical/wire-size-calculator/page.js": {
       "bytes": 935,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../../chunks/ssr/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/methodology/page.js": {
+      "bytes": 1014,
       "imports": [
         {
           "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
@@ -8853,6 +9342,17 @@
           "path": ".open-next/server-functions/default/.next/server/chunks/[turbopack]_runtime.js",
           "kind": "require-call",
           "original": "../../../../chunks/[turbopack]_runtime.js"
+        }
+      ],
+      "format": "cjs"
+    },
+    ".open-next/server-functions/default/.next/server/app/building-envelope/page.js": {
+      "bytes": 906,
+      "imports": [
+        {
+          "path": ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js",
+          "kind": "require-call",
+          "original": "../../chunks/ssr/[turbopack]_runtime.js"
         }
       ],
       "format": "cjs"
@@ -9111,7 +9611,7 @@
       "format": "cjs"
     },
     ".open-next/server-functions/default/node_modules/next/dist/server/require.js": {
-      "bytes": 16754,
+      "bytes": 19443,
       "imports": [
         {
           "path": "path",
@@ -9159,6 +9659,26 @@
           "external": true
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/blown-in-insulation-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\blown-in-insulation-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/attic-insulation-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\attic-insulation-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/wall-insulation-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\wall-insulation-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/carbon-payback-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\carbon-payback-calculator\\page.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/app/electrical/3-phase-voltage-drop-calculator/page.js",
           "kind": "require-call",
           "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\3-phase-voltage-drop-calculator\\page.js"
@@ -9169,9 +9689,29 @@
           "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\battery-cable-size-calculator\\page.js"
         },
         {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/insulation-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\insulation-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/heat-loss-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\heat-loss-calculator\\page.js"
+        },
+        {
           "path": ".open-next/server-functions/default/.next/server/app/electrical/cable-power-loss-calculator/page.js",
           "kind": "require-call",
           "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\cable-power-loss-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/r-value-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\r-value-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/u-value-calculator/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\u-value-calculator\\page.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/electrical/watts-to-amps-calculator/page.js",
@@ -9202,6 +9742,11 @@
           "path": ".open-next/server-functions/default/.next/server/app/electrical/wire-size-calculator/page.js",
           "kind": "require-call",
           "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\electrical\\wire-size-calculator\\page.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/methodology/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\methodology\\page.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/api/cbam/reference/activate/route.js",
@@ -9312,6 +9857,11 @@
           "path": ".open-next/server-functions/default/.next/server/app/api/lca/projects/route.js",
           "kind": "require-call",
           "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\api\\lca\\projects\\route.js"
+        },
+        {
+          "path": ".open-next/server-functions/default/.next/server/app/building-envelope/page.js",
+          "kind": "require-call",
+          "original": "D:\\embodied-carbon-lca\\.open-next\\server-functions\\default\\.next\\server\\app\\building-envelope\\page.js"
         },
         {
           "path": ".open-next/server-functions/default/.next/server/app/api/cbam/health/route.js",
@@ -10662,7 +11212,7 @@
       "format": "esm"
     },
     ".open-next/server-functions/default/index.mjs": {
-      "bytes": 112718,
+      "bytes": 121652,
       "imports": [
         {
           "path": "node:module",
@@ -12307,7 +12857,7 @@
           "bytesInOutput": 459
         },
         ".open-next/server-functions/default/node_modules/next/dist/server/load-manifest.external.js": {
-          "bytesInOutput": 113274
+          "bytesInOutput": 140976
         },
         ".open-next/cloudflare-templates/shims/throw.js": {
           "bytesInOutput": 215
@@ -12388,13 +12938,13 @@
           "bytesInOutput": 2426
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0w66zr0._.js": {
-          "bytesInOutput": 11330
+          "bytesInOutput": 12086
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1yvv6ks._.js": {
           "bytesInOutput": 3007
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_0979ajz._.js": {
-          "bytesInOutput": 59566
+          "bytesInOutput": 60077
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app__not-found_page_actions_0pt47yr.js": {
           "bytesInOutput": 270
@@ -12587,6 +13137,72 @@
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_bim-embodied-carbon_page_actions_0_ezbwy.js": {
           "bytesInOutput": 289
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_attic-insulation-calculator_page_actions_0mbkl91.js": {
+          "bytesInOutput": 321
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__19j5ura._.js": {
+          "bytesInOutput": 13938
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/src_02ewp98._.js": {
+          "bytesInOutput": 64657
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1jng_app_building-envelope_blown-in-insulation-calculator_page_actions_0gasyey.js": {
+          "bytesInOutput": 312
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1murdpu._.js": {
+          "bytesInOutput": 13938
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_carbon-payback-calculator_page_actions_0q-okty.js": {
+          "bytesInOutput": 317
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1u6ji_-._.js": {
+          "bytesInOutput": 14027
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_heat-loss-calculator_page_actions_19h_5yr.js": {
+          "bytesInOutput": 307
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__02pvjx7._.js": {
+          "bytesInOutput": 13821
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_insulation-calculator_page_actions_1oipezn.js": {
+          "bytesInOutput": 309
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1234ok_._.js": {
+          "bytesInOutput": 14148
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1t0fc56._.js": {
+          "bytesInOutput": 3812
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_methodology_page_actions_16jct89.js": {
+          "bytesInOutput": 308
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/app_building-envelope_methodology_page_tsx_1m7d22v._.js": {
+          "bytesInOutput": 12336
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__0c5h8ij._.js": {
+          "bytesInOutput": 10875
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/_next-internal_server_app_building-envelope_page_actions_10awzre.js": {
+          "bytesInOutput": 285
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_r-value-calculator_page_actions_0pgap2p.js": {
+          "bytesInOutput": 303
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__17q60y0._.js": {
+          "bytesInOutput": 13444
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_u-value-calculator_page_actions_18ibhbi.js": {
+          "bytesInOutput": 303
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1esuotz._.js": {
+          "bytesInOutput": 13716
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/1oeh_server_app_building-envelope_wall-insulation-calculator_page_actions_19ikmqb.js": {
+          "bytesInOutput": 319
+        },
+        ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1imjrnf._.js": {
+          "bytesInOutput": 13851
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[root-of-the-server]__1y7q_ns._.js": {
           "bytesInOutput": 4560
@@ -12814,7 +13430,7 @@
           "bytesInOutput": 269
         },
         ".open-next/server-functions/default/.next/server/chunks/[root-of-the-server]__1-6bjl1._.js": {
-          "bytesInOutput": 13487
+          "bytesInOutput": 13902
         },
         ".open-next/server-functions/default/.next/server/chunks/_next-internal_server_app_sitemap_xml_route_actions_05l5km9.js": {
           "bytesInOutput": 271
@@ -12841,37 +13457,64 @@
           "bytesInOutput": 275
         },
         ".open-next/server-functions/default/.next/server/chunks/[turbopack]_runtime.js": {
-          "bytesInOutput": 34073
+          "bytesInOutput": 37284
         },
         ".open-next/server-functions/default/.next/server/chunks/ssr/[turbopack]_runtime.js": {
-          "bytesInOutput": 34088
+          "bytesInOutput": 37299
+        },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/blown-in-insulation-calculator/page.js": {
+          "bytesInOutput": 1102
+        },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/attic-insulation-calculator/page.js": {
+          "bytesInOutput": 1101
+        },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/wall-insulation-calculator/page.js": {
+          "bytesInOutput": 1098
+        },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/carbon-payback-calculator/page.js": {
+          "bytesInOutput": 1095
         },
         ".open-next/server-functions/default/.next/server/app/electrical/3-phase-voltage-drop-calculator/page.js": {
-          "bytesInOutput": 1091
+          "bytesInOutput": 1092
         },
         ".open-next/server-functions/default/.next/server/app/electrical/battery-cable-size-calculator/page.js": {
           "bytesInOutput": 1086
         },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/insulation-calculator/page.js": {
+          "bytesInOutput": 1083
+        },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/heat-loss-calculator/page.js": {
+          "bytesInOutput": 1080
+        },
         ".open-next/server-functions/default/.next/server/app/electrical/cable-power-loss-calculator/page.js": {
           "bytesInOutput": 1080
         },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/r-value-calculator/page.js": {
+          "bytesInOutput": 1075
+        },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/u-value-calculator/page.js": {
+          "bytesInOutput": 1075
+        },
         ".open-next/server-functions/default/.next/server/app/electrical/watts-to-amps-calculator/page.js": {
-          "bytesInOutput": 1071
+          "bytesInOutput": 1072
         },
         ".open-next/server-functions/default/.next/server/app/electrical/dc-wire-size-calculator/page.js": {
-          "bytesInOutput": 1068
+          "bytesInOutput": 1069
         },
         ".open-next/server-functions/default/.next/server/app/electrical/voltage-drop-calculator/page.js": {
-          "bytesInOutput": 1068
+          "bytesInOutput": 1069
         },
         ".open-next/server-functions/default/.next/server/app/electrical/kva-to-amps-calculator/page.js": {
-          "bytesInOutput": 1075
+          "bytesInOutput": 1076
         },
         ".open-next/server-functions/default/.next/server/app/electrical/wire-length-calculator/page.js": {
-          "bytesInOutput": 1075
+          "bytesInOutput": 1076
         },
         ".open-next/server-functions/default/.next/server/app/electrical/wire-size-calculator/page.js": {
-          "bytesInOutput": 1067
+          "bytesInOutput": 1068
+        },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/methodology/page.js": {
+          "bytesInOutput": 1145
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/reference/activate/route.js": {
           "bytesInOutput": 578
@@ -12938,6 +13581,9 @@
         },
         ".open-next/server-functions/default/.next/server/app/api/lca/projects/route.js": {
           "bytesInOutput": 547
+        },
+        ".open-next/server-functions/default/.next/server/app/building-envelope/page.js": {
+          "bytesInOutput": 1028
         },
         ".open-next/server-functions/default/.next/server/app/api/cbam/health/route.js": {
           "bytesInOutput": 544
@@ -13009,7 +13655,7 @@
           "bytesInOutput": 974
         },
         ".open-next/server-functions/default/node_modules/next/dist/server/require.js": {
-          "bytesInOutput": 8270
+          "bytesInOutput": 9465
         },
         ".open-next/server-functions/default/node_modules/next/dist/lib/wait.js": {
           "bytesInOutput": 341
@@ -13162,10 +13808,10 @@
           "bytesInOutput": 5074
         },
         ".open-next/server-functions/default/index.mjs": {
-          "bytesInOutput": 83064
+          "bytesInOutput": 91098
         }
       },
-      "bytes": 7028245
+      "bytes": 7289816
     }
   }
 }

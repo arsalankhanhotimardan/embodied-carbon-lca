@@ -177,6 +177,66 @@
       "namedRegex": "^/bim\\-embodied\\-carbon(?:/)?$"
     },
     {
+      "page": "/building-envelope",
+      "regex": "^/building\\-envelope(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope(?:/)?$"
+    },
+    {
+      "page": "/building-envelope/attic-insulation-calculator",
+      "regex": "^/building\\-envelope/attic\\-insulation\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope/attic\\-insulation\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/building-envelope/blown-in-insulation-calculator",
+      "regex": "^/building\\-envelope/blown\\-in\\-insulation\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope/blown\\-in\\-insulation\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/building-envelope/carbon-payback-calculator",
+      "regex": "^/building\\-envelope/carbon\\-payback\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope/carbon\\-payback\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/building-envelope/heat-loss-calculator",
+      "regex": "^/building\\-envelope/heat\\-loss\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope/heat\\-loss\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/building-envelope/insulation-calculator",
+      "regex": "^/building\\-envelope/insulation\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope/insulation\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/building-envelope/methodology",
+      "regex": "^/building\\-envelope/methodology(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope/methodology(?:/)?$"
+    },
+    {
+      "page": "/building-envelope/r-value-calculator",
+      "regex": "^/building\\-envelope/r\\-value\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope/r\\-value\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/building-envelope/u-value-calculator",
+      "regex": "^/building\\-envelope/u\\-value\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope/u\\-value\\-calculator(?:/)?$"
+    },
+    {
+      "page": "/building-envelope/wall-insulation-calculator",
+      "regex": "^/building\\-envelope/wall\\-insulation\\-calculator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/building\\-envelope/wall\\-insulation\\-calculator(?:/)?$"
+    },
+    {
       "page": "/cbam-calculator",
       "regex": "^/cbam\\-calculator(?:/)?$",
       "routeKeys": {},

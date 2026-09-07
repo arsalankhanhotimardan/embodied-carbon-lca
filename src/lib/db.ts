@@ -1,35 +1,34 @@
-﻿import { Pool } from "@neondatabase/serverless";
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __lcaNeonPool: Pool | undefined;
-}
-
-const connectionString = process.env.DATABASE_URL;
-
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not configured.");
-}
+import { neon } from "@neondatabase/serverless";
 
 /**
- * Reuse the pool between hot reloads / warm serverless invocations.
- * Do NOT call pool.end() inside every API request.
+ * Keep the existing query/rows API, but use request-local HTTP queries.
+ * A WebSocket Pool cannot be shared across Cloudflare Worker requests.
+ * No automatic retries: a timed-out write may already have committed.
  */
-export const db =
-  global.__lcaNeonPool ??
-  new Pool({
-    connectionString,
-    max: 5,
-  });
+export const db = {
+  async query(text: string, params: unknown[] = []) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      throw new Error("DATABASE_URL is not configured.");
+    }
 
-if (process.env.NODE_ENV !== "production") {
-  global.__lcaNeonPool = db;
-}
+    const sql = neon(connectionString, { fullResults: true });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20_000);
+    try {
+      return await sql(text, params, {
+        fetchOptions: { signal: controller.signal, cache: "no-store" },
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+  },
+};
 
 export async function dbQuery<T = any>(
   text: string,
   params: unknown[] = []
 ): Promise<T[]> {
-  const result = await db.query(text, params as any[]);
+  const result = await db.query(text, params);
   return result.rows as T[];
 }
