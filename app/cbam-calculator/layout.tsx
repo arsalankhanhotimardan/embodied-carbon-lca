@@ -3,6 +3,39 @@ import type { ReactNode } from "react";
 
 const canonical = "https://greenengineeringtools.com/cbam-calculator";
 
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "EU CBAM Calculator",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web Browser",
+  url: canonical,
+  description:
+    "EU CBAM calculator for 2026 onward, with official country/CN reference data, dynamic reporting years, certificate-price periods, the 50-tonne threshold and portfolio analysis.",
+  provider: {
+    "@type": "Organization",
+    name: "Green Engineering Tools",
+    url: "https://greenengineeringtools.com",
+  },
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "EUR",
+  },
+  featureList: [
+    "Multi-year CBAM certificate cost estimate",
+    "50-tonne annual de minimis threshold",
+    "CBAM default and actual emissions modes",
+    "CBAM benchmark and free-allocation adjustment",
+    "Iron and steel CBAM calculations",
+    "Aluminium CBAM calculations",
+    "Cement CBAM calculations",
+    "Fertiliser CBAM calculations",
+    "CSV bulk import",
+    "Portfolio exposure analysis",
+  ],
+};
+
 export const metadata: Metadata = {
   title: "EU CBAM Calculator | Official Data & Future Price Periods",
   description:
@@ -42,5 +75,13 @@ export default function CbamCalculatorLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  return children;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+      />
+      {children}
+    </>
+  );
 }

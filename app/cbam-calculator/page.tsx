@@ -509,39 +509,6 @@ const buildAdvancedHref = (
 };
 
 export default function CbamEstimatorV3() {
-  const softwareSchema = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: "EU CBAM Calculator",
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web Browser",
-    url: "https://greenengineeringtools.com/cbam-calculator",
-    description:
-      "EU CBAM calculator for 2026 onward, with official country/CN reference data, dynamic reporting years, certificate-price periods, the 50-tonne threshold and portfolio analysis.",
-    provider: {
-      "@type": "Organization",
-      name: "Green Engineering Tools",
-      url: "https://greenengineeringtools.com",
-    },
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "EUR",
-    },
-    featureList: [
-      "Multi-year CBAM certificate cost estimate",
-      "50-tonne annual de minimis threshold",
-      "CBAM default and actual emissions modes",
-      "CBAM benchmark and free-allocation adjustment",
-      "Iron and steel CBAM calculations",
-      "Aluminium CBAM calculations",
-      "Cement CBAM calculations",
-      "Fertiliser CBAM calculations",
-      "CSV bulk import",
-      "Portfolio exposure analysis",
-    ],
-  };
-
   const [isLoading, setIsLoading] = useState(true);
   const [apiWarning, setApiWarning] = useState("");
   const [activeAppTab, setActiveAppTab] = useState<
@@ -742,10 +709,16 @@ export default function CbamEstimatorV3() {
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    setIsLoading(true);
+
     const load = async () => {
       try {
         const res = await fetch(`/api/cbam?year=${selectedYear}`, {
           cache: "no-store",
+          signal: controller.signal,
         });
 
         if (!res.ok) {
@@ -792,6 +765,8 @@ export default function CbamEstimatorV3() {
               .filter((r: PriceRecord) => Number.isFinite(r.price))
           : [];
 
+        if (!active) return;
+
         setProductDatabase(products);
         setPriceRecords(prices);
 
@@ -812,6 +787,8 @@ export default function CbamEstimatorV3() {
           );
         }
       } catch (error) {
+        if (!active || (error as Error)?.name === "AbortError") return;
+
         console.error(error);
         setApiWarning(
           error instanceof Error
@@ -819,11 +796,16 @@ export default function CbamEstimatorV3() {
             : "Could not load CBAM backend."
         );
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     };
 
     load();
+
+    return () => {
+      active = false;
+      controller.abort();
+    };
   }, [selectedYear, priceRefreshToken]);
 
   useEffect(() => {
@@ -2342,20 +2324,18 @@ export default function CbamEstimatorV3() {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-[70vh] flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full" />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen min-w-0 overflow-x-hidden bg-slate-50">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
-      />
+      {isLoading && (
+        <div
+          role="status"
+          className="mx-auto max-w-7xl px-3 pt-4 sm:px-6 lg:px-8"
+        >
+          <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-800">
+            Loading official CBAM reference data…
+          </div>
+        </div>
+      )}
 
       <main className="w-full min-w-0 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
         <header className="text-center max-w-4xl mx-auto mb-8">
