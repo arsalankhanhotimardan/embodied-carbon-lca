@@ -1,8 +1,11 @@
 import type { MetadataRoute } from "next";
 
+import { QUICK_TOOLS } from "@/data/electrical-quick-tools";
+import { countrySlug, listCnCodes, listCountries, safely } from "@/lib/cbam-public-reference";
+
 export const dynamic = "force-static";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = "https://greenengineeringtools.com";
   const paths = [
     "/",
@@ -46,6 +49,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/building-envelope/carbon-payback-calculator",
     "/building-envelope/methodology",
   ];
+  // Country and CN-code pages come from the database; if it is unreachable at build time they are simply omitted.
+  const countries = await safely(listCountries, []);
+  const cnCodes = await safely(listCnCodes, []);
+  const dataPaths = [
+    ...(countries.length ? ["/cbam/country"] : []),
+    ...countries.map((c) => `/cbam/country/${countrySlug(c.normalized)}`),
+    ...(cnCodes.length ? ["/cbam/cn"] : []),
+    ...cnCodes.map((c) => `/cbam/cn/${c.digits}`),
+  ];
   const cbamPaths = [
     "/cbam",
     "/cbam/certificate-price",
@@ -53,8 +65,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/cbam/cn-code-lookup",
     "/cbam/deadlines",
   ];
-  return [...paths, ...cbamPaths].map((path) => ({
+  const toolPaths = ["/house-carbon-footprint-calculator"];
+  const quickElectrical = QUICK_TOOLS.map((t) => `/electrical/${t.slug}`);
+  return [...paths, ...cbamPaths, ...dataPaths, ...quickElectrical, ...toolPaths].map((path) => ({
     url: `${base}${path}`,
-    ...(path.startsWith("/cbam/") || path === "/cbam" ? { lastModified: new Date("2026-10-12") } : {}),
+    ...(path.startsWith("/cbam/") || path === "/cbam" || quickElectrical.includes(path) || dataPaths.includes(path) || toolPaths.includes(path) ? { lastModified: new Date("2026-10-12") } : {}),
   }));
 }

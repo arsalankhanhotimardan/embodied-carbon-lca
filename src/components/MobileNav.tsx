@@ -14,6 +14,8 @@ const primaryLinks = [
   { href: "/electrical", label: "Electrical Tools" },
   { href: "/electrical/voltage-drop-calculator", label: "Voltage Drop Calculator" },
   { href: "/electrical/wire-size-calculator", label: "Wire Size Calculator" },
+  { href: "/electrical/kw-to-amps-calculator", label: "kW to Amps Calculator" },
+  { href: "/electrical/breaker-size-calculator", label: "Breaker Size Calculator" },
   { href: "/cbam-calculator/actual-data", label: "CBAM Actual / Complex Goods" },
   { href: "/cbam-calculator/electricity", label: "CBAM Electricity" },
   { href: "/cbam-calculator/bulk", label: "CBAM Bulk CSV" },
@@ -28,6 +30,7 @@ const primaryLinks = [
 ];
 
 const learningLinks = [
+  { href: "/house-carbon-footprint-calculator", label: "House Carbon Footprint Calculator" },
   { href: "/building-envelope/methodology", label: "Building Envelope Methodology" },
   { href: "/embodied-carbon-calculator", label: "Embodied Carbon Calculator" },
   { href: "/a1-a3-embodied-carbon", label: "A1-A3 Embodied Carbon" },

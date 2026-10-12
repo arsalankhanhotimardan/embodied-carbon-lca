@@ -13,6 +13,7 @@ type Props = {
   path: string;
   updated: string; // ISO date, shown on the page and in structured data
   tool?: ReactNode;
+  parent?: { label: string; href: string };
   faqs?: Faq[];
   children?: ReactNode;
 };
@@ -21,11 +22,13 @@ const related = [
   { href: "/cbam/certificate-price", title: "CBAM certificate price tracker", text: "Quarterly and weekly official prices." },
   { href: "/cbam/do-i-need-cbam", title: "Do I need to comply with CBAM?", text: "50-tonne threshold checker." },
   { href: "/cbam/cn-code-lookup", title: "CBAM CN code lookup", text: "Default emissions by country and CN code." },
+  { href: "/cbam/country", title: "CBAM by country", text: "Default emissions for goods from each origin country." },
+  { href: "/cbam/cn", title: "CBAM CN code index", text: "Every covered CN code with default emissions by country." },
   { href: "/cbam/deadlines", title: "CBAM deadlines and checklist", text: "Key dates and a compliance checklist." },
   { href: "/cbam-calculator", title: "Full CBAM cost calculator", text: "Multi-year certificate cost estimate." },
 ];
 
-export default function CbamInfoPage({ title, eyebrow, intro, path, updated, tool, faqs = [], children }: Props) {
+export default function CbamInfoPage({ title, eyebrow, intro, path, updated, tool, parent, faqs = [], children }: Props) {
   const url = `${SITE_URL}${path}`;
   const updatedLabel = new Date(`${updated}T00:00:00Z`).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -50,7 +53,8 @@ export default function CbamInfoPage({ title, eyebrow, intro, path, updated, too
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Green Engineering Tools", item: SITE_URL },
         { "@type": "ListItem", position: 2, name: "CBAM", item: `${SITE_URL}/cbam` },
-        { "@type": "ListItem", position: 3, name: title, item: url },
+        ...(parent ? [{ "@type": "ListItem", position: 3, name: parent.label, item: `${SITE_URL}${parent.href}` }] : []),
+        { "@type": "ListItem", position: parent ? 4 : 3, name: title, item: url },
       ],
     },
   ];
@@ -76,6 +80,12 @@ export default function CbamInfoPage({ title, eyebrow, intro, path, updated, too
           <Link href="/" className="hover:text-emerald-700">Home</Link>
           <span>/</span>
           <Link href="/cbam" className="hover:text-emerald-700">CBAM</Link>
+          {parent ? (
+            <>
+              <span>/</span>
+              <Link href={parent.href} className="hover:text-emerald-700">{parent.label}</Link>
+            </>
+          ) : null}
           {path !== "/cbam" ? (
             <>
               <span>/</span>

@@ -48,6 +48,7 @@ export const metadata: Metadata = {
 };
 
 const lcaGuideLinks = [
+  { href: "/house-carbon-footprint-calculator", label: "House Carbon Footprint" },
   { href: "/embodied-carbon-calculator", label: "Embodied Carbon Calculator" },
   { href: "/a1-a3-embodied-carbon", label: "A1-A3 Embodied Carbon" },
   { href: "/epd-carbon-calculator", label: "EPD Carbon Calculator" },
@@ -58,6 +59,10 @@ const electricalLinks = [
   { href: "/electrical/voltage-drop-calculator", label: "Voltage Drop" },
   { href: "/electrical/wire-size-calculator", label: "Wire Size" },
   { href: "/electrical/dc-wire-size-calculator", label: "DC Wire Size" },
+  { href: "/electrical/kw-to-amps-calculator", label: "kW to Amps" },
+  { href: "/electrical/breaker-size-calculator", label: "Breaker Size" },
+  { href: "/electrical/awg-to-mm2-calculator", label: "AWG to mm²" },
+  { href: "/electrical#converters", label: "All converters" },
 ];
 
 const buildingLinks = [
