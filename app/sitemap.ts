@@ -1,5 +1,7 @@
 import type { MetadataRoute } from "next";
 
+import { QUICK_TOOLS } from "@/data/electrical-quick-tools";
+
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -53,8 +55,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/cbam/cn-code-lookup",
     "/cbam/deadlines",
   ];
-  return [...paths, ...cbamPaths].map((path) => ({
+  const quickElectrical = QUICK_TOOLS.map((t) => `/electrical/${t.slug}`);
+  return [...paths, ...cbamPaths, ...quickElectrical].map((path) => ({
     url: `${base}${path}`,
-    ...(path.startsWith("/cbam/") || path === "/cbam" ? { lastModified: new Date("2026-10-12") } : {}),
+    ...(path.startsWith("/cbam/") || path === "/cbam" || quickElectrical.includes(path) ? { lastModified: new Date("2026-10-12") } : {}),
   }));
 }

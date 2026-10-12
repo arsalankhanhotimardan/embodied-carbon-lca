@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { QUICK_TOOLS } from "@/data/electrical-quick-tools";
 
 export const metadata: Metadata = {
   title: "Free Electrical Engineering Calculators",
@@ -108,6 +109,21 @@ export default function ElectricalHubPage() {
               <h2 className="text-xl font-black text-slate-950 group-hover:text-emerald-700">{tool.title}</h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">{tool.description}</p>
               <span className="mt-5 inline-flex text-sm font-black text-emerald-700">Open calculator →</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section id="converters" className="mx-auto max-w-7xl px-4 pb-14 sm:px-6 lg:px-8">
+        <h2 className="text-3xl font-black text-slate-950">Quick converters and reference tools</h2>
+        <p className="mt-3 max-w-3xl leading-7 text-slate-600">
+          Single-purpose calculators for everyday conversions: amps, watts, kW, kVA, horsepower, breaker size, wire gauge, running cost and power factor.
+        </p>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {QUICK_TOOLS.map((tool) => (
+            <Link key={tool.slug} href={`/electrical/${tool.slug}`} className="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:bg-emerald-50">
+              <div className="font-black text-slate-950">{tool.title} →</div>
+              <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">{tool.eyebrow}</div>
             </Link>
           ))}
         </div>
