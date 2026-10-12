@@ -115,6 +115,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 <nav className="mt-4 space-y-3 text-sm" aria-label="Footer core tools navigation">
                   <Link href="/" className="block hover:text-white">LCA Engine</Link>
                   <Link href="/cbam-calculator" className="block hover:text-white">CBAM Estimator</Link>
+                  <Link href="/cbam" className="block hover:text-white">CBAM Tools & Guides</Link>
                   <Link href="/building-envelope" className="block hover:text-white">Building Envelope</Link>
                   <Link href="/electrical" className="block hover:text-white">Electrical Tools</Link>
                   <a href="https://solarcalculator.greenengineeringtools.com" className="block hover:text-white">Solar Calculator ↗</a>

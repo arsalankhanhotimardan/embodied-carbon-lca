@@ -46,5 +46,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/building-envelope/carbon-payback-calculator",
     "/building-envelope/methodology",
   ];
-  return paths.map((path) => ({ url: `${base}${path}` }));
+  const cbamPaths = [
+    "/cbam",
+    "/cbam/certificate-price",
+    "/cbam/do-i-need-cbam",
+    "/cbam/cn-code-lookup",
+    "/cbam/deadlines",
+  ];
+  return [...paths, ...cbamPaths].map((path) => ({
+    url: `${base}${path}`,
+    ...(path.startsWith("/cbam/") || path === "/cbam" ? { lastModified: new Date("2026-10-12") } : {}),
+  }));
 }
