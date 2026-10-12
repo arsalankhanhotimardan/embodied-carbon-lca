@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Zap } from "lucide-react";
+import PageHero from "@/components/site/PageHero";
 import QuickTool from "@/components/electrical/quick/QuickTool";
 import QuickTables from "@/components/electrical/quick/QuickTables";
 import { EXISTING_ELECTRICAL_LINKS, QUICK_TOOLS, quickToolBySlug } from "@/data/electrical-quick-tools";
@@ -74,27 +76,22 @@ export default async function QuickElectricalPage({ params }: Props) {
     .filter((x): x is { href: string; title: string } => x !== null);
 
   return (
-    <div className="min-w-0 bg-gradient-to-b from-emerald-50 via-white to-slate-50">
+    <div className="min-w-0 bg-slate-50">
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(s) }} />
       ))}
+      <PageHero
+        crumbs={[{ label: "Electrical tools", href: "/electrical" }, { label: page.title }]}
+        eyebrow={page.eyebrow}
+        title={page.title}
+        intro={page.intro}
+        icon={Zap}
+        tint="bg-blue-50 text-blue-700"
+        ring="ring-blue-100"
+        badges={["Free", "No signup", "Runs in your browser", "Formulas shown"]}
+      />
       <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
-          <Link href="/" className="hover:text-emerald-700">Home</Link>
-          <span>/</span>
-          <Link href="/electrical" className="hover:text-emerald-700">Electrical tools</Link>
-          <span>/</span>
-          <span className="text-slate-700">{page.title}</span>
-        </nav>
-
-        <header className="max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">{page.eyebrow}</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">{page.title}</h1>
-          <p className="mt-5 text-base leading-7 text-slate-600 sm:text-lg">{page.intro}</p>
-          <p className="mt-3 text-xs font-bold text-slate-500">Free · No signup · Runs in your browser</p>
-        </header>
-
-        <div className="mt-8">
+        <div>
           <QuickTool config={page.tool} />
         </div>
 

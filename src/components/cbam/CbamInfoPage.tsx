@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Ship } from "lucide-react";
 import { jsonLdString } from "@/lib/json-ld";
+import PageHero from "@/components/site/PageHero";
+import HubHero from "@/components/site/HubHero";
 
 const SITE_URL = "https://greenengineeringtools.com";
 
@@ -14,6 +17,7 @@ type Props = {
   updated: string; // ISO date, shown on the page and in structured data
   tool?: ReactNode;
   parent?: { label: string; href: string };
+  variant?: "page" | "hub";
   faqs?: Faq[];
   children?: ReactNode;
 };
@@ -28,7 +32,7 @@ const related = [
   { href: "/cbam-calculator", title: "Full CBAM cost calculator", text: "Multi-year certificate cost estimate." },
 ];
 
-export default function CbamInfoPage({ title, eyebrow, intro, path, updated, tool, parent, faqs = [], children }: Props) {
+export default function CbamInfoPage({ title, eyebrow, intro, path, updated, tool, parent, variant = "page", faqs = [], children }: Props) {
   const url = `${SITE_URL}${path}`;
   const updatedLabel = new Date(`${updated}T00:00:00Z`).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -70,40 +74,26 @@ export default function CbamInfoPage({ title, eyebrow, intro, path, updated, too
     });
   }
 
+  const crumbs = [
+    ...(path === "/cbam" ? [] : [{ label: "CBAM", href: "/cbam" }]),
+    ...(parent ? [{ label: parent.label, href: parent.href }] : []),
+    { label: path === "/cbam" ? "CBAM" : title },
+  ];
+
   return (
-    <div className="min-w-0 bg-gradient-to-b from-emerald-50 via-white to-slate-50">
+    <div className="min-w-0 bg-slate-50">
       {schemas.map((schema, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(schema) }} />
       ))}
+      {variant === "hub" ? (
+        <HubHero eyebrow={eyebrow} title={title} intro={intro} icon={Ship} chips={["Free, no signup", `Updated ${updatedLabel}`, "Official EU data"]} />
+      ) : (
+        <PageHero crumbs={crumbs} eyebrow={eyebrow} title={title} intro={intro} icon={Ship} tint="bg-teal-50 text-teal-700" ring="ring-teal-100" badges={["Free", "No signup", `Updated ${updatedLabel}`]} />
+      )}
       <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
-          <Link href="/" className="hover:text-emerald-700">Home</Link>
-          <span>/</span>
-          <Link href="/cbam" className="hover:text-emerald-700">CBAM</Link>
-          {parent ? (
-            <>
-              <span>/</span>
-              <Link href={parent.href} className="hover:text-emerald-700">{parent.label}</Link>
-            </>
-          ) : null}
-          {path !== "/cbam" ? (
-            <>
-              <span>/</span>
-              <span className="text-slate-700">{title}</span>
-            </>
-          ) : null}
-        </nav>
+        {tool ? <div>{tool}</div> : null}
 
-        <header className="max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">{eyebrow}</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">{title}</h1>
-          <p className="mt-5 text-base leading-7 text-slate-600 sm:text-lg">{intro}</p>
-          <p className="mt-3 text-xs font-bold text-slate-500">Free, no signup · Last updated {updatedLabel}</p>
-        </header>
-
-        {tool ? <div className="mt-8">{tool}</div> : null}
-
-        <article className="mt-10 space-y-10 rounded-3xl border border-slate-200 bg-white p-5 text-slate-700 shadow-sm sm:p-8 lg:p-10">
+        <article className={`${tool ? "mt-10" : ""} space-y-10 rounded-3xl border border-slate-200 bg-white p-5 text-slate-700 shadow-sm sm:p-8 lg:p-10`}>
           {children}
 
           {faqs.length ? (

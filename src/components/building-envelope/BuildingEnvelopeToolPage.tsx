@@ -1,5 +1,7 @@
 import type React from "react";
 import Link from "next/link";
+import { Building2 } from "lucide-react";
+import PageHero from "@/components/site/PageHero";
 import BuildingEnvelopeDesigner from "./BuildingEnvelopeDesigner";
 import ThermalValueConverter from "./ThermalValueConverter";
 
@@ -45,26 +47,21 @@ export default function BuildingEnvelopeToolPage({ title, eyebrow, intro, canoni
   };
 
   return (
-    <div className="min-w-0 bg-gradient-to-b from-emerald-50 via-white to-slate-50">
+    <div className="min-w-0 bg-slate-50">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbs) }} />
+      <PageHero
+        maxWidth="max-w-7xl"
+        crumbs={[{ label: "Building Envelope", href: "/building-envelope" }, { label: title }]}
+        eyebrow={eyebrow}
+        title={title}
+        intro={intro}
+        icon={Building2}
+        tint="bg-orange-50 text-orange-700"
+        ring="ring-orange-100"
+        badges={["No signup", "Metric + Imperial", "Transparent formulas", "Versioned engine"]}
+      />
       <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
-          <Link href="/" className="hover:text-emerald-700">Home</Link><span>/</span><Link href="/building-envelope" className="hover:text-emerald-700">Building Envelope</Link><span>/</span><span className="text-slate-700">{title}</span>
-        </nav>
-
-        <header className="mx-auto max-w-4xl text-center">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">{eyebrow}</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">{title}</h1>
-          <p className="mx-auto mt-5 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">{intro}</p>
-          <div className="mt-5 flex flex-wrap justify-center gap-2 text-xs font-bold text-slate-600">
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">No signup</span>
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">Metric + Imperial</span>
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">Transparent formulas</span>
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5">Versioned engine</span>
-          </div>
-        </header>
-
         {showConverter ? <div className="mx-auto mt-8 max-w-5xl"><ThermalValueConverter defaultMode={showConverter} /></div> : null}
 
         <div className="mt-10"><BuildingEnvelopeDesigner initialMode={initialMode} initialScenario={scenario} /></div>

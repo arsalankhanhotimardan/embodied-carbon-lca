@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ExternalLink } from "lucide-react";
+import { CATEGORIES } from "@/components/site/categories";
 
 const primaryLinks = [
   { href: "/", label: "LCA Engine" },
@@ -93,12 +95,22 @@ export default function MobileNav() {
             <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6">
               <section className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
                 <p className="px-1 pb-3 text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Core calculators</p>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <Link href="/#calculator-workspace" onClick={closeMenu} className="rounded-xl bg-slate-900 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-slate-800">LCA Workspace</Link>
-                  <Link href="/cbam-calculator" onClick={closeMenu} className="rounded-xl bg-emerald-600 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-emerald-500">CBAM Calculator</Link>
-                  <Link href="/building-envelope" onClick={closeMenu} className="rounded-xl bg-orange-600 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-orange-500">Building Envelope</Link>
-                  <Link href="/electrical" onClick={closeMenu} className="rounded-xl bg-blue-700 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-blue-600">Electrical Tools</Link>
-                  <a href="https://solarcalculator.greenengineeringtools.com" onClick={closeMenu} className="rounded-xl bg-sky-600 px-4 py-3.5 text-center text-sm font-black text-white hover:bg-sky-500 sm:col-span-2">Solar Calculator ↗</a>
+                <div className="grid grid-cols-2 gap-2">
+                  {CATEGORIES.filter((c) => c.id !== "guides").map((c, i, arr) => {
+                    const Icon = c.icon;
+                    const cls = `flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left transition hover:border-slate-300 active:bg-slate-50 ${i === arr.length - 1 && arr.length % 2 === 1 ? "col-span-2" : ""}`;
+                    const inner = (
+                      <>
+                        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg ${c.tint}`}><Icon className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+                        <span className="min-w-0 text-[13px] font-black leading-tight text-slate-900">{c.short === "LCA" ? "LCA Workspace" : c.id === "cbam" ? "CBAM" : c.name}{c.external ? <ExternalLink className="ml-1 inline h-3 w-3 text-slate-400" aria-hidden="true" /> : null}</span>
+                      </>
+                    );
+                    return c.external ? (
+                      <a key={c.id} href={c.href} onClick={closeMenu} className={cls}>{inner}</a>
+                    ) : (
+                      <Link key={c.id} href={c.href} onClick={closeMenu} className={cls}>{inner}</Link>
+                    );
+                  })}
                 </div>
               </section>
 

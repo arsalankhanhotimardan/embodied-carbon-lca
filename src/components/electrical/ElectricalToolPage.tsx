@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Zap } from "lucide-react";
+import PageHero from "@/components/site/PageHero";
 import ElectricalDesigner, { type ElectricalPresetName } from "./ElectricalDesigner";
 import type { CalculationMode } from "@/lib/electrical-engine";
 
@@ -50,25 +52,17 @@ export default function ElectricalToolPage({
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
 
-      <section className="border-b border-slate-200 bg-gradient-to-b from-white to-slate-50">
-        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-          <nav className="text-xs font-bold text-slate-500" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-emerald-700">Home</Link>
-            <span className="px-2">/</span>
-            <Link href="/electrical" className="hover:text-emerald-700">Electrical tools</Link>
-          </nav>
-          <div className="mt-6 max-w-4xl">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700">{eyebrow}</p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">{title}</h1>
-            <p className="mt-5 text-lg leading-8 text-slate-600">{description}</p>
-            <div className="mt-6 flex flex-wrap gap-2 text-xs font-bold text-slate-600">
-              {["No signup", "AWG + mm²", "DC + AC", "Mobile friendly", "Shareable result", "Transparent formulas"].map((item) => (
-                <span key={item} className="rounded-full border border-slate-200 bg-white px-3 py-1.5">{item}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageHero
+        maxWidth="max-w-7xl"
+        crumbs={[{ label: "Electrical tools", href: "/electrical" }, { label: title }]}
+        eyebrow={eyebrow}
+        title={title}
+        intro={description}
+        icon={Zap}
+        tint="bg-blue-50 text-blue-700"
+        ring="ring-blue-100"
+        badges={["No signup", "AWG + mm²", "DC + AC", "Mobile friendly", "Shareable result", "Transparent formulas"]}
+      />
 
       <section className="mx-auto max-w-[1500px] px-2 py-8 sm:px-6 sm:py-12">
         <ElectricalDesigner initialPreset={initialPreset} initialMode={initialMode} />
