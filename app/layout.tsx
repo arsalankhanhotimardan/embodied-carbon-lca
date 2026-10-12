@@ -48,6 +48,7 @@ export const metadata: Metadata = {
 };
 
 const lcaGuideLinks = [
+  { href: "/house-carbon-footprint-calculator", label: "House Carbon Footprint" },
   { href: "/embodied-carbon-calculator", label: "Embodied Carbon Calculator" },
   { href: "/a1-a3-embodied-carbon", label: "A1-A3 Embodied Carbon" },
   { href: "/epd-carbon-calculator", label: "EPD Carbon Calculator" },

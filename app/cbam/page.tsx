@@ -13,6 +13,8 @@ const tools = [
   { href: "/cbam/certificate-price", title: "Certificate price tracker", text: "Latest official quarterly price, history and when the next one is due." },
   { href: "/cbam/do-i-need-cbam", title: "Do I need to comply?", text: "Check your yearly tonnage against the 50-tonne threshold." },
   { href: "/cbam/cn-code-lookup", title: "CN code lookup", text: "Default direct, indirect and total emissions by country and CN code." },
+  { href: "/cbam/country", title: "CBAM by country", text: "Default emissions for goods from each origin country, by sector and CN code." },
+  { href: "/cbam/cn", title: "CBAM CN code index", text: "Browse every covered CN code and compare default emissions across countries." },
   { href: "/cbam/deadlines", title: "Deadlines and checklist", text: "Every key date to 2027 and a printable step-by-step checklist." },
   { href: "/cbam-calculator", title: "CBAM cost calculator", text: "Multi-year certificate cost estimate with default or actual emissions." },
   { href: "/cbam-calculator/bulk", title: "Bulk CSV calculator", text: "Upload a portfolio of shipments and get total exposure." },

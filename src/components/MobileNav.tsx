@@ -30,6 +30,7 @@ const primaryLinks = [
 ];
 
 const learningLinks = [
+  { href: "/house-carbon-footprint-calculator", label: "House Carbon Footprint Calculator" },
   { href: "/building-envelope/methodology", label: "Building Envelope Methodology" },
   { href: "/embodied-carbon-calculator", label: "Embodied Carbon Calculator" },
   { href: "/a1-a3-embodied-carbon", label: "A1-A3 Embodied Carbon" },
