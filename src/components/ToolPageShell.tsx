@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { Leaf } from "lucide-react";
 import { jsonLdString } from "@/lib/json-ld";
+import PageHero from "@/components/site/PageHero";
 
 const SITE = "https://greenengineeringtools.com";
 
@@ -54,31 +56,13 @@ export default function ToolPageShell({ title, eyebrow, intro, path, crumbs, too
   ];
 
   return (
-    <div className="min-w-0 bg-gradient-to-b from-emerald-50 via-white to-slate-50">
+    <div className="min-w-0 bg-slate-50">
       {schemas.map((s, i) => (
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(s) }} />
       ))}
+      <PageHero crumbs={[...crumbs.map((c) => ({ label: c.label, href: c.href })), { label: title }]} eyebrow={eyebrow} title={title} intro={intro} icon={Leaf} />
       <div className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-500">
-          <Link href="/" className="hover:text-emerald-700">Home</Link>
-          {crumbs.map((c) => (
-            <span key={c.label} className="contents">
-              <span>/</span>
-              {c.href ? <Link href={c.href} className="hover:text-emerald-700">{c.label}</Link> : <span>{c.label}</span>}
-            </span>
-          ))}
-          <span>/</span>
-          <span className="text-slate-700">{title}</span>
-        </nav>
-
-        <header className="max-w-3xl">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">{eyebrow}</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950 sm:text-5xl">{title}</h1>
-          <p className="mt-5 text-base leading-7 text-slate-600 sm:text-lg">{intro}</p>
-          <p className="mt-3 text-xs font-bold text-slate-500">Free · No signup · Runs in your browser</p>
-        </header>
-
-        <div className="mt-8">{tool}</div>
+        <div>{tool}</div>
 
         <article className="mt-10 space-y-10 rounded-3xl border border-slate-200 bg-white p-5 text-slate-700 shadow-sm sm:p-8 lg:p-10">
           {children}

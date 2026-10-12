@@ -115,7 +115,7 @@ export default function SeoGuideLayout({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <section className="bg-slate-950 text-white">
+      <section className="hero-dark hero-grid text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
           <nav className="text-sm text-slate-400 mb-7" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white">Home</Link>

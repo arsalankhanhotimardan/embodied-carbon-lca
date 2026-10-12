@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import HomeHero from "@/components/site/HomeHero";
+import ToolsGrid from "@/components/site/ToolsGrid";
 import Papa from "papaparse";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -1582,31 +1584,14 @@ export default function GreenEngineeringSaaS() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
       />
 
-      <section className="bg-slate-950 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
-          <div className="inline-flex px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 text-xs font-black tracking-widest uppercase">
-            Free embodied carbon & whole-building LCA calculator
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-black mt-6 tracking-tight">
-            Embodied Carbon Calculator for <span className="text-emerald-400">Construction Materials</span>
-          </h1>
-          <p className="max-w-4xl mx-auto mt-5 text-slate-300 text-base sm:text-xl leading-relaxed">
-            Upload CSV or BIM material quantities, reconcile unknown products with EC3 EPD data,
-            calculate lifecycle carbon by module, compare baseline and proposed designs, and report
-            building carbon intensity in kg CO₂e/m².
-          </p>
+      <HomeHero />
+      <ToolsGrid />
 
-          <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs font-bold text-slate-300">
-            {["A1-A3", "A4-A5", "B4 replacements", "C1-C4", "Module D", "EPD data", "EC3 matching", "CSV/BIM"].map((item) => (
-              <span key={item} className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-                {item}
-              </span>
-            ))}
-          </div>
+      <section id="calculator-workspace" className="max-w-[1500px] mx-auto px-2 sm:px-6 py-8 sm:py-12">
+        <div className="mx-auto mb-6 max-w-7xl px-2 sm:px-0">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700">LCA workspace</p>
+          <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Calculate embodied carbon from your own materials</h2>
         </div>
-      </section>
-
-      <section className="max-w-[1500px] mx-auto px-2 sm:px-6 py-8 sm:py-12">
         <LcaEngineComponent />
       </section>
 

@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Activity, Battery, BatteryCharging, Cable, Calculator, Flame, Gauge, Network, Ruler, Zap, type LucideIcon } from "lucide-react";
+import HubHero from "@/components/site/HubHero";
+import ToolLinkCard from "@/components/site/ToolLinkCard";
 import { QUICK_TOOLS } from "@/data/electrical-quick-tools";
 
 export const metadata: Metadata = {
@@ -14,6 +17,18 @@ export const metadata: Metadata = {
     url: "https://greenengineeringtools.com/electrical",
     type: "website",
   },
+};
+
+const ICONS: Record<string, LucideIcon> = {
+  "/electrical/voltage-drop-calculator": Activity,
+  "/electrical/wire-size-calculator": Cable,
+  "/electrical/wire-length-calculator": Ruler,
+  "/electrical/dc-wire-size-calculator": BatteryCharging,
+  "/electrical/3-phase-voltage-drop-calculator": Network,
+  "/electrical/battery-cable-size-calculator": Battery,
+  "/electrical/cable-power-loss-calculator": Flame,
+  "/electrical/watts-to-amps-calculator": Zap,
+  "/electrical/kva-to-amps-calculator": Gauge,
 };
 
 const tools = [
@@ -82,34 +97,24 @@ export default function ElectricalHubPage() {
   return (
     <main className="bg-slate-50">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-      <section className="bg-slate-950 text-white">
-        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-300">Electrical engineering workspace</p>
-          <h1 className="mt-4 max-w-5xl text-4xl font-black tracking-tight sm:text-6xl">
-            Free electrical calculators for cable, voltage drop & power systems
-          </h1>
-          <p className="mt-6 max-w-4xl text-lg leading-8 text-slate-300">
-            Solve practical DC, single-phase and balanced three-phase calculations without an account. Work in AWG, kcmil or mm², reverse-solve cable length and current, estimate I²R losses and keep the engineering assumptions visible.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link href="/electrical/voltage-drop-calculator" className="rounded-xl bg-emerald-500 px-5 py-3 font-black text-slate-950 hover:bg-emerald-400">
-              Open flagship designer
-            </Link>
-            <Link href="/electrical/methodology" className="rounded-xl border border-slate-700 px-5 py-3 font-black text-white hover:bg-slate-900">
-              Read methodology
-            </Link>
-          </div>
-        </div>
-      </section>
+      <HubHero
+        icon={Zap}
+        eyebrow="Electrical engineering workspace"
+        title="Free electrical calculators for cable, voltage drop & power systems"
+        intro="Solve practical DC, single-phase and balanced three-phase calculations without an account. Work in AWG, kcmil or mm², reverse-solve cable length and current, estimate I²R losses and keep the engineering assumptions visible."
+        ctas={[
+          { label: "Open flagship designer", href: "/electrical/voltage-drop-calculator", primary: true },
+          { label: "Quick converters", href: "/electrical#converters" },
+          { label: "Read methodology", href: "/electrical/methodology" },
+        ]}
+        chips={["AWG · kcmil · mm²", "DC · 1-phase · 3-phase", "Reverse solving", "Cable loss and cost"]}
+      />
 
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-18 lg:px-8">
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <h2 className="text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">Cable and circuit designers</h2>
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map((tool) => (
-            <Link key={tool.href} href={tool.href} className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg">
-              <h2 className="text-xl font-black text-slate-950 group-hover:text-emerald-700">{tool.title}</h2>
-              <p className="mt-3 text-sm leading-6 text-slate-600">{tool.description}</p>
-              <span className="mt-5 inline-flex text-sm font-black text-emerald-700">Open calculator →</span>
-            </Link>
+            <ToolLinkCard key={tool.href} href={tool.href} title={tool.title} description={tool.description} icon={ICONS[tool.href] ?? Calculator} tint="bg-blue-50 text-blue-700" hoverBorder="hover:border-blue-300" accentText="text-blue-700" />
           ))}
         </div>
       </section>
@@ -121,10 +126,7 @@ export default function ElectricalHubPage() {
         </p>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {QUICK_TOOLS.map((tool) => (
-            <Link key={tool.slug} href={`/electrical/${tool.slug}`} className="rounded-2xl border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:bg-emerald-50">
-              <div className="font-black text-slate-950">{tool.title} →</div>
-              <div className="mt-1 text-xs font-bold uppercase tracking-wider text-slate-500">{tool.eyebrow}</div>
-            </Link>
+            <ToolLinkCard key={tool.slug} href={`/electrical/${tool.slug}`} title={tool.title} description={tool.eyebrow} icon={Calculator} tint="bg-slate-100 text-slate-700" hoverBorder="hover:border-blue-300" accentText="text-blue-700" />
           ))}
         </div>
       </section>

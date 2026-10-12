@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import MobileNav from "@/components/MobileNav";
+import DesktopNav from "@/components/site/DesktopNav";
+import BrandLogo from "@/components/site/BrandLogo";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -76,29 +78,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en">
       <body className={`${inter.className} flex min-h-screen w-full min-w-0 flex-col overflow-x-hidden bg-slate-50 text-slate-900`}>
-        <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white shadow-sm">
+        <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/85 backdrop-blur-xl supports-[backdrop-filter]:bg-white/75">
           <nav aria-label="Main navigation">
             <div className="mx-auto w-full max-w-7xl px-3 sm:px-6 lg:px-8">
               <div className="flex h-16 min-w-0 items-center justify-between gap-2 sm:h-20 sm:gap-4">
                 <Link href="/" aria-label="Green Engineering Tools home" className="flex min-w-0 max-w-[calc(100%_-_3.25rem)] items-center sm:max-w-none">
-                  <div className="mr-2 shrink-0 rounded-lg bg-emerald-500 p-1.5 shadow-inner shadow-emerald-700/50 sm:mr-3 sm:p-2">
-                    <svg className="h-6 w-6 text-white sm:h-7 sm:w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7Z" /></svg>
-                  </div>
-                  <span className="min-w-0 truncate text-[15px] font-black tracking-tight text-slate-900 min-[360px]:text-base sm:text-2xl">GreenEngineering <span className="text-emerald-600">Tools</span></span>
+                  <BrandLogo />
                 </Link>
-
-                <div className="hidden items-center gap-3 xl:flex 2xl:gap-5">
-                  <Link href="/" className="whitespace-nowrap text-sm font-bold text-slate-600 transition-colors hover:text-emerald-600">LCA</Link>
-                  <Link href="/cbam-calculator" className="whitespace-nowrap text-sm font-bold text-slate-600 transition-colors hover:text-emerald-600">CBAM</Link>
-                  <Link href="/building-envelope" className="whitespace-nowrap text-sm font-bold text-slate-600 transition-colors hover:text-orange-600">Building</Link>
-                  <Link href="/electrical" className="whitespace-nowrap text-sm font-bold text-slate-600 transition-colors hover:text-blue-700">Electrical</Link>
-                  <a href="https://solarcalculator.greenengineeringtools.com" className="whitespace-nowrap text-sm font-bold text-slate-600 transition-colors hover:text-sky-600">Solar ↗</a>
-                  <Link href="/guides" className="whitespace-nowrap text-sm font-bold text-slate-600 transition-colors hover:text-emerald-600">Guides</Link>
-                  <Link href="/methodology" className="whitespace-nowrap text-sm font-bold text-slate-600 transition-colors hover:text-emerald-600">Methodology</Link>
-                  <Link href="/about" className="whitespace-nowrap text-sm font-bold text-slate-600 transition-colors hover:text-emerald-600">About</Link>
-                  <Link href="/#calculator-workspace" className="whitespace-nowrap rounded-md bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow-md transition-colors hover:bg-slate-800">LCA Workspace</Link>
-                </div>
-
+                <DesktopNav />
                 <MobileNav />
               </div>
             </div>
@@ -107,12 +94,18 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
         <main className="w-full min-w-0 flex-1 overflow-x-clip">{children}</main>
 
-        <footer className="mt-auto w-full border-t border-slate-800 bg-slate-950 text-slate-400">
-          <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-            <div className="grid grid-cols-1 gap-8 text-center sm:grid-cols-2 sm:text-left lg:grid-cols-6 lg:gap-7">
-              <div className="sm:col-span-2 lg:col-span-1">
-                <Link href="/" className="inline-flex items-center justify-center font-black tracking-tight text-white sm:justify-start">GreenEngineering Tools</Link>
-                <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-slate-400 sm:mx-0">Free browser-based engineering tools for carbon, building physics, electrical systems and sustainable design.</p>
+        <footer className="mt-auto w-full bg-slate-950 text-slate-400">
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
+          <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+            <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-6 lg:gap-8">
+              <div className="sm:col-span-2 lg:col-span-2">
+                <Link href="/" aria-label="Green Engineering Tools home" className="inline-flex">
+                  <BrandLogo tone="dark" />
+                </Link>
+                <p className="mt-5 max-w-sm text-sm leading-6 text-slate-400">Free browser-based engineering tools for carbon, building physics, electrical systems and sustainable design. No signup, with the formulas shown.</p>
+                <a href="https://solarcalculator.greenengineeringtools.com" className="mt-5 inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-900 px-4 py-2 text-xs font-black text-slate-200 transition hover:border-amber-400/50 hover:text-white">
+                  <span className="h-2 w-2 rounded-full bg-amber-400" aria-hidden="true" /> Solar Calculator ↗
+                </a>
               </div>
 
               <div>
@@ -123,7 +116,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <Link href="/cbam" className="block hover:text-white">CBAM Tools & Guides</Link>
                   <Link href="/building-envelope" className="block hover:text-white">Building Envelope</Link>
                   <Link href="/electrical" className="block hover:text-white">Electrical Tools</Link>
-                  <a href="https://solarcalculator.greenengineeringtools.com" className="block hover:text-white">Solar Calculator ↗</a>
                 </nav>
               </div>
 
@@ -142,25 +134,17 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </div>
 
               <div>
-                <h2 className="text-xs font-black uppercase tracking-widest text-white">LCA learning</h2>
+                <h2 className="text-xs font-black uppercase tracking-widest text-white">Learn</h2>
                 <nav className="mt-4 space-y-3 text-sm" aria-label="Footer LCA learning navigation">
                   {lcaGuideLinks.map((item) => <Link key={item.href} href={item.href} className="block hover:text-white">{item.label}</Link>)}
-                </nav>
-              </div>
-
-              <div>
-                <h2 className="text-xs font-black uppercase tracking-widest text-white">Company</h2>
-                <nav className="mt-4 space-y-3 text-sm" aria-label="Footer company navigation">
                   <Link href="/about" className="block hover:text-white">About Us</Link>
                   <Link href="/contact" className="block hover:text-white">Contact</Link>
-                  <Link href="/privacy-policy" className="block hover:text-white">Privacy Policy</Link>
-                  <Link href="/terms-of-service" className="block hover:text-white">Terms of Service</Link>
                 </nav>
               </div>
             </div>
 
-            <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-7 md:flex-row">
-              <p className="text-center text-xs text-slate-500 md:text-left">© {new Date().getFullYear()} Green Engineering Tools. All rights reserved.</p>
+            <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-800 pt-7 md:flex-row">
+              <p className="text-center text-xs text-slate-500 md:text-left">© {new Date().getFullYear()} Green Engineering Tools · <Link href="/privacy-policy" className="hover:text-slate-300">Privacy</Link> · <Link href="/terms-of-service" className="hover:text-slate-300">Terms</Link></p>
               <p className="max-w-2xl text-center text-xs leading-5 text-slate-500 md:text-right">Engineering decision-support tools. Formal compliance, certification and site-specific design remain subject to applicable standards, manufacturer data and qualified professional review.</p>
             </div>
           </div>

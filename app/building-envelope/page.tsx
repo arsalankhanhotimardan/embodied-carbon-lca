@@ -1,10 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BookOpen, BrickWall, Building2, Flame, Gauge, House, Layers, Leaf, Thermometer, Wind, type LucideIcon } from "lucide-react";
+import HubHero from "@/components/site/HubHero";
+import ToolLinkCard from "@/components/site/ToolLinkCard";
 
 export const metadata: Metadata = {
   title: "Building Envelope Calculators | Insulation, U-Value & Heat Loss",
   description: "Free building-envelope engineering calculators for insulation quantity, R-value, U-value, heat loss, retrofit energy savings and carbon payback. Metric and Imperial, no signup.",
   alternates: { canonical: "/building-envelope" },
+};
+
+const ICONS: Record<string, LucideIcon> = {
+  "/building-envelope/insulation-calculator": Layers,
+  "/building-envelope/attic-insulation-calculator": House,
+  "/building-envelope/blown-in-insulation-calculator": Wind,
+  "/building-envelope/wall-insulation-calculator": BrickWall,
+  "/building-envelope/r-value-calculator": Thermometer,
+  "/building-envelope/u-value-calculator": Gauge,
+  "/building-envelope/heat-loss-calculator": Flame,
+  "/building-envelope/carbon-payback-calculator": Leaf,
+  "/building-envelope/methodology": BookOpen,
 };
 
 const tools = [
@@ -29,28 +44,23 @@ export default function BuildingEnvelopeHub() {
   };
 
   return (
-    <div className="min-w-0 bg-gradient-to-b from-emerald-50 via-white to-slate-50">
+    <div className="min-w-0 bg-slate-50">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <HubHero
+        icon={Building2}
+        eyebrow="Free building physics tools"
+        title="Building Envelope & Insulation Calculators"
+        intro="Design and compare walls, roofs and floors; estimate insulation quantity; calculate R-value, U-value and heat loss; then connect retrofit energy savings with embodied carbon. Built for worldwide use with Metric and Imperial units."
+        ctas={[
+          { label: "Open the U-value calculator", href: "/building-envelope/u-value-calculator", primary: true },
+          { label: "Read methodology", href: "/building-envelope/methodology" },
+        ]}
+        chips={["No signup", "Metric + Imperial", "Transparent methodology", "Product data can override presets"]}
+      />
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <header className="mx-auto max-w-4xl text-center">
-          <p className="text-xs font-black uppercase tracking-[0.22em] text-emerald-700">Free Building Physics Tools</p>
-          <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-950 sm:text-6xl">Building Envelope & Insulation Calculators</h1>
-          <p className="mx-auto mt-6 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">Design and compare walls, roofs and floors; estimate insulation quantity; calculate R-value, U-value and heat loss; then connect retrofit energy savings with embodied carbon. Built for worldwide use with Metric and Imperial units.</p>
-          <div className="mt-7 flex flex-wrap justify-center gap-2 text-xs font-black text-slate-600">
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-2">No signup</span>
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-2">Metric + Imperial</span>
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-2">Transparent methodology</span>
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-2">Product data can override presets</span>
-          </div>
-        </header>
-
-        <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {tools.map((tool) => (
-            <Link key={tool.href} href={tool.href} className="group rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:shadow-lg">
-              <h2 className="text-lg font-black text-slate-950 group-hover:text-emerald-700">{tool.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{tool.text}</p>
-              <div className="mt-4 text-sm font-black text-emerald-700">Open tool →</div>
-            </Link>
+            <ToolLinkCard key={tool.href} href={tool.href} title={tool.title} description={tool.text} icon={ICONS[tool.href] ?? Building2} tint="bg-orange-50 text-orange-700" hoverBorder="hover:border-orange-300" accentText="text-orange-700" />
           ))}
         </section>
 

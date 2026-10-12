@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { CalendarClock, Calculator, CircleHelp, FileSpreadsheet, Globe, List, Search, TrendingUp, type LucideIcon } from "lucide-react";
+import ToolLinkCard from "@/components/site/ToolLinkCard";
 import CbamInfoPage from "@/components/cbam/CbamInfoPage";
 
 export const metadata: Metadata = {
@@ -7,6 +8,17 @@ export const metadata: Metadata = {
   description:
     "Free EU CBAM resources: certificate price tracker, 50-tonne threshold checker, CN code lookup with default emissions, deadlines checklist and a full cost calculator.",
   alternates: { canonical: "/cbam" },
+};
+
+const ICONS: Record<string, LucideIcon> = {
+  "/cbam/certificate-price": TrendingUp,
+  "/cbam/do-i-need-cbam": CircleHelp,
+  "/cbam/cn-code-lookup": Search,
+  "/cbam/country": Globe,
+  "/cbam/cn": List,
+  "/cbam/deadlines": CalendarClock,
+  "/cbam-calculator": Calculator,
+  "/cbam-calculator/bulk": FileSpreadsheet,
 };
 
 const tools = [
@@ -27,6 +39,7 @@ export default function CbamHubPage() {
       eyebrow="Carbon Border Adjustment Mechanism"
       intro="Free, no-signup tools for importers, exporters and consultants preparing for the EU carbon border levy on steel, aluminium, cement, fertilisers, hydrogen and electricity."
       path="/cbam"
+      variant="hub"
       updated="2026-10-12"
       faqs={[
         {
@@ -48,10 +61,7 @@ export default function CbamHubPage() {
         <h2 className="text-2xl font-black tracking-tight text-slate-950">Free CBAM tools</h2>
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {tools.map((tool) => (
-            <Link key={tool.href} href={tool.href} className="rounded-2xl border border-slate-200 bg-slate-50 p-5 transition hover:border-emerald-300 hover:bg-emerald-50">
-              <div className="font-black text-slate-950">{tool.title} →</div>
-              <p className="mt-1 text-sm leading-6 text-slate-600">{tool.text}</p>
-            </Link>
+            <ToolLinkCard key={tool.href} href={tool.href} title={tool.title} description={tool.text} icon={ICONS[tool.href] ?? Calculator} tint="bg-teal-50 text-teal-700" hoverBorder="hover:border-teal-300" accentText="text-teal-700" />
           ))}
         </div>
       </section>
