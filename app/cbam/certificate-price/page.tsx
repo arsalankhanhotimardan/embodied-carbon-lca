@@ -4,7 +4,8 @@ import CertificateCostQuick from "@/components/cbam/CertificateCostQuick";
 import PriceChart from "@/components/cbam/PriceChart";
 import { getOfficialCbamPrices, type PublicCbamPrice } from "@/lib/cbam-public-prices";
 
-export const revalidate = 3600;
+// Read the latest official price on every request (cached revalidation is not available on the Cloudflare deployment).
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "CBAM Certificate Price Today | Official Quarterly Prices",

@@ -5,12 +5,8 @@ import CbamInfoPage from "@/components/cbam/CbamInfoPage";
 import { fmt, markupSummary, trim, versionDate, withMarkup } from "@/components/cbam/DefaultsFormat";
 import { countrySlug, getCnRows, includedEmissions, median, sectorLabel } from "@/lib/cbam-public-reference";
 
-export const revalidate = 86400;
-
-// Render every CN code on first visit, then revalidate (see the country page).
-export function generateStaticParams() {
-  return [];
-}
+// Rendered on every request. ISR / prerendered dynamic routes do not work on the Cloudflare (OpenNext) deployment.
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ code: string }> };
 

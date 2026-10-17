@@ -5,14 +5,9 @@ import CbamInfoPage from "@/components/cbam/CbamInfoPage";
 import { fmt, markupSummary, trim, versionDate, withMarkup } from "@/components/cbam/DefaultsFormat";
 import { getCountryRows, includedEmissions, sectorLabel, sectorStats } from "@/lib/cbam-public-reference";
 
-export const revalidate = 86400;
+// Rendered on every request. ISR / prerendered dynamic routes do not work on the Cloudflare (OpenNext) deployment.
+export const dynamic = "force-dynamic";
 const MAX_ROWS_PER_SECTOR = 120;
-
-// Render every country on first visit, then revalidate. Returning [] keeps the
-// build independent of the database, so an outage can never fail a deploy.
-export function generateStaticParams() {
-  return [];
-}
 
 type Props = { params: Promise<{ slug: string }> };
 
