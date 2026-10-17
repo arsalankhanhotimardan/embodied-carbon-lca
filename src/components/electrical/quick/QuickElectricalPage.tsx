@@ -5,21 +5,17 @@ import { Zap } from "lucide-react";
 import PageHero from "@/components/site/PageHero";
 import QuickTool from "@/components/electrical/quick/QuickTool";
 import QuickTables from "@/components/electrical/quick/QuickTables";
-import { EXISTING_ELECTRICAL_LINKS, QUICK_TOOLS, quickToolBySlug } from "@/data/electrical-quick-tools";
+import { EXISTING_ELECTRICAL_LINKS, quickToolBySlug } from "@/data/electrical-quick-tools";
 import { jsonLdString } from "@/lib/json-ld";
 
 const SITE = "https://greenengineeringtools.com";
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return QUICK_TOOLS.map((t) => ({ slug: t.slug }));
-}
-
-type Props = { params: Promise<{ slug: string }> };
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+/**
+ * Each converter has its own route folder (app/electrical/<slug>/page.tsx) that renders this component.
+ * A single [slug] route is NOT used because the Cloudflare/OpenNext deployment cannot serve
+ * prerendered dynamic-segment pages (they return 404).
+ */
+export function quickElectricalMetadata(slug: string): Metadata {
   const page = quickToolBySlug(slug);
   if (!page) return {};
   const url = `${SITE}/electrical/${page.slug}`;
@@ -31,8 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function QuickElectricalPage({ params }: Props) {
-  const { slug } = await params;
+export default function QuickElectricalPage({ slug }: { slug: string }) {
   const page = quickToolBySlug(slug);
   if (!page) notFound();
 
